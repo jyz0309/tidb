@@ -203,7 +203,7 @@ func (e *IndexMergeReaderExecutor) startPartialIndexWorker(ctx context.Context, 
 		return err
 	}
 
-	result, err := distsql.SelectWithRuntimeStats(ctx, e.ctx, kvReq, e.handleCols.GetFieldsTypes(), e.feedbacks[workID], getPhysicalPlanIDs(e.partialPlans[workID]), e.id)
+	result, err := distsql.SelectWithRuntimeStats(ctx, e.ctx, kvReq, e.handleCols.GetFieldsTypes(), e.feedbacks[workID], getPhysicalPlanIDs(e.partialPlans[workID]), e.partialPlans[workID][0].ID())
 	if err != nil {
 		return err
 	}
@@ -408,8 +408,14 @@ func (e *IndexMergeReaderExecutor) startIndexMergeTableScanWorker(ctx context.Co
 }
 
 func (e *IndexMergeReaderExecutor) buildFinalTableReader(ctx context.Context, handles []kv.Handle) (Executor, error) {
+	var tblID int
+	if len(e.tblPlans) > 0 {
+		tblID = e.tblPlans[len(e.tblPlans)-1].ID()
+	} else {
+		tblID = e.id
+	}
 	tableReaderExec := &TableReaderExecutor{
-		baseExecutor: newBaseExecutor(e.ctx, e.schema, 0),
+		baseExecutor: newBaseExecutor(e.ctx, e.schema, tblID),
 		table:        e.table,
 		dagPB:        e.tableRequest,
 		startTS:      e.startTS,
