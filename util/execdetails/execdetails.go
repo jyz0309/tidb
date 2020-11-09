@@ -480,11 +480,11 @@ const (
 	// TpSelectResultRuntimeStats is the tp for SelectResultRuntimeStats.
 	TpSelectResultRuntimeStats
 	// TpInsertRuntimeStat is the tp for InsertRuntimeStat
-	TpInsertRuntimeStat
+	TpInsertRuntimeStats
 	// TpIndexLookUpRunTimeStats is the tp for TpIndexLookUpRunTimeStats
 	TpIndexLookUpRunTimeStats
 	// TpSlowQueryRuntimeStat is the tp for TpSlowQueryRuntimeStat
-	TpSlowQueryRuntimeStat
+	TpSlowQueryRuntimeStats
 )
 
 // RuntimeStats is used to express the executor runtime information.

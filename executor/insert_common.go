@@ -79,7 +79,7 @@ type InsertValues struct {
 	lazyFillAutoID bool
 	memTracker     *memory.Tracker
 
-	stats *InsertRuntimeStat
+	stats *InsertRuntimeStats
 }
 
 type defaultVal struct {
@@ -937,7 +937,7 @@ func (e *InsertValues) collectRuntimeStatsEnabled() bool {
 	if e.runtimeStats != nil {
 		if e.stats == nil {
 			snapshotStats := &tikv.SnapshotRuntimeStats{}
-			e.stats = &InsertRuntimeStat{
+			e.stats = &InsertRuntimeStats{
 				BasicRuntimeStats:    e.runtimeStats,
 				SnapshotRuntimeStats: snapshotStats,
 				Prefetch:             0,
@@ -1054,14 +1054,14 @@ func (e *InsertValues) addRecordWithAutoIDHint(ctx context.Context, row []types.
 }
 
 // InsertRuntimeStat record the stat about insert and check
-type InsertRuntimeStat struct {
+type InsertRuntimeStats struct {
 	*execdetails.BasicRuntimeStats
 	*tikv.SnapshotRuntimeStats
 	CheckInsertTime time.Duration
 	Prefetch        time.Duration
 }
 
-func (e *InsertRuntimeStat) String() string {
+func (e *InsertRuntimeStats) String() string {
 	if e.CheckInsertTime == 0 {
 		// For replace statement.
 		if e.Prefetch > 0 && e.SnapshotRuntimeStats != nil {
@@ -1084,8 +1084,8 @@ func (e *InsertRuntimeStat) String() string {
 }
 
 // Clone implements the RuntimeStats interface.
-func (e *InsertRuntimeStat) Clone() execdetails.RuntimeStats {
-	newRs := &InsertRuntimeStat{
+func (e *InsertRuntimeStats) Clone() execdetails.RuntimeStats {
+	newRs := &InsertRuntimeStats{
 		CheckInsertTime: e.CheckInsertTime,
 		Prefetch:        e.Prefetch,
 	}
@@ -1101,8 +1101,8 @@ func (e *InsertRuntimeStat) Clone() execdetails.RuntimeStats {
 }
 
 // Merge implements the RuntimeStats interface.
-func (e *InsertRuntimeStat) Merge(other execdetails.RuntimeStats) {
-	tmp, ok := other.(*InsertRuntimeStat)
+func (e *InsertRuntimeStats) Merge(other execdetails.RuntimeStats) {
+	tmp, ok := other.(*InsertRuntimeStats)
 	if !ok {
 		return
 	}
@@ -1127,6 +1127,6 @@ func (e *InsertRuntimeStat) Merge(other execdetails.RuntimeStats) {
 }
 
 // Tp implements the RuntimeStats interface.
-func (e *InsertRuntimeStat) Tp() int {
-	return execdetails.TpInsertRuntimeStat
+func (e *InsertRuntimeStats) Tp() int {
+	return execdetails.TpInsertRuntimeStats
 }
