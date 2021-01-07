@@ -17,6 +17,7 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -996,6 +997,7 @@ func (er *expressionRewriter) handleScalarSubquery(ctx context.Context, v *ast.S
 		}
 		er.ctxStackAppend(expr, types.EmptyName)
 	} else {
+		fmt.Println(len(np.Schema().Columns))
 		er.ctxStackAppend(&expression.Constant{
 			Value:   row[0],
 			RetType: np.Schema().Columns[0].GetType(),

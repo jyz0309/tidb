@@ -184,13 +184,8 @@ func (e *slowQueryRetriever) getPreviousFile() *os.File {
 }
 
 func (e *slowQueryRetriever) parseDataForSlowLog(ctx context.Context, sctx sessionctx.Context) {
-	file := e.getNextFile()
-	if file == nil {
-		close(e.taskList)
-		return
-	}
-	reader := bufio.NewReader(file)
-	e.parseSlowLog(ctx, sctx, reader, ParseSlowLogBatchSize)
+
+	e.parseSlowLog(ctx, sctx, ParseSlowLogBatchSize)
 }
 
 func (e *slowQueryRetriever) dataForSlowLog(ctx context.Context) ([][]types.Datum, bool, error) {
@@ -289,13 +284,63 @@ type slowLogTask struct {
 	resultCh chan parsedSlowLog
 }
 
+type slowLogReader struct {
+	reader *bufio.Reader
+	limit  int
+}
+
 type slowLogBlock []string
 
-func (e *slowQueryRetriever) getBatchLog(ctx context.Context, reader *bufio.Reader, offset *offset, num int) ([][]string, error) {
+func (e *slowQueryRetriever) getNextStart(ctx context.Context, logReader *slowLogReader) ([]string, error) {
 	var line string
-	log := make([]string, 0, num)
+	log := make([]string, 0)
+	for {
+		if isCtxDone(ctx) {
+			return log, ctx.Err()
+		}
+		lineByte, err := getOneLine(logReader.reader)
+		logReader.limit -= len(lineByte)
+		if err != nil {
+			if err == io.EOF {
+				file := e.getNextFile()
+				if file == nil {
+					return log, nil
+				}
+				logReader.reader.Reset(file)
+				logReader.limit = 1024 * 1024 * 10 // 10mb
+				continue
+			}
+			return log, err
+		}
+		line = string(hack.String(lineByte))
+		if strings.HasPrefix(line, variable.SlowLogRowPrefixStr+variable.SlowLogTimeStr) {
+			e.fileLine++
+			log = append(log, line)
+			return log, nil
+		}
+		if strings.HasSuffix(line, variable.SlowLogSQLSuffixStr) {
+			if strings.HasPrefix(line, "use") || strings.HasPrefix(line, variable.SlowLogRowPrefixStr) {
+				continue
+			}
+			break
+		}
+	}
+	return log, nil
+}
+
+func (e *slowQueryRetriever) getBatchLog(ctx context.Context, offset *offset, file *os.File, batchSize int) ([][]string, error) {
+	var line string
+	log := make([]string, 0)
 	var err error
-	for i := 0; i < num; i++ {
+	//batchSize := 1 * 1024 * 1024 (10mb)
+	for index := 0; ; index++ {
+		file.Seek(int64(batchSize*index), 0)
+		reader := bufio.NewReader(file)
+		logReader := &slowLogReader{reader, batchSize}
+		log, err = e.getNextStart(ctx, logReader)
+		if err != nil {
+			return [][]string{log}, err
+		}
 		for {
 			if isCtxDone(ctx) {
 				return nil, ctx.Err()
@@ -315,13 +360,19 @@ func (e *slowQueryRetriever) getBatchLog(ctx context.Context, reader *bufio.Read
 				}
 				return [][]string{log}, err
 			}
+			logReader.limit -= len(lineByte)
 			line = string(hack.String(lineByte))
 			log = append(log, line)
-			if strings.HasSuffix(line, variable.SlowLogSQLSuffixStr) {
-				if strings.HasPrefix(line, "use") || strings.HasPrefix(line, variable.SlowLogRowPrefixStr) {
+			if logReader.limit <= 0 {
+				if strings.HasSuffix(line, variable.SlowLogSQLSuffixStr) {
+					if strings.HasPrefix(line, "use") || strings.HasPrefix(line, variable.SlowLogRowPrefixStr) {
+						continue
+					}
+					break
+				} else {
+					// read this log end
 					continue
 				}
-				break
 			}
 		}
 	}
@@ -415,10 +466,16 @@ func decomposeToSlowLogTasks(logs []slowLogBlock, num int) [][]string {
 	return decomposedSlowLogTasks
 }
 
-func (e *slowQueryRetriever) parseSlowLog(ctx context.Context, sctx sessionctx.Context, reader *bufio.Reader, logNum int) {
+func (e *slowQueryRetriever) parseSlowLog(ctx context.Context, sctx sessionctx.Context, logNum int) {
 	defer close(e.taskList)
 	var wg sync.WaitGroup
 	offset := offset{offset: 0, length: 0}
+	file := e.getNextFile()
+	if file == nil {
+		close(e.taskList)
+		return
+	}
+	reader := bufio.NewReader(file)
 	// To limit the num of go routine
 	concurrent := sctx.GetSessionVars().Concurrency.DistSQLScanConcurrency()
 	ch := make(chan int, concurrent)
@@ -431,7 +488,7 @@ func (e *slowQueryRetriever) parseSlowLog(ctx context.Context, sctx sessionctx.C
 		var logs [][]string
 		var err error
 		if !e.extractor.Desc {
-			logs, err = e.getBatchLog(ctx, reader, &offset, logNum)
+			logs, err = e.getBatchLog(ctx, &offset, file, 1*1024*1024)
 		} else {
 			logs, err = e.getBatchLogForReversedScan(ctx, reader, &offset, logNum)
 		}
