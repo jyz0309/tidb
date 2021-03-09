@@ -21,7 +21,10 @@ import (
 	"os"
 	"path"
 	"reflect"
+<<<<<<< HEAD
 	"runtime"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"testing"
 	"time"
 
@@ -90,7 +93,11 @@ func TestTopology(t *testing.T) {
 	failpoint.Enable("github.com/pingcap/tidb/domain/infosync/mockServerInfo", "return(true)")
 	defer failpoint.Disable("github.com/pingcap/tidb/domain/infosync/mockServerInfo")
 
+<<<<<<< HEAD
 	info, err := GlobalInfoSyncerInit(ctx, currentID, func() uint64 { return 1 }, cli, false)
+=======
+	info, err := GlobalInfoSyncerInit(ctx, currentID, cli, false)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,9 +116,12 @@ func TestTopology(t *testing.T) {
 	if topo.StartTimestamp != 1282967700000 {
 		t.Fatal("start_timestamp of topology info does not match")
 	}
+<<<<<<< HEAD
 	if v, ok := topo.Labels["foo"]; !ok || v != "bar" {
 		t.Fatal("labels of topology info does not match")
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	if !reflect.DeepEqual(*topo, info.getTopologyInfo()) {
 		t.Fatal("the info in etcd is not match with info.")

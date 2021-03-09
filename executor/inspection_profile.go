@@ -22,7 +22,10 @@ import (
 	"strings"
 	"time"
 
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/infoschema"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/sessionctx"
 	"github.com/pingcap/tidb/util/sqlexec"
 )
@@ -58,12 +61,20 @@ type metricNode struct {
 }
 
 type metricValue struct {
+<<<<<<< HEAD
 	sum     float64
 	count   int
 	avgP99  float64
 	avgP90  float64
 	avgP80  float64
 	comment string
+=======
+	sum    float64
+	count  int
+	avgP99 float64
+	avgP90 float64
+	avgP80 float64
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 type metricValueType int
@@ -110,9 +121,13 @@ func (m *metricValue) getComment() string {
 	if m.count == 0 {
 		return ""
 	}
+<<<<<<< HEAD
 	buf := bytes.NewBuffer(make([]byte, 0, 64))
 	buf.WriteString(m.comment)
 	buf.WriteString("\n\n")
+=======
+	buf := bytes.NewBuffer(make([]byte, 0, 32))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	buf.WriteString("total_time: ")
 	buf.WriteString(time.Duration(int64(m.sum * float64(time.Second))).String())
 	buf.WriteByte('\n')
@@ -165,6 +180,7 @@ func (n *metricNode) getLabelValue(label string) *metricValue {
 }
 
 func (n *metricNode) queryRowsByLabel(pb *profileBuilder, query string, handleRowFn func(label string, v float64)) error {
+<<<<<<< HEAD
 	exec := pb.sctx.(sqlexec.RestrictedSQLExecutor)
 	stmt, err := exec.ParseWithParams(context.TODO(), query)
 	if err != nil {
@@ -172,6 +188,9 @@ func (n *metricNode) queryRowsByLabel(pb *profileBuilder, query string, handleRo
 	}
 
 	rows, _, err := pb.sctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedStmt(context.TODO(), stmt)
+=======
+	rows, _, err := pb.sctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQLWithContext(context.Background(), query)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return err
 	}
@@ -287,6 +306,7 @@ func (n *metricNode) initializeMetricValue(pb *profileBuilder) error {
 		}
 		setQuantileValue(n.value, quantile, totalValue/float64(cnt))
 	}
+<<<<<<< HEAD
 
 	// 4. Add metric comment.
 	def, ok := infoschema.MetricTableMap[n.table+"_total_time"]
@@ -296,6 +316,8 @@ func (n *metricNode) initializeMetricValue(pb *profileBuilder) error {
 			value.comment = fmt.Sprintf("%s, the label of [%v] is [%v]", def.Comment, strings.Join(n.label, ","), label)
 		}
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return nil
 }
 

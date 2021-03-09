@@ -760,7 +760,12 @@ func (h *Helper) GetStoresStat() (*StoresStat, error) {
 
 // GetPDAddr return the PD Address.
 func (h *Helper) GetPDAddr() ([]string, error) {
+<<<<<<< HEAD
 	etcd, ok := h.Store.(kv.EtcdBackend)
+=======
+	var pdAddrs []string
+	etcd, ok := h.Store.(tikv.EtcdBackend)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if !ok {
 		return nil, errors.New("not implemented")
 	}

@@ -52,10 +52,15 @@ const (
 	TypeLimit = "Limit"
 	// TypeHashJoin is the type of hash join.
 	TypeHashJoin = "HashJoin"
+<<<<<<< HEAD
 	// TypeExchangeSender is the type of mpp exchanger sender.
 	TypeExchangeSender = "ExchangeSender"
 	// TypeExchangeReceiver is the type of mpp exchanger receiver.
 	TypeExchangeReceiver = "ExchangeReceiver"
+=======
+	// TypeBroadcastJoin is the type of broad cast join.
+	TypeBroadcastJoin = "BroadcastJoin"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// TypeMergeJoin is the type of merge join.
 	TypeMergeJoin = "MergeJoin"
 	// TypeIndexJoin is the type of index look up join.
@@ -359,6 +364,11 @@ func PhysicalIDToTypeString(id int) string {
 		return TypeClusterMemTableReader
 	case typeLoadDataID:
 		return TypeLoadData
+<<<<<<< HEAD
+=======
+	case typeTableSampleID:
+		return TypeTableSample
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case typeTableFullScan:
 		return TypeTableFullScan
 	case typeTableRangeScan:

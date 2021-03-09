@@ -998,6 +998,7 @@ func (e *SlowQueryExtractor) setTimeRange(start, end int64) {
 	e.Enable = true
 }
 
+<<<<<<< HEAD
 func (e *SlowQueryExtractor) buildTimeRangeFromKeyRange(keyRanges []*coprocessor.KeyRange) error {
 	for _, kr := range keyRanges {
 		startTime, err := e.decodeBytesToTime(kr.Start)
@@ -1047,6 +1048,8 @@ func (e *SlowQueryExtractor) decodeToTime(handle kv.Handle) (int64, error) {
 	return timestampInNano, err
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // TableStorageStatsExtractor is used to extract some predicates of `disk_usage`.
 type TableStorageStatsExtractor struct {
 	extractHelper
@@ -1105,8 +1108,13 @@ func (e *SlowQueryExtractor) explainInfo(p *PhysicalMemTable) string {
 	if !e.Enable {
 		return fmt.Sprintf("only search in the current '%v' file", p.ctx.GetSessionVars().SlowQueryFile)
 	}
+<<<<<<< HEAD
 	startTime := e.TimeRanges[0].StartTime.In(p.ctx.GetSessionVars().StmtCtx.TimeZone)
 	endTime := e.TimeRanges[0].EndTime.In(p.ctx.GetSessionVars().StmtCtx.TimeZone)
+=======
+	startTime := e.StartTime.In(p.ctx.GetSessionVars().StmtCtx.TimeZone)
+	endTime := e.EndTime.In(p.ctx.GetSessionVars().StmtCtx.TimeZone)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return fmt.Sprintf("start_time:%v, end_time:%v",
 		types.NewTime(types.FromGoTime(startTime), mysql.TypeDatetime, types.MaxFsp).String(),
 		types.NewTime(types.FromGoTime(endTime), mysql.TypeDatetime, types.MaxFsp).String())

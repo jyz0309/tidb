@@ -198,6 +198,7 @@ func (l *SimpleLRUCache) SetCapacity(capacity uint) error {
 	}
 	return nil
 }
+<<<<<<< HEAD
 
 // RemoveOldest removes the oldest element from the cache.
 func (l *SimpleLRUCache) RemoveOldest() (key Key, value Value, ok bool) {
@@ -210,3 +211,5 @@ func (l *SimpleLRUCache) RemoveOldest() (key Key, value Value, ok bool) {
 	}
 	return nil, nil, false
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

@@ -506,6 +506,7 @@ func (h *Handle) DumpStatsFeedbackToKV() error {
 				err = h.DumpFeedbackToKV(fb)
 			} else {
 				t, ok := h.statsCache.Load().(statsCache).tables[fb.PhysicalID]
+<<<<<<< HEAD
 				if !ok {
 					continue
 				}
@@ -517,6 +518,10 @@ func (h *Handle) DumpStatsFeedbackToKV() error {
 					err = h.DumpFeedbackForIndex(fb, t)
 				} else {
 					err = h.DumpFeedbackToKV(fb)
+=======
+				if ok {
+					err = h.DumpFeedbackForIndex(fb, t)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				}
 			}
 			if err != nil {
@@ -558,7 +563,10 @@ func (h *Handle) DumpFeedbackToKV(fb *statistics.QueryFeedback) error {
 // feedback locally on this tidb-server, so it could be used more timely.
 func (h *Handle) UpdateStatsByLocalFeedback(is infoschema.InfoSchema) {
 	h.sweepList()
+<<<<<<< HEAD
 OUTER:
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	for _, fbs := range h.feedback.Feedbacks {
 		for _, fb := range fbs {
 			h.mu.Lock()
@@ -576,6 +584,7 @@ OUTER:
 				}
 				newIdx := *idx
 				eqFB, ranFB := statistics.SplitFeedbackByQueryType(fb.Feedback)
+<<<<<<< HEAD
 				if idx.StatsVer >= statistics.Version2 {
 					// // For StatsVersion higher than Version1, the topn is extracted out of histogram. So we don't update the histogram if the feedback overlaps with some topn.
 					// ranFB = statistics.CleanRangeFeedbackByTopN(ranFB, idx.TopN)
@@ -583,6 +592,10 @@ OUTER:
 				}
 				newIdx.CMSketch, newIdx.TopN = statistics.UpdateCMSketchAndTopN(idx.CMSketch, idx.TopN, eqFB)
 				newIdx.Histogram = *statistics.UpdateHistogram(&idx.Histogram, &statistics.QueryFeedback{Feedback: ranFB}, int(idx.StatsVer))
+=======
+				newIdx.CMSketch = statistics.UpdateCMSketch(idx.CMSketch, eqFB)
+				newIdx.Histogram = *statistics.UpdateHistogram(&idx.Histogram, &statistics.QueryFeedback{Feedback: ranFB})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				newIdx.Histogram.PreCalculateScalar()
 				newIdx.Flag = statistics.ResetAnalyzeFlag(newIdx.Flag)
 				newTblStats.Indices[fb.Hist.ID] = &newIdx
@@ -591,17 +604,24 @@ OUTER:
 				if !ok || col.Histogram.Len() == 0 {
 					continue
 				}
+<<<<<<< HEAD
 				if col.StatsVer >= statistics.Version2 {
 					// // For StatsVersion higher than Version1, the topn is extracted out of histogram. So we don't update the histogram if the feedback overlaps with some topn.
 					// ranFB = statistics.CleanRangeFeedbackByTopN(ranFB, idx.TopN)
 					continue OUTER
 				}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				newCol := *col
 				// only use the range query to update primary key
 				_, ranFB := statistics.SplitFeedbackByQueryType(fb.Feedback)
 				newFB := &statistics.QueryFeedback{Feedback: ranFB}
 				newFB = newFB.DecodeIntValues()
+<<<<<<< HEAD
 				newCol.Histogram = *statistics.UpdateHistogram(&col.Histogram, newFB, statistics.Version1)
+=======
+				newCol.Histogram = *statistics.UpdateHistogram(&col.Histogram, newFB)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				newCol.Flag = statistics.ResetAnalyzeFlag(newCol.Flag)
 				newTblStats.Columns[fb.Hist.ID] = &newCol
 			}
@@ -644,8 +664,13 @@ func (h *Handle) UpdateErrorRate(is infoschema.InfoSchema) {
 
 // HandleUpdateStats update the stats using feedback.
 func (h *Handle) HandleUpdateStats(is infoschema.InfoSchema) error {
+<<<<<<< HEAD
 	ctx := context.Background()
 	tables, _, err := h.execRestrictedSQL(ctx, "SELECT distinct table_id from mysql.stats_feedback")
+=======
+	sql := "SELECT distinct table_id from mysql.stats_feedback"
+	tables, _, err := h.restrictedExec.ExecRestrictedSQL(sql)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -657,6 +682,7 @@ func (h *Handle) HandleUpdateStats(is infoschema.InfoSchema) error {
 		// this func lets `defer` works normally, where `Close()` should be called before any return
 		err = func() error {
 			tbl := ptbl.GetInt64(0)
+<<<<<<< HEAD
 			const sql = "select table_id, hist_id, is_index, feedback from mysql.stats_feedback where table_id=%? order by hist_id, is_index"
 			rc, err := h.mu.ctx.(sqlexec.SQLExecutor).ExecuteInternal(context.TODO(), sql, tbl)
 			if err != nil {
@@ -669,6 +695,22 @@ func (h *Handle) HandleUpdateStats(is infoschema.InfoSchema) error {
 				req := rc.NewChunk()
 				iter := chunk.NewIterator4Chunk(req)
 				err := rc.Next(context.TODO(), req)
+=======
+			sql = fmt.Sprintf("select table_id, hist_id, is_index, feedback from mysql.stats_feedback where table_id=%d order by hist_id, is_index", tbl)
+			rc, err := h.mu.ctx.(sqlexec.SQLExecutor).Execute(context.TODO(), sql)
+			if len(rc) > 0 {
+				defer terror.Call(rc[0].Close)
+			}
+			if err != nil {
+				return errors.Trace(err)
+			}
+			tableID, histID, isIndex := int64(-1), int64(-1), int64(-1)
+			var rows []chunk.Row
+			for {
+				req := rc[0].NewChunk()
+				iter := chunk.NewIterator4Chunk(req)
+				err := rc[0].Next(context.TODO(), req)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				if err != nil {
 					return errors.Trace(err)
 				}

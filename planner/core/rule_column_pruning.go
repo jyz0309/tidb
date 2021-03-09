@@ -317,6 +317,13 @@ func (p *LogicalJoin) mergeSchema() {
 		p.schema.Append(joinCol)
 	} else {
 		p.schema = expression.MergeSchema(lChild.Schema(), rChild.Schema())
+		switch p.JoinType {
+		case LeftOuterJoin:
+			resetNotNullFlag(p.schema, p.children[1].Schema().Len(), p.schema.Len())
+		case RightOuterJoin:
+			resetNotNullFlag(p.schema, 0, p.children[0].Schema().Len())
+		default:
+		}
 	}
 }
 
@@ -368,7 +375,11 @@ func (la *LogicalApply) PruneColumns(parentUsedCols []*expression.Column) error 
 
 // PruneColumns implements LogicalPlan interface.
 func (p *LogicalLock) PruneColumns(parentUsedCols []*expression.Column) error {
+<<<<<<< HEAD
 	if !IsSelectForUpdateLockType(p.Lock.LockType) {
+=======
+	if p.Lock != ast.SelectLockForUpdate && p.Lock != ast.SelectLockForUpdateNoWait && p.Lock != ast.SelectLockInShareMode {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return p.baseLogicalPlan.PruneColumns(parentUsedCols)
 	}
 

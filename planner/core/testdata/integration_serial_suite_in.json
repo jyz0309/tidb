@@ -2,6 +2,7 @@
   {
     "name": "TestSelPushDownTiFlash",
     "cases": [
+<<<<<<< HEAD
       "explain format = 'brief' select * from t where t.a > 1 and t.b = \"flash\" or t.a + 3 * t.a = 5",
       "explain format = 'brief' select * from t where cast(t.a as float) + 3 = 5.1",
       "explain format = 'brief' select * from t where b > 'a' order by convert(b, unsigned) limit 2",
@@ -46,11 +47,18 @@
       "explain format = 'brief' select count(*) from fact_t where exists (select 1 from d1_t where d1_k = fact_t.d1_k and value > fact_t.col1)",
       "explain format = 'brief' select count(*) from fact_t where not exists (select 1 from d1_t where d1_k = fact_t.d1_k)",
       "explain format = 'brief' select count(*) from fact_t where not exists (select 1 from d1_t where d1_k = fact_t.d1_k and value > fact_t.col1)"
+=======
+      "explain select * from t where t.a > 1 and t.b = \"flash\" or t.a + 3 * t.a = 5",
+      "explain select * from t where cast(t.a as float) + 3 = 5.1",
+      "explain select * from t where b > 'a' order by convert(b, unsigned) limit 2",
+      "explain select * from t where b > 'a' order by b limit 2"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
     ]
   },
   {
     "name": "TestBroadcastJoin",
     "cases": [
+<<<<<<< HEAD
       "explain format = 'brief' select /*+ broadcast_join(fact_t,d1_t) */ count(*) from fact_t, d1_t where fact_t.d1_k = d1_t.d1_k",
       "explain format = 'brief' select /*+ broadcast_join(fact_t,d1_t,d2_t,d3_t) */ count(*) from fact_t, d1_t, d2_t, d3_t where fact_t.d1_k = d1_t.d1_k and fact_t.d2_k = d2_t.d2_k and fact_t.d3_k = d3_t.d3_k",
       "explain format = 'brief' select /*+ broadcast_join(fact_t,d1_t), broadcast_join_local(d1_t) */ count(*) from fact_t, d1_t where fact_t.d1_k = d1_t.d1_k",
@@ -66,6 +74,14 @@
       "explain format = 'brief' select /*+ broadcast_join(fact_t,d1_t) */ count(*) from fact_t where exists (select 1 from d1_t where d1_k = fact_t.d1_k and value > fact_t.col1)",
       "explain format = 'brief' select /*+ broadcast_join(fact_t,d1_t) */ count(*) from fact_t where not exists (select 1 from d1_t where d1_k = fact_t.d1_k)",
       "explain format = 'brief' select /*+ broadcast_join(fact_t,d1_t) */ count(*) from fact_t where not exists (select 1 from d1_t where d1_k = fact_t.d1_k and value > fact_t.col1)"
+=======
+      "explain select /*+ broadcast_join(fact_t,d1_t) */ count(*) from fact_t, d1_t where fact_t.d1_k = d1_t.d1_k",
+      "explain select /*+ broadcast_join(fact_t,d1_t,d2_t,d3_t) */ count(*) from fact_t, d1_t, d2_t, d3_t where fact_t.d1_k = d1_t.d1_k and fact_t.d2_k = d2_t.d2_k and fact_t.d3_k = d3_t.d3_k",
+      "explain select /*+ broadcast_join(fact_t,d1_t), broadcast_join_local(d1_t) */ count(*) from fact_t, d1_t where fact_t.d1_k = d1_t.d1_k",
+      "explain select /*+ broadcast_join(fact_t,d1_t,d2_t,d3_t), broadcast_join_local(d2_t) */ count(*) from fact_t, d1_t, d2_t, d3_t where fact_t.d1_k = d1_t.d1_k and fact_t.d2_k = d2_t.d2_k and fact_t.d3_k = d3_t.d3_k",
+      "explain select /*+ broadcast_join(fact_t,d1_t) */ count(*) from fact_t left join d1_t on fact_t.d1_k = d1_t.d1_k",
+      "explain select /*+ broadcast_join(fact_t,d1_t) */ count(*) from fact_t right join d1_t on fact_t.d1_k = d1_t.d1_k"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
     ]
   },
   {
@@ -88,6 +104,18 @@
     ]
   },
   {
+<<<<<<< HEAD
+=======
+    "name": "TestIsolationReadTiFlashUseIndexHint",
+    "cases": [
+      "explain select * from t",
+      "explain select * from t use index();",
+      "explain select /*+ use_index(t, idx)*/ * from t",
+      "explain select /*+ use_index(t)*/ * from t"
+    ]
+  },
+  {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
     "name": "TestReadFromStorageHintAndIsolationRead",
     "cases": [
       "desc select /*+ read_from_storage(tikv[t], tiflash[t]) */ avg(a) from t",
@@ -106,22 +134,35 @@
   {
     "name": "TestIsolationReadTiFlashNotChoosePointGet",
     "cases": [
+<<<<<<< HEAD
       "explain format = 'brief' select * from t where t.a = 1",
       "explain format = 'brief' select * from t where t.a in (1, 2)"
+=======
+      "explain select * from t where t.a = 1",
+      "explain select * from t where t.a in (1, 2)"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
     ]
   },
   {
     "name": "TestIsolationReadTiFlashUseIndexHint",
     "cases": [
+<<<<<<< HEAD
       "explain format = 'brief' select * from t",
       "explain format = 'brief' select * from t use index();",
       "explain format = 'brief' select /*+ use_index(t, idx)*/ * from t",
       "explain format = 'brief' select /*+ use_index(t)*/ * from t"
+=======
+      "explain select * from t",
+      "explain select * from t use index();",
+      "explain select /*+ use_index(t, idx)*/ * from t",
+      "explain select /*+ use_index(t)*/ * from t"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
     ]
   },
   {
     "name": "TestIssue20710",
     "cases": [
+<<<<<<< HEAD
       "explain format = 'brief' select /*+ inl_join(s) */ * from t join s on t.a=s.a and t.b = s.b",
       "explain format = 'brief' select /*+ inl_join(s) */ * from t join s on t.a=s.a and t.b = s.a",
       "explain format = 'brief' select /*+ inl_join(s) */ * from t join s on t.a=s.a and t.a = s.b",
@@ -198,6 +239,14 @@
       "desc select sum(b) from (select t.id, t1.id as b from t join t t1 on t.id=t1.id)A group by id",
       "desc select * from (select id from t group by id) C join (select sum(value),id from t group by id)B on C.id=B.id",
       "desc select * from (select id from t group by id) C join (select sum(b),id from (select t.id, t1.id as b from t join (select id, count(*) as c from t group by id) t1 on t.id=t1.id)A group by id)B on C.id=b.id"
+=======
+      "explain select /*+ inl_join(s) */ * from t join s on t.a=s.a and t.b = s.b",
+      "explain select /*+ inl_join(s) */ * from t join s on t.a=s.a and t.b = s.a",
+      "explain select /*+ inl_join(s) */ * from t join s on t.a=s.a and t.a = s.b",
+      "explain select /*+ inl_hash_join(s) */ * from t join s on t.a=s.a and t.b = s.b",
+      "explain select /*+ inl_hash_join(s) */ * from t join s on t.a=s.a and t.b = s.a",
+      "explain select /*+ inl_hash_join(s) */ * from t join s on t.a=s.a and t.a = s.b"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
     ]
   }
 ]

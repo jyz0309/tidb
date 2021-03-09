@@ -17,6 +17,10 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+<<<<<<< HEAD
+=======
+	"io"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"os"
 	"strings"
 	"time"
@@ -33,6 +37,7 @@ import (
 )
 
 func parseLog(retriever *slowQueryRetriever, sctx sessionctx.Context, reader *bufio.Reader, logNum int) ([][]types.Datum, error) {
+<<<<<<< HEAD
 	retriever.taskList = make(chan slowLogTask, 100)
 	ctx := context.Background()
 	retriever.parseSlowLog(ctx, sctx, reader, 64)
@@ -56,6 +61,28 @@ func parseSlowLog(sctx sessionctx.Context, reader *bufio.Reader, logNum int) ([]
 }
 
 func (s *testExecSerialSuite) TestParseSlowLogPanic(c *C) {
+=======
+	retriever.parsedSlowLogCh = make(chan parsedSlowLog, 100)
+	ctx := context.Background()
+	retriever.parseSlowLog(ctx, sctx, reader, logNum)
+	slowLog := <-retriever.parsedSlowLogCh
+	rows, err := slowLog.rows, slowLog.err
+	if err == io.EOF {
+		err = nil
+	}
+	return rows, err
+}
+
+func parseSlowLog(sctx sessionctx.Context, reader *bufio.Reader, logNum int) ([][]types.Datum, error) {
+	retriever := &slowQueryRetriever{}
+	// Ignore the error is ok for test.
+	terror.Log(retriever.initialize(context.Background(), sctx))
+	rows, err := parseLog(retriever, sctx, reader, logNum)
+	return rows, err
+}
+
+func (s *testExecSuite) TestParseSlowLogPanic(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	slowLogStr :=
 		`# Time: 2019-04-28T15:24:04.309074+08:00
 # Txn_start_ts: 405888132465033227
@@ -70,7 +97,10 @@ func (s *testExecSerialSuite) TestParseSlowLogPanic(c *C) {
 # Mem_max: 70724
 # Disk_max: 65536
 # Plan_from_cache: true
+<<<<<<< HEAD
 # Plan_from_binding: true
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 # Succ: false
 # Plan_digest: 60e9378c746d9a2be1c791047e008967cf252eb6de9167ad3aa6098fa2d523f4
 # Prev_stmt: update t set i = 1;
@@ -98,7 +128,10 @@ func (s *testExecSuite) TestParseSlowLogFile(c *C) {
 # Exec_retry_time: 0.12 Exec_retry_count: 57
 # Query_time: 0.216905
 # Cop_time: 0.38 Process_time: 0.021 Request_count: 1 Total_keys: 637 Processed_keys: 436
+<<<<<<< HEAD
 # Rocksdb_delete_skipped_count: 10 Rocksdb_key_skipped_count: 10 Rocksdb_block_cache_hit_count: 10 Rocksdb_block_read_count: 10 Rocksdb_block_read_byte: 100
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 # Is_internal: true
 # Digest: 42a1c8aae6f133e934d4bf0147491709a8812ea05ff8819ec522780fe657b772
 # Stats: t1:1,t2:2
@@ -110,7 +143,10 @@ func (s *testExecSuite) TestParseSlowLogFile(c *C) {
 # Mem_max: 70724
 # Disk_max: 65536
 # Plan_from_cache: true
+<<<<<<< HEAD
 # Plan_from_binding: true
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 # Succ: false
 # Plan_digest: 60e9378c746d9a2be1c791047e008967cf252eb6de9167ad3aa6098fa2d523f4
 # Prev_stmt: update t set i = 1;
@@ -135,12 +171,21 @@ select * from t;`
 	}
 	expectRecordString := `2019-04-28 15:24:04.309074,` +
 		`405888132465033227,root,localhost,0,57,0.12,0.216905,` +
+<<<<<<< HEAD
 		`0,0,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,0,0,0.38,0.021,0,0,0,1,637,0,10,10,10,10,100,,,1,42a1c8aae6f133e934d4bf0147491709a8812ea05ff8819ec522780fe657b772,t1:1,t2:2,` +
 		`0.1,0.2,0.03,127.0.0.1:20160,0.05,0.6,0.8,0.0.0.0:20160,70724,65536,0,0,0,0,` +
 		`Cop_backoff_regionMiss_total_times: 200 Cop_backoff_regionMiss_total_time: 0.2 Cop_backoff_regionMiss_max_time: 0.2 Cop_backoff_regionMiss_max_addr: 127.0.0.1 Cop_backoff_regionMiss_avg_time: 0.2 Cop_backoff_regionMiss_p90_time: 0.2 Cop_backoff_rpcPD_total_times: 200 Cop_backoff_rpcPD_total_time: 0.2 Cop_backoff_rpcPD_max_time: 0.2 Cop_backoff_rpcPD_max_addr: 127.0.0.1 Cop_backoff_rpcPD_avg_time: 0.2 Cop_backoff_rpcPD_p90_time: 0.2 Cop_backoff_rpcTiKV_total_times: 200 Cop_backoff_rpcTiKV_total_time: 0.2 Cop_backoff_rpcTiKV_max_time: 0.2 Cop_backoff_rpcTiKV_max_addr: 127.0.0.1 Cop_backoff_rpcTiKV_avg_time: 0.2 Cop_backoff_rpcTiKV_p90_time: 0.2,` +
 		`0,0,1,1,,60e9378c746d9a2be1c791047e008967cf252eb6de9167ad3aa6098fa2d523f4,` +
 		`update t set i = 1;,select * from t;`
 	c.Assert(expectRecordString, Equals, recordString)
+=======
+		`0,0,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,0,0,0.38,0.021,0,0,0,1,637,0,,,1,42a1c8aae6f133e934d4bf0147491709a8812ea05ff8819ec522780fe657b772,t1:1,t2:2,` +
+		`0.1,0.2,0.03,127.0.0.1:20160,0.05,0.6,0.8,0.0.0.0:20160,70724,65536,0,0,0,0,` +
+		`Cop_backoff_regionMiss_total_times: 200 Cop_backoff_regionMiss_total_time: 0.2 Cop_backoff_regionMiss_max_time: 0.2 Cop_backoff_regionMiss_max_addr: 127.0.0.1 Cop_backoff_regionMiss_avg_time: 0.2 Cop_backoff_regionMiss_p90_time: 0.2 Cop_backoff_rpcPD_total_times: 200 Cop_backoff_rpcPD_total_time: 0.2 Cop_backoff_rpcPD_max_time: 0.2 Cop_backoff_rpcPD_max_addr: 127.0.0.1 Cop_backoff_rpcPD_avg_time: 0.2 Cop_backoff_rpcPD_p90_time: 0.2 Cop_backoff_rpcTiKV_total_times: 200 Cop_backoff_rpcTiKV_total_time: 0.2 Cop_backoff_rpcTiKV_max_time: 0.2 Cop_backoff_rpcTiKV_max_addr: 127.0.0.1 Cop_backoff_rpcTiKV_avg_time: 0.2 Cop_backoff_rpcTiKV_p90_time: 0.2,` +
+		`0,0,1,,60e9378c746d9a2be1c791047e008967cf252eb6de9167ad3aa6098fa2d523f4,` +
+		`update t set i = 1;,select * from t;`
+	c.Assert(recordString, Equals, expectRecordString)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// Issue 20928
 	reader = bufio.NewReader(bytes.NewBufferString(slowLogStr))
@@ -156,6 +201,7 @@ select * from t;`
 		}
 		recordString += str
 	}
+<<<<<<< HEAD
 	expectRecordString = `2019-04-28 15:24:04.309074,` +
 		`405888132465033227,root,localhost,0,57,0.12,0.216905,` +
 		`0,0,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,0,0,0.38,0.021,0,0,0,1,637,0,10,10,10,10,100,,,1,42a1c8aae6f133e934d4bf0147491709a8812ea05ff8819ec522780fe657b772,t1:1,t2:2,` +
@@ -163,6 +209,8 @@ select * from t;`
 		`Cop_backoff_regionMiss_total_times: 200 Cop_backoff_regionMiss_total_time: 0.2 Cop_backoff_regionMiss_max_time: 0.2 Cop_backoff_regionMiss_max_addr: 127.0.0.1 Cop_backoff_regionMiss_avg_time: 0.2 Cop_backoff_regionMiss_p90_time: 0.2 Cop_backoff_rpcPD_total_times: 200 Cop_backoff_rpcPD_total_time: 0.2 Cop_backoff_rpcPD_max_time: 0.2 Cop_backoff_rpcPD_max_addr: 127.0.0.1 Cop_backoff_rpcPD_avg_time: 0.2 Cop_backoff_rpcPD_p90_time: 0.2 Cop_backoff_rpcTiKV_total_times: 200 Cop_backoff_rpcTiKV_total_time: 0.2 Cop_backoff_rpcTiKV_max_time: 0.2 Cop_backoff_rpcTiKV_max_addr: 127.0.0.1 Cop_backoff_rpcTiKV_avg_time: 0.2 Cop_backoff_rpcTiKV_p90_time: 0.2,` +
 		`0,0,1,1,,60e9378c746d9a2be1c791047e008967cf252eb6de9167ad3aa6098fa2d523f4,` +
 		`update t set i = 1;,select * from t;`
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(expectRecordString, Equals, recordString)
 
 	// fix sql contain '# ' bug
@@ -326,7 +374,10 @@ select 5;
 select 6;
 # Time: 2020-04-15T18:00:05.299063744+08:00
 select 7;`
+<<<<<<< HEAD
 	logData := []string{logData0, logData1, logData2, logData3}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	fileName0 := "tidb-slow-2020-02-14T19-04-05.01.log"
 	fileName1 := "tidb-slow-2020-02-15T19-04-05.01.log"

@@ -988,6 +988,7 @@ func (c *Column) equalRowCount(sc *stmtctx.StatementContext, val types.Datum, mo
 		}
 		return c.Histogram.equalRowCount(val, false), nil
 	}
+<<<<<<< HEAD
 	// Stats version == 2
 	// 1. try to find this value in TopN
 	if c.TopN != nil {
@@ -999,6 +1000,10 @@ func (c *Column) equalRowCount(sc *stmtctx.StatementContext, val types.Datum, mo
 		if ok {
 			return float64(rowcount), nil
 		}
+=======
+	if c.NDV > 0 && c.outOfRange(val) {
+		return outOfRangeEQSelectivity(c.NDV, modifyCount, int64(c.TotalRowCount())) * c.TotalRowCount(), nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	// 2. try to find this value in bucket.repeats(the last value in every bucket)
 	index, match := c.Histogram.Bounds.LowerBound(0, &val)
@@ -1037,10 +1042,25 @@ func (c *Column) GetColumnRowCount(sc *stmtctx.StatementContext, ranges []*range
 		highVal := *rg.HighVal[0].Clone()
 		lowVal := *rg.LowVal[0].Clone()
 		if highVal.Kind() == types.KindString {
+<<<<<<< HEAD
 			highVal.SetBytes(collate.GetCollator(highVal.Collation()).Key(highVal.GetString()))
 		}
 		if lowVal.Kind() == types.KindString {
 			lowVal.SetBytes(collate.GetCollator(lowVal.Collation()).Key(lowVal.GetString()))
+=======
+			highVal.SetBytesAsString(collate.GetCollator(
+				highVal.Collation()).Key(highVal.GetString()),
+				highVal.Collation(),
+				uint32(highVal.Length()),
+			)
+		}
+		if lowVal.Kind() == types.KindString {
+			lowVal.SetBytesAsString(collate.GetCollator(
+				lowVal.Collation()).Key(lowVal.GetString()),
+				lowVal.Collation(),
+				uint32(lowVal.Length()),
+			)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		cmp, err := lowVal.CompareDatum(sc, &highVal)
 		if err != nil {
@@ -1076,10 +1096,14 @@ func (c *Column) GetColumnRowCount(sc *stmtctx.StatementContext, ranges []*range
 			continue
 		}
 		// The interval case.
+<<<<<<< HEAD
 		cnt, err := c.BetweenRowCount(sc, lowVal, highVal)
 		if err != nil {
 			return 0, err
 		}
+=======
+		cnt := c.BetweenRowCount(lowVal, highVal)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if (c.outOfRange(lowVal) && !lowVal.IsNull()) || c.outOfRange(highVal) {
 			cnt += outOfRangeEQSelectivity(outOfRangeBetweenRate, modifyCount, int64(c.TotalRowCount())) * c.TotalRowCount()
 		}
@@ -1162,7 +1186,11 @@ func (idx *Index) equalRowCount(b []byte, modifyCount int64) float64 {
 	}
 	val := types.NewBytesDatum(b)
 	if idx.NDV > 0 && idx.outOfRange(val) {
+<<<<<<< HEAD
 		return outOfRangeEQSelectivity(idx.NDV, modifyCount, int64(idx.TotalRowCount())) * idx.TotalRowCount()
+=======
+		return outOfRangeEQSelectivity(idx.NDV, modifyCount, int64(idx.TotalRowCount())) * idx.TotalRowCount(), nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	if idx.CMSketch != nil && idx.StatsVer < Version2 {
 		return float64(idx.QueryBytes(b))

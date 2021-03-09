@@ -53,7 +53,11 @@ func (*testSysVarSuite) TestSysVar(c *C) {
 	c.Assert(f.Value, Equals, "leader")
 
 	f = GetSysVar("tidb_enable_table_partition")
+<<<<<<< HEAD
 	c.Assert(f.Value, Equals, "ON")
+=======
+	c.Assert(f.Value, Equals, "on")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (*testSysVarSuite) TestTxnMode(c *C) {

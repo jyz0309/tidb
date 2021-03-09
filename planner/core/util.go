@@ -40,7 +40,11 @@ type AggregateFuncExtractor struct {
 // Enter implements Visitor interface.
 func (a *AggregateFuncExtractor) Enter(n ast.Node) (ast.Node, bool) {
 	switch n.(type) {
+<<<<<<< HEAD
 	case *ast.SelectStmt, *ast.SetOprStmt:
+=======
+	case *ast.SelectStmt, *ast.UnionStmt:
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return n, true
 	}
 	return n, false
@@ -301,6 +305,7 @@ func tableHasDirtyContent(ctx sessionctx.Context, tableInfo *model.TableInfo) bo
 	}
 	return false
 }
+<<<<<<< HEAD
 
 func cloneExprs(exprs []expression.Expression) []expression.Expression {
 	cloned := make([]expression.Expression, 0, len(exprs))
@@ -345,3 +350,5 @@ func clonePhysicalPlan(plans []PhysicalPlan) ([]PhysicalPlan, error) {
 	}
 	return cloned, nil
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

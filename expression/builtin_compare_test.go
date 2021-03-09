@@ -68,8 +68,12 @@ func (s *testEvaluatorSuite) TestCompareFunctionWithRefine(c *C) {
 		{"-123456789123456789123456789.12345 < a", "1"},
 		{"'aaaa'=a", "eq(0, a)"},
 	}
+<<<<<<< HEAD
 	cols, names, err := ColumnInfos2ColumnsAndNames(s.ctx, model.NewCIStr(""), tblInfo.Name, tblInfo.Cols(), tblInfo)
 	c.Assert(err, IsNil)
+=======
+	cols, names := ColumnInfos2ColumnsAndNames(s.ctx, model.NewCIStr(""), tblInfo.Name, tblInfo.Columns, tblInfo)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	schema := NewSchema(cols...)
 	for _, t := range tests {
 		f, err := ParseSimpleExprsWithNames(s.ctx, t.exprStr, schema, names)

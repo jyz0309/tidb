@@ -198,7 +198,10 @@ func (s *testCollateSuite) TestGetCollator(c *C) {
 	c.Assert(GetCollator("utf8_general_ci"), FitsTypeOf, &generalCICollator{})
 	c.Assert(GetCollator("utf8mb4_unicode_ci"), FitsTypeOf, &unicodeCICollator{})
 	c.Assert(GetCollator("utf8_unicode_ci"), FitsTypeOf, &unicodeCICollator{})
+<<<<<<< HEAD
 	c.Assert(GetCollator("utf8mb4_zh_pinyin_tidb_as_cs"), FitsTypeOf, &zhPinyinTiDBASCSCollator{})
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(GetCollator("default_test"), FitsTypeOf, &binPaddingCollator{})
 	c.Assert(GetCollatorByID(63), FitsTypeOf, &binCollator{})
 	c.Assert(GetCollatorByID(46), FitsTypeOf, &binPaddingCollator{})
@@ -207,7 +210,10 @@ func (s *testCollateSuite) TestGetCollator(c *C) {
 	c.Assert(GetCollatorByID(33), FitsTypeOf, &generalCICollator{})
 	c.Assert(GetCollatorByID(224), FitsTypeOf, &unicodeCICollator{})
 	c.Assert(GetCollatorByID(192), FitsTypeOf, &unicodeCICollator{})
+<<<<<<< HEAD
 	c.Assert(GetCollatorByID(2048), FitsTypeOf, &zhPinyinTiDBASCSCollator{})
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(GetCollatorByID(9999), FitsTypeOf, &binPaddingCollator{})
 
 	SetNewCollationEnabledForTest(false)
@@ -218,7 +224,10 @@ func (s *testCollateSuite) TestGetCollator(c *C) {
 	c.Assert(GetCollator("utf8_general_ci"), FitsTypeOf, &binCollator{})
 	c.Assert(GetCollator("utf8mb4_unicode_ci"), FitsTypeOf, &binCollator{})
 	c.Assert(GetCollator("utf8_unicode_ci"), FitsTypeOf, &binCollator{})
+<<<<<<< HEAD
 	c.Assert(GetCollator("utf8mb4_zh_pinyin_tidb_as_cs"), FitsTypeOf, &binCollator{})
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(GetCollator("default_test"), FitsTypeOf, &binCollator{})
 	c.Assert(GetCollatorByID(63), FitsTypeOf, &binCollator{})
 	c.Assert(GetCollatorByID(46), FitsTypeOf, &binCollator{})
@@ -227,6 +236,9 @@ func (s *testCollateSuite) TestGetCollator(c *C) {
 	c.Assert(GetCollatorByID(33), FitsTypeOf, &binCollator{})
 	c.Assert(GetCollatorByID(224), FitsTypeOf, &binCollator{})
 	c.Assert(GetCollatorByID(192), FitsTypeOf, &binCollator{})
+<<<<<<< HEAD
 	c.Assert(GetCollatorByID(2048), FitsTypeOf, &binCollator{})
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(GetCollatorByID(9999), FitsTypeOf, &binCollator{})
 }

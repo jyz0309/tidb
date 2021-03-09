@@ -143,6 +143,7 @@ func (s *testBatchPointGetSuite) TestBatchPointGetCache(c *C) {
 	tk.MustQuery("SELECT id, token FROM test.customers WHERE id IN (28, 29);").Check(testkit.Rows("28 07j", "29 03j"))
 }
 
+<<<<<<< HEAD
 func (s *testBatchPointGetSuite) TestIssue18843(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -155,6 +156,8 @@ func (s *testBatchPointGetSuite) TestIssue18843(c *C) {
 	tk.MustQuery("select * from t18843 where f is null").Check(testkit.Rows("2 <nil>"))
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testBatchPointGetSuite) TestBatchPointGetUnsignedHandleWithSort(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -177,7 +180,10 @@ func (s *testBatchPointGetSuite) TestBatchPointGetLockExistKey(c *C) {
 
 		errCh <- tk1.ExecToErr("use test")
 		errCh <- tk2.ExecToErr("use test")
+<<<<<<< HEAD
 		tk1.Se.GetSessionVars().EnableClusteredIndex = false
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 		errCh <- tk1.ExecToErr(fmt.Sprintf("drop table if exists %s", tableName))
 		errCh <- tk1.ExecToErr(fmt.Sprintf("create table %s(id int, v int, k int, %s key0(id, v))", tableName, key))

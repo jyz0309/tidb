@@ -688,10 +688,18 @@ func (s *testEvaluatorSuite) TestExprPushDownToFlash(c *C) {
 	c.Assert(err, IsNil)
 	exprs = append(exprs, function)
 
+<<<<<<< HEAD
 	// CastDecimalAsString
 	function, err = NewFunction(mock.NewContext(), ast.Cast, types.NewFieldType(mysql.TypeString), decimalColumn)
 	c.Assert(err, IsNil)
 	exprs = append(exprs, function)
+=======
+	// TODO: Wait for TiFlash to fix CastDecimalAsString
+	// CastDecimalAsString
+	// function, err = NewFunction(mock.NewContext(), ast.Cast, types.NewFieldType(mysql.TypeString), decimalColumn)
+	// c.Assert(err, IsNil)
+	// exprs = append(exprs, function)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// CastStringAsString
 	function, err = NewFunction(mock.NewContext(), ast.Cast, types.NewFieldType(mysql.TypeString), stringColumn)
@@ -883,7 +891,10 @@ func (s *testEvaluatorSerialSuites) TestNewCollationsEnabled(c *C) {
 	colExprs = append(colExprs, columnCollation(dg.genColumn(mysql.TypeString, 4), "utf8mb4_0900_ai_ci"))
 	colExprs = append(colExprs, columnCollation(dg.genColumn(mysql.TypeVarchar, 5), "utf8_bin"))
 	colExprs = append(colExprs, columnCollation(dg.genColumn(mysql.TypeVarchar, 6), "utf8_unicode_ci"))
+<<<<<<< HEAD
 	colExprs = append(colExprs, columnCollation(dg.genColumn(mysql.TypeVarchar, 7), "utf8mb4_zh_pinyin_tidb_as_cs"))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	pushed, _ := PushDownExprs(sc, colExprs, client, kv.UnSpecified)
 	c.Assert(len(pushed), Equals, len(colExprs))
 	pbExprs, err := ExpressionsToPBList(sc, colExprs, client)
@@ -895,7 +906,10 @@ func (s *testEvaluatorSerialSuites) TestNewCollationsEnabled(c *C) {
 		"{\"tp\":201,\"val\":\"gAAAAAAAAAQ=\",\"sig\":0,\"field_type\":{\"tp\":254,\"flag\":0,\"flen\":-1,\"decimal\":-1,\"collate\":-255,\"charset\":\"\"}}",
 		"{\"tp\":201,\"val\":\"gAAAAAAAAAU=\",\"sig\":0,\"field_type\":{\"tp\":15,\"flag\":0,\"flen\":-1,\"decimal\":-1,\"collate\":-83,\"charset\":\"\"}}",
 		"{\"tp\":201,\"val\":\"gAAAAAAAAAY=\",\"sig\":0,\"field_type\":{\"tp\":15,\"flag\":0,\"flen\":-1,\"decimal\":-1,\"collate\":-192,\"charset\":\"\"}}",
+<<<<<<< HEAD
 		"{\"tp\":201,\"val\":\"gAAAAAAAAAc=\",\"sig\":0,\"field_type\":{\"tp\":15,\"flag\":0,\"flen\":-1,\"decimal\":-1,\"collate\":-2048,\"charset\":\"\"}}",
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	for i, pbExpr := range pbExprs {
 		c.Assert(pbExprs, NotNil)

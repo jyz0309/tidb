@@ -189,7 +189,11 @@ func (*testSessionSuite) TestSlowLogFormat(c *C) {
 # Rewrite_time: 0.000000003 Preproc_subqueries: 2 Preproc_subqueries_time: 0.000000002
 # Optimize_time: 0.00000001
 # Wait_TS: 0.000000003
+<<<<<<< HEAD
 # Process_time: 2 Wait_time: 60 Backoff_time: 0.001 Request_count: 2 Process_keys: 20001 Total_keys: 10000
+=======
+# Process_time: 2 Wait_time: 60 Backoff_time: 0.001 Request_count: 2 Total_keys: 10000 Process_keys: 20001
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 # DB: test
 # Index_names: [t1:a,t2:b]
 # Is_internal: true
@@ -205,7 +209,10 @@ func (*testSessionSuite) TestSlowLogFormat(c *C) {
 # Disk_max: 6666
 # Prepared: true
 # Plan_from_cache: true
+<<<<<<< HEAD
 # Plan_from_binding: true
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 # Has_more_results: true
 # KV_total: 10
 # PD_total: 11
@@ -231,7 +238,10 @@ func (*testSessionSuite) TestSlowLogFormat(c *C) {
 		DiskMax:           diskMax,
 		Prepared:          true,
 		PlanFromCache:     true,
+<<<<<<< HEAD
 		PlanFromBinding:   true,
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		HasMoreResults:    true,
 		KVTotal:           10 * time.Second,
 		PDTotal:           11 * time.Second,

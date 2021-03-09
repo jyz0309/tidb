@@ -42,7 +42,10 @@ import (
 	"github.com/pingcap/tidb/util/codec"
 	"github.com/pingcap/tidb/util/collate"
 	"github.com/pingcap/tidb/util/hint"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/util/rowcodec"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/util/stringutil"
 )
 
@@ -54,6 +57,7 @@ func evalAstExpr(sctx sessionctx.Context, expr ast.ExprNode) (types.Datum, error
 	if val, ok := expr.(*driver.ValueExpr); ok {
 		return val.Datum, nil
 	}
+<<<<<<< HEAD
 	newExpr, err := rewriteAstExpr(sctx, expr, nil, nil)
 	if err != nil {
 		return types.Datum{}, err
@@ -62,6 +66,16 @@ func evalAstExpr(sctx sessionctx.Context, expr ast.ExprNode) (types.Datum, error
 }
 
 // rewriteAstExpr rewrites ast expression directly.
+=======
+	NewExpr, err := rewriteAstExpr(sctx, expr, nil, nil)
+	if err != nil {
+		return types.Datum{}, err
+	}
+	return NewExpr.Eval(chunk.Row{})
+}
+
+// rewriteAstExpr rewrite ast expression directly.
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func rewriteAstExpr(sctx sessionctx.Context, expr ast.ExprNode, schema *expression.Schema, names types.NameSlice) (expression.Expression, error) {
 	var is infoschema.InfoSchema
 	if sctx.GetSessionVars().TxnCtx.InfoSchema != nil {
@@ -73,7 +87,10 @@ func rewriteAstExpr(sctx sessionctx.Context, expr ast.ExprNode, schema *expressi
 		fakePlan.schema = schema
 		fakePlan.names = names
 	}
+<<<<<<< HEAD
 	b.curClause = expressionClause
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	newExpr, _, err := b.rewrite(context.TODO(), expr, fakePlan, nil, true)
 	if err != nil {
 		return nil, err
@@ -1180,7 +1197,11 @@ func (er *expressionRewriter) rewriteVariable(v *ast.VariableExpr) {
 		if v.Value != nil {
 			tp := er.ctxStack[stkLen-1].GetType()
 			er.ctxStack[stkLen-1], er.err = er.newFunction(ast.SetVar, tp,
+<<<<<<< HEAD
 				expression.DatumToConstant(types.NewDatum(name), mysql.TypeString, 0),
+=======
+				expression.DatumToConstant(types.NewDatum(name), mysql.TypeString),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				er.ctxStack[stkLen-1])
 			er.ctxNameStk[stkLen-1] = types.EmptyName
 			// Store the field type of the variable into SessionVars.UserVarTypes.
@@ -1198,7 +1219,11 @@ func (er *expressionRewriter) rewriteVariable(v *ast.VariableExpr) {
 			tp = types.NewFieldType(mysql.TypeVarString)
 			tp.Flen = mysql.MaxFieldVarCharLength
 		}
+<<<<<<< HEAD
 		f, err := er.newFunction(ast.GetVar, tp, expression.DatumToConstant(types.NewStringDatum(name), mysql.TypeString, 0))
+=======
+		f, err := er.newFunction(ast.GetVar, tp, expression.DatumToConstant(types.NewStringDatum(name), mysql.TypeString))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			er.err = err
 			return
@@ -1483,7 +1508,11 @@ func (er *expressionRewriter) patternLikeToExpression(v *ast.PatternLikeExpr) {
 	fieldType := &types.FieldType{}
 	isPatternExactMatch := false
 	// Treat predicate 'like' the same way as predicate '=' when it is an exact match and new collation is not enabled.
+<<<<<<< HEAD
 	if patExpression, ok := er.ctxStack[l-1].(*expression.Constant); ok && !collate.NewCollationEnabled() {
+=======
+	if patExpression, ok := er.ctxStack[l-1].(*expression.Constant); ok {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		patString, isNull, err := patExpression.EvalString(nil, chunk.Row{})
 		if err != nil {
 			er.err = err
@@ -1496,11 +1525,17 @@ func (er *expressionRewriter) patternLikeToExpression(v *ast.PatternLikeExpr) {
 				if v.Not {
 					op = ast.NE
 				}
-				types.DefaultTypeForValue(string(patValue), fieldType, char, col)
-				function, er.err = er.constructBinaryOpFunction(er.ctxStack[l-2],
-					&expression.Constant{Value: types.NewStringDatum(string(patValue)), RetType: fieldType},
-					op)
+				types.DefaultTypeForValue(string(patValue), fieldType, patExpression.RetType.Charset, patExpression.RetType.Collate)
+				constant := &expression.Constant{Value: types.NewStringDatum(string(patValue)), RetType: fieldType}
+				constant.SetCoercibility(patExpression.Coercibility())
+				function, er.err = er.constructBinaryOpFunction(er.ctxStack[l-2], constant, op)
 				isPatternExactMatch = true
+				if collate.NewCollationEnabled() {
+					_, coll := expression.DeriveCollationFromExprs(er.sctx, er.ctxStack[l-1], er.ctxStack[l-2])
+					if coll == "utf8mb4_unicode_ci" || coll == "utf8_unicode_ci" {
+						isPatternExactMatch = false
+					}
+				}
 			}
 		}
 	}

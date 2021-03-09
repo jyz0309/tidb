@@ -20,7 +20,10 @@ import (
 
 	"github.com/pingcap/errors"
 	"github.com/pingcap/parser/mysql"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/ddl/placement"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/infoschema"
 	"github.com/pingcap/tidb/kv"
 	"github.com/pingcap/tidb/sessionctx/stmtctx"
@@ -234,7 +237,10 @@ func (builder *RequestBuilder) SetFromSessionVars(sv *variable.SessionVars) *Req
 	} else {
 		builder.Request.SchemaVar = sv.TxnCtx.SchemaVersion
 	}
+<<<<<<< HEAD
 	builder.txnScope = sv.TxnCtx.TxnScope
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return builder
 }
 

@@ -35,7 +35,10 @@ import (
 	"github.com/pingcap/tidb/kv"
 	"github.com/pingcap/tidb/meta"
 	"github.com/pingcap/tidb/meta/autoid"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/metrics"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/sessionctx"
 	"github.com/pingcap/tidb/sessionctx/stmtctx"
 	"github.com/pingcap/tidb/table"
@@ -140,9 +143,15 @@ func createColumnInfo(tblInfo *model.TableInfo, colInfo *model.ColumnInfo, pos *
 	colInfo.Offset = len(cols)
 
 	// Append the column info to the end of the tblInfo.Columns.
+<<<<<<< HEAD
 	// It will reorder to the right offset in "Columns" when it state change to public.
 	tblInfo.Columns = append(cols, colInfo)
 	return colInfo, pos, offset, nil
+=======
+	// It will reorder to the right position in "Columns" when it state change to public.
+	tblInfo.Columns = append(cols, colInfo)
+	return colInfo, position, nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func checkAddColumn(t *meta.Meta, job *model.Job) (*model.TableInfo, *model.ColumnInfo, *model.ColumnInfo, *ast.ColumnPosition, int, error) {
@@ -236,6 +245,7 @@ func onAddColumn(d *ddlCtx, t *meta.Meta, job *model.Job) (ver int64, err error)
 		}
 		// Update the job state when all affairs done.
 		job.SchemaState = model.StateWriteReorganization
+<<<<<<< HEAD
 	case model.StateWriteReorganization:
 		// reorganization -> public
 		// Adjust table column offset.
@@ -382,6 +392,8 @@ func onAddColumns(d *ddlCtx, t *meta.Meta, job *model.Job) (ver int64, err error
 			return ver, errors.Trace(err)
 		}
 		job.SchemaState = model.StateWriteReorganization
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case model.StateWriteReorganization:
 		// reorganization -> public
 		// Adjust table column offsets.
@@ -1121,6 +1133,7 @@ func (w *worker) updateColumnAndIndexes(t table.Table, oldCol, col *model.Column
 		return errors.Trace(err)
 	}
 
+<<<<<<< HEAD
 	startElementOffset := 0
 	startElementOffsetToResetHandle := -1
 	// This backfill job starts with backfilling index data, whose index ID is currElement.ID.
@@ -1139,6 +1152,63 @@ func (w *worker) updateColumnAndIndexes(t table.Table, oldCol, col *model.Column
 		// Then the handle range of the rest elements' is [originalStartHandle, originalEndHandle].
 		if i == startElementOffsetToResetHandle+1 {
 			reorgInfo.StartKey, reorgInfo.EndKey = originalStartHandle, originalEndHandle
+=======
+	originalState := colInfo.State
+	switch colInfo.State {
+	case model.StatePublic:
+		// public -> write only
+		colInfo.State = model.StateWriteOnly
+		// Set this column's offset to the last and reset all following columns' offsets.
+		adjustColumnInfoInDropColumn(tblInfo, colInfo.Offset)
+		// When the dropping column has not-null flag and it hasn't the default value, we can backfill the column value like "add column".
+		// NOTE: If the state of StateWriteOnly can be rollbacked, we'd better reconsider the original default value.
+		// And we need consider the column without not-null flag.
+		if colInfo.GetOriginDefaultValue() == nil && mysql.HasNotNullFlag(colInfo.Flag) {
+			// If the column is timestamp default current_timestamp, and DDL owner is new version TiDB that set column.Version to 1,
+			// then old TiDB update record in the column write only stage will uses the wrong default value of the dropping column.
+			// Because new version of the column default value is UTC time, but old version TiDB will think the default value is the time in system timezone.
+			// But currently will be ok, because we can't cancel the drop column job when the job is running,
+			// so the column will be dropped succeed and client will never see the wrong default value of the dropped column.
+			// More info about this problem, see PR#9115.
+			oldDVal, err := generateOriginDefaultValue(colInfo)
+			if err != nil {
+				return ver, errors.Trace(err)
+			}
+			err = colInfo.SetOriginDefaultValue(oldDVal)
+			if err != nil {
+				return ver, errors.Trace(err)
+			}
+		}
+		ver, err = updateVersionAndTableInfoWithCheck(t, job, tblInfo, originalState != colInfo.State)
+		if err != nil {
+			return ver, errors.Trace(err)
+		}
+		job.SchemaState = model.StateWriteOnly
+	case model.StateWriteOnly:
+		// write only -> delete only
+		colInfo.State = model.StateDeleteOnly
+		ver, err = updateVersionAndTableInfo(t, job, tblInfo, originalState != colInfo.State)
+		if err != nil {
+			return ver, errors.Trace(err)
+		}
+		job.SchemaState = model.StateDeleteOnly
+	case model.StateDeleteOnly:
+		// delete only -> reorganization
+		colInfo.State = model.StateDeleteReorganization
+		ver, err = updateVersionAndTableInfo(t, job, tblInfo, originalState != colInfo.State)
+		if err != nil {
+			return ver, errors.Trace(err)
+		}
+		job.SchemaState = model.StateDeleteReorganization
+	case model.StateDeleteReorganization:
+		// reorganization -> absent
+		// All reorganization jobs are done, drop this column.
+		tblInfo.Columns = tblInfo.Columns[:len(tblInfo.Columns)-1]
+		colInfo.State = model.StateNone
+		ver, err = updateVersionAndTableInfo(t, job, tblInfo, originalState != colInfo.State)
+		if err != nil {
+			return ver, errors.Trace(err)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 
 		// Update the element in the reorgCtx to keep the atomic access for daemon-worker.
@@ -1215,6 +1285,7 @@ func (w *updateColumnWorker) getNextKey(taskRange reorgBackfillTask,
 	return taskRange.endKey.Next()
 }
 
+<<<<<<< HEAD
 func (w *updateColumnWorker) fetchRowColVals(txn kv.Transaction, taskRange reorgBackfillTask) ([]*rowRecord, kv.Key, bool, error) {
 	w.rowRecords = w.rowRecords[:0]
 	startTime := time.Now()
@@ -1257,6 +1328,28 @@ func (w *updateColumnWorker) fetchRowColVals(txn kv.Transaction, taskRange reorg
 
 func (w *updateColumnWorker) getRowRecord(handle kv.Handle, recordKey []byte, rawRow []byte) error {
 	_, err := w.rowDecoder.DecodeAndEvalRowWithMap(w.sessCtx, handle, rawRow, time.UTC, timeutil.SystemLocation(), w.rowMap)
+=======
+func (w *worker) onModifyColumn(t *meta.Meta, job *model.Job) (ver int64, _ error) {
+	newCol := &model.ColumnInfo{}
+	oldColName := &model.CIStr{}
+	pos := &ast.ColumnPosition{}
+	var modifyColumnTp byte
+	var updatedAutoRandomBits uint64
+	err := job.DecodeArgs(newCol, oldColName, pos, &modifyColumnTp, &updatedAutoRandomBits)
+	if err != nil {
+		job.State = model.JobStateCancelled
+		return ver, errors.Trace(err)
+	}
+
+	return w.doModifyColumn(t, job, newCol, oldColName, pos, modifyColumnTp, updatedAutoRandomBits)
+}
+
+// doModifyColumn updates the column information and reorders all columns.
+func (w *worker) doModifyColumn(
+	t *meta.Meta, job *model.Job, newCol *model.ColumnInfo, oldName *model.CIStr,
+	pos *ast.ColumnPosition, modifyColumnTp byte, newAutoRandBits uint64) (ver int64, _ error) {
+	dbInfo, err := checkSchemaExistAndCancelNotExistJob(t, job)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return errors.Trace(errCantDecodeRecord.GenWithStackByArgs("column", err))
 	}
@@ -1382,10 +1475,18 @@ func updateChangingInfo(changingCol *model.ColumnInfo, changingIdxs []*model.Ind
 	}
 }
 
+<<<<<<< HEAD
 // doModifyColumn updates the column information and reorders all columns. It does not support modifying column data.
 func (w *worker) doModifyColumn(
 	t *meta.Meta, job *model.Job, dbInfo *model.DBInfo, tblInfo *model.TableInfo,
 	newCol, oldCol *model.ColumnInfo, pos *ast.ColumnPosition) (ver int64, _ error) {
+=======
+	if newAutoRandBits > 0 {
+		if err := checkAndApplyNewAutoRandomBits(job, t, tblInfo, newCol, oldName, newAutoRandBits); err != nil {
+			return ver, errors.Trace(err)
+		}
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Column from null to not null.
 	if !mysql.HasNotNullFlag(oldCol.Flag) && mysql.HasNotNullFlag(newCol.Flag) {
 		noPreventNullFlag := !mysql.HasPreventNullInsertFlag(oldCol.Flag)
@@ -1496,6 +1597,34 @@ func adjustColumnInfoInModifyColumn(
 			}
 		}
 	}
+	return nil
+}
+
+func checkAndApplyNewAutoRandomBits(job *model.Job, t *meta.Meta, tblInfo *model.TableInfo,
+	newCol *model.ColumnInfo, oldName *model.CIStr, newAutoRandBits uint64) error {
+	schemaID := job.SchemaID
+	newLayout := autoid.NewShardIDLayout(&newCol.FieldType, newAutoRandBits)
+
+	// GenAutoRandomID first to prevent concurrent update.
+	_, err := t.GenAutoRandomID(schemaID, tblInfo.ID, 1)
+	if err != nil {
+		return err
+	}
+	currentIncBitsVal, err := t.GetAutoRandomID(schemaID, tblInfo.ID)
+	if err != nil {
+		return err
+	}
+	// Find the max number of available shard bits by
+	// counting leading zeros in current inc part of auto_random ID.
+	availableBits := bits.LeadingZeros64(uint64(currentIncBitsVal))
+	isOccupyingIncBits := newLayout.TypeBitsLength-newLayout.IncrementalBits > uint64(availableBits)
+	if isOccupyingIncBits {
+		availableBits := mathutil.Min(autoid.MaxAutoRandomBits, availableBits)
+		errMsg := fmt.Sprintf(autoid.AutoRandomOverflowErrMsg, availableBits, newAutoRandBits, oldName.O)
+		job.State = model.JobStateCancelled
+		return ErrInvalidAutoRandom.GenWithStackByArgs(errMsg)
+	}
+	tblInfo.AutoRandomBits = newAutoRandBits
 	return nil
 }
 

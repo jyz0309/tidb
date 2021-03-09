@@ -965,6 +965,7 @@ func (s *testCodecSuite) TestDecodeOneToChunk(c *C) {
 			if got.IsNull() {
 				c.Assert(expect.IsNull(), IsTrue)
 			} else {
+<<<<<<< HEAD
 				if got.Kind() != types.KindMysqlDecimal {
 					cmp, err := got.CompareDatum(sc, &expect)
 					c.Assert(err, IsNil)
@@ -972,6 +973,11 @@ func (s *testCodecSuite) TestDecodeOneToChunk(c *C) {
 				} else {
 					c.Assert(got.GetString(), Equals, expect.GetString(), Commentf("expect: %v, got %v", expect, got))
 				}
+=======
+				cmp, err := got.CompareDatum(sc, &expect)
+				c.Assert(err, IsNil)
+				c.Assert(cmp, Equals, 0, Commentf("expect: %v, got %v", expect, got))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 		}
 	}
@@ -1237,6 +1243,7 @@ func (s *testCodecSuite) TestHashChunkColumns(c *C) {
 	vecHash := []hash.Hash64{fnv.New64(), fnv.New64(), fnv.New64()}
 	rowHash := []hash.Hash64{fnv.New64(), fnv.New64(), fnv.New64()}
 
+<<<<<<< HEAD
 	sel := make([]bool, len(datums))
 	for i := 0; i < 3; i++ {
 		sel[i] = true
@@ -1246,6 +1253,12 @@ func (s *testCodecSuite) TestHashChunkColumns(c *C) {
 	for i := 0; i < 12; i++ {
 		c.Assert(chk.GetRow(0).IsNull(i), Equals, true)
 		err1 := HashChunkSelected(sc, vecHash, chk, tps[i], i, buf, hasNull, sel, false)
+=======
+	// Test hash value of the first two `Null` columns
+	for i := 0; i < 2; i++ {
+		c.Assert(chk.GetRow(0).IsNull(i), Equals, true)
+		err1 := HashChunkColumns(sc, vecHash, chk, tps[i], i, buf, hasNull)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		err2 := HashChunkRow(sc, rowHash[0], chk.GetRow(0), tps, colIdx[i:i+1], buf)
 		err3 := HashChunkRow(sc, rowHash[1], chk.GetRow(1), tps, colIdx[i:i+1], buf)
 		err4 := HashChunkRow(sc, rowHash[2], chk.GetRow(2), tps, colIdx[i:i+1], buf)
@@ -1253,6 +1266,7 @@ func (s *testCodecSuite) TestHashChunkColumns(c *C) {
 		c.Assert(err2, IsNil)
 		c.Assert(err3, IsNil)
 		c.Assert(err4, IsNil)
+<<<<<<< HEAD
 
 		c.Assert(hasNull[0], Equals, true)
 		c.Assert(hasNull[1], Equals, true)
@@ -1265,12 +1279,30 @@ func (s *testCodecSuite) TestHashChunkColumns(c *C) {
 
 	// Test hash value of every single column that is not `Null`
 	for i := 12; i < len(tps); i++ {
+=======
+
+		c.Assert(hasNull[0], Equals, true)
+		c.Assert(hasNull[1], Equals, true)
+		c.Assert(hasNull[2], Equals, true)
+		c.Assert(vecHash[0].Sum64(), Equals, rowHash[0].Sum64())
+		c.Assert(vecHash[1].Sum64(), Equals, rowHash[1].Sum64())
+		c.Assert(vecHash[2].Sum64(), Equals, rowHash[2].Sum64())
+
+	}
+
+	// Test hash value of every single column that is not `Null`
+	for i := 2; i < len(tps); i++ {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		hasNull = []bool{false, false, false}
 		vecHash = []hash.Hash64{fnv.New64(), fnv.New64(), fnv.New64()}
 		rowHash = []hash.Hash64{fnv.New64(), fnv.New64(), fnv.New64()}
 
 		c.Assert(chk.GetRow(0).IsNull(i), Equals, false)
+<<<<<<< HEAD
 		err1 := HashChunkSelected(sc, vecHash, chk, tps[i], i, buf, hasNull, sel, false)
+=======
+		err1 := HashChunkColumns(sc, vecHash, chk, tps[i], i, buf, hasNull)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		err2 := HashChunkRow(sc, rowHash[0], chk.GetRow(0), tps, colIdx[i:i+1], buf)
 		err3 := HashChunkRow(sc, rowHash[1], chk.GetRow(1), tps, colIdx[i:i+1], buf)
 		err4 := HashChunkRow(sc, rowHash[2], chk.GetRow(2), tps, colIdx[i:i+1], buf)

@@ -14,7 +14,6 @@
 package stringutil
 
 import (
-	"bytes"
 	"fmt"
 	"sort"
 	"strings"

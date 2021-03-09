@@ -480,8 +480,30 @@ func (e *ShowExec) fetchShowColumns(ctx context.Context) error {
 	} else {
 		cols = tb.VisibleCols()
 	}
+<<<<<<< HEAD
 	if err := tryFillViewColumnType(ctx, e.ctx, e.is, e.DBName, tb.Meta()); err != nil {
 		return err
+=======
+	if tb.Meta().IsView() {
+		// Because view's undertable's column could change or recreate, so view's column type may change overtime.
+		// To avoid this situation we need to generate a logical plan and extract current column types from Schema.
+		planBuilder, _ := plannercore.NewPlanBuilder(e.ctx, e.is, &hint.BlockHintProcessor{})
+		viewLogicalPlan, err := planBuilder.BuildDataSourceFromView(ctx, e.DBName, tb.Meta())
+		if err != nil {
+			return err
+		}
+		viewSchema := viewLogicalPlan.Schema()
+		viewOutputNames := viewLogicalPlan.OutputNames()
+		for _, col := range cols {
+			idx := expression.FindFieldNameIdxByColName(viewOutputNames, col.Name.L)
+			if idx >= 0 {
+				col.FieldType = *viewSchema.Columns[idx].GetType()
+			}
+			if col.Tp == mysql.TypeVarString {
+				col.Tp = mysql.TypeVarchar
+			}
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	for _, col := range cols {
 		if e.Column != nil && e.Column.Name.L != col.Name.L {
@@ -662,17 +684,23 @@ func (e *ShowExec) fetchShowVariables() (err error) {
 		// 1. Exclude the variables of ScopeSession in variable.SysVars;
 		// 2. If the variable is ScopeNone, it's a read-only variable, return the default value of it,
 		// 		otherwise, fetch the value from table `mysql.Global_Variables`.
+<<<<<<< HEAD
 		for _, v := range variable.GetSysVars() {
 			if v.Scope != variable.ScopeSession {
 				if variable.FilterImplicitFeatureSwitch(v) {
 					continue
 				}
+=======
+		for _, v := range variable.SysVars {
+			if v.Scope != variable.ScopeSession {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				value, err = variable.GetGlobalSystemVar(sessionVars, v.Name)
 				if err != nil {
 					return errors.Trace(err)
 				}
 				e.appendRow([]interface{}{v.Name, value})
 			}
+<<<<<<< HEAD
 		}
 		return nil
 	}
@@ -684,6 +712,16 @@ func (e *ShowExec) fetchShowVariables() (err error) {
 		if variable.FilterImplicitFeatureSwitch(v) {
 			continue
 		}
+=======
+		}
+		return nil
+	}
+
+	// Collect session scope variables,
+	// If it is a session only variable, use the default value defined in code,
+	//   otherwise, fetch the value from table `mysql.Global_Variables`.
+	for _, v := range variable.SysVars {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		value, err = variable.GetSessionSystemVar(sessionVars, v.Name)
 		if err != nil {
 			return errors.Trace(err)
@@ -830,7 +868,11 @@ func ConstructResultOfShowCreateTable(ctx sessionctx.Context, tableInfo *model.T
 				buf.WriteString(table.OptionalFsp(&col.FieldType))
 			}
 		}
+<<<<<<< HEAD
 		if ddl.IsAutoRandomColumnID(tableInfo, col.ID) {
+=======
+		if tableInfo.PKIsHandle && tableInfo.ContainsAutoRandomBits() && tableInfo.GetPkName().L == col.Name.L {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			buf.WriteString(fmt.Sprintf(" /*T![auto_rand] AUTO_RANDOM(%d) */", tableInfo.AutoRandomBits))
 		}
 		if len(col.Comment) > 0 {

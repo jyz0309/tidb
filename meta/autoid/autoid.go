@@ -298,7 +298,11 @@ func (alloc *allocator) rebase4Signed(tableID, requiredBase int64, allocIDs bool
 func (alloc *allocator) rebase4Sequence(tableID, requiredBase int64) (int64, bool, error) {
 	startTime := time.Now()
 	alreadySatisfied := false
+<<<<<<< HEAD
 	err := kv.RunInNewTxn(context.Background(), alloc.store, true, func(ctx context.Context, txn kv.Transaction) error {
+=======
+	err := kv.RunInNewTxn(alloc.store, true, func(txn kv.Transaction) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		m := meta.NewMeta(txn)
 		currentEnd, err := getAutoIDByAllocType(m, alloc.dbID, tableID, alloc.allocType)
 		if err != nil {
@@ -428,6 +432,7 @@ func NewSequenceAllocator(store kv.Storage, dbID int64, info *model.SequenceInfo
 func NewAllocatorsFromTblInfo(store kv.Storage, schemaID int64, tblInfo *model.TableInfo) Allocators {
 	var allocs []Allocator
 	dbID := tblInfo.GetDBID(schemaID)
+<<<<<<< HEAD
 	hasRowID := !tblInfo.PKIsHandle && !tblInfo.IsCommonHandle
 	hasAutoIncID := tblInfo.GetAutoIncrementColInfo() != nil
 	if hasRowID || hasAutoIncID {
@@ -436,6 +441,12 @@ func NewAllocatorsFromTblInfo(store kv.Storage, schemaID int64, tblInfo *model.T
 		} else {
 			allocs = append(allocs, NewAllocator(store, dbID, tblInfo.IsAutoIncColUnsigned(), RowIDAllocType))
 		}
+=======
+	if tblInfo.AutoIdCache > 0 {
+		allocs = append(allocs, NewAllocator(store, dbID, tblInfo.IsAutoIncColUnsigned(), RowIDAllocType, CustomAutoIncCacheOption(tblInfo.AutoIdCache)))
+	} else {
+		allocs = append(allocs, NewAllocator(store, dbID, tblInfo.IsAutoIncColUnsigned(), RowIDAllocType))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	if tblInfo.ContainsAutoRandomBits() {
 		allocs = append(allocs, NewAllocator(store, dbID, tblInfo.IsAutoRandomBitColUnsigned(), AutoRandomType))

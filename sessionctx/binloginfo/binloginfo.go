@@ -298,7 +298,11 @@ func SetDDLBinlog(client *pumpcli.PumpsClient, txn kv.Transaction, jobID int64, 
 	txn.SetOption(kv.BinlogInfo, info)
 }
 
+<<<<<<< HEAD
 const specialPrefix = `/*T! `
+=======
+const specialPrefix = `/*!90000 `
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 // AddSpecialComment uses to add comment for table option in DDL query.
 // Export for testing.

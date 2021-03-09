@@ -85,9 +85,12 @@ const (
 		Reload_priv				ENUM('N','Y') NOT NULL DEFAULT 'N',
 		FILE_priv				ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Config_priv				ENUM('N','Y') NOT NULL DEFAULT 'N',
+<<<<<<< HEAD
 		Create_Tablespace_Priv  ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Repl_slave_priv	    	ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Repl_client_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		PRIMARY KEY (Host, User));`
 	// CreateGlobalPrivTable is the SQL statement creates Global scope privilege table in system db.
 	CreateGlobalPrivTable = "CREATE TABLE IF NOT EXISTS mysql.global_priv (" +
@@ -181,6 +184,7 @@ const (
 	);`
 
 	// CreateStatsColsTable stores the statistics of table columns.
+<<<<<<< HEAD
 	CreateStatsColsTable = `CREATE TABLE IF NOT EXISTS mysql.stats_histograms (
 		table_id 			BIGINT(64) NOT NULL,
 		is_index 			TINYINT(2) NOT NULL,
@@ -196,6 +200,23 @@ const (
 		correlation 		DOUBLE NOT NULL DEFAULT 0,
 		last_analyze_pos 	BLOB DEFAULT NULL,
 		UNIQUE INDEX tbl(table_id, is_index, hist_id)
+=======
+	CreateStatsColsTable = `CREATE TABLE if not exists mysql.stats_histograms (
+		table_id bigint(64) NOT NULL,
+		is_index tinyint(2) NOT NULL,
+		hist_id bigint(64) NOT NULL,
+		distinct_count bigint(64) NOT NULL,
+		null_count bigint(64) NOT NULL DEFAULT 0,
+		tot_col_size bigint(64) NOT NULL DEFAULT 0,
+		modify_count bigint(64) NOT NULL DEFAULT 0,
+		version bigint(64) unsigned NOT NULL DEFAULT 0,
+		cm_sketch blob(6291456),
+		stats_ver bigint(64) NOT NULL DEFAULT 0,
+		flag bigint(64) NOT NULL DEFAULT 0,
+		correlation double NOT NULL DEFAULT 0,
+		last_analyze_pos blob DEFAULT NULL,
+		unique index tbl(table_id, is_index, hist_id)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	);`
 
 	// CreateStatsBucketsTable stores the histogram info for every table columns.
@@ -296,9 +317,15 @@ const (
 
 	// CreateExprPushdownBlacklist stores the expressions which are not allowed to be pushed down.
 	CreateExprPushdownBlacklist = `CREATE TABLE IF NOT EXISTS mysql.expr_pushdown_blacklist (
+<<<<<<< HEAD
 		name 		CHAR(100) NOT NULL,
 		store_type 	CHAR(100) NOT NULL DEFAULT 'tikv,tiflash,tidb',
 		reason 		VARCHAR(200)
+=======
+		name char(100) NOT NULL,
+		store_type char(100) NOT NULL DEFAULT 'tikv,tiflash,tidb',
+		reason varchar(200)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	);`
 
 	// CreateOptRuleBlacklist stores the list of disabled optimizing operations.
@@ -381,9 +408,12 @@ const (
 	// The variable name in mysql.tidb table and it records the default value of
 	// mem-quota-query when upgrade from v3.0.x to v4.0.9+.
 	tidbDefMemoryQuotaQuery = "default_memory_quota_query"
+<<<<<<< HEAD
 	// The variable name in mysql.tidb table and it records the default value of
 	// oom-action when upgrade from v3.0.x to v4.0.11+.
 	tidbDefOOMAction = "default_oom_action"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Const for TiDB server version 2.
 	version2  = 2
 	version3  = 3
@@ -439,6 +469,7 @@ const (
 	version46 = 46
 	// version47 add Source to bindings to indicate the way binding created.
 	version47 = 47
+<<<<<<< HEAD
 	// version48 reset all deprecated concurrency related system-variables if they were all default value.
 	// version49 introduces mysql.stats_extended table.
 	// Both version48 and version49 will be redone in version55 and version56 so they're skipped here.
@@ -477,6 +508,16 @@ const (
 
 	// please make sure this is the largest version
 	currentBootstrapVersion = version65
+=======
+	// version48 change mysql.stats_histograms cm_sketch column from blob to blob(6291456)
+	version48 = 48
+	// version49 writes a variable `mem_quota_query` to mysql.tidb if it's a cluster upgraded from v3.0.x to v4.0.9.
+	version49 = 49
+	// version50 fixes the bug of concurrent create / drop binding
+	version50 = 50
+	// version51 restore all SQL bindings.
+	version51 = 51
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 var (
@@ -518,8 +559,12 @@ var (
 		upgradeToVer36,
 		upgradeToVer37,
 		upgradeToVer38,
+<<<<<<< HEAD
 		// We will redo upgradeToVer39 in upgradeToVer46,
 		// so upgradeToVer39 is skipped here.
+=======
+		upgradeToVer39,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		upgradeToVer40,
 		upgradeToVer41,
 		upgradeToVer42,
@@ -528,6 +573,7 @@ var (
 		upgradeToVer45,
 		upgradeToVer46,
 		upgradeToVer47,
+<<<<<<< HEAD
 		// We will redo upgradeToVer48 and upgradeToVer49 in upgradeToVer55 and upgradeToVer56,
 		// so upgradeToVer48 and upgradeToVer49 is skipped here.
 		upgradeToVer50,
@@ -546,6 +592,12 @@ var (
 		upgradeToVer63,
 		upgradeToVer64,
 		upgradeToVer65,
+=======
+		upgradeToVer48,
+		upgradeToVer49,
+		upgradeToVer50,
+		upgradeToVer51,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 )
 
@@ -586,9 +638,12 @@ func getTiDBVar(s Session, name string) (sVal string, isNull bool, e error) {
 	if err != nil {
 		return "", true, errors.Trace(err)
 	}
+<<<<<<< HEAD
 	if rs == nil {
 		return "", true, errors.New("Wrong number of Recordset")
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	defer terror.Call(rs.Close)
 	req := rs.NewChunk()
 	err = rs.Next(ctx, req)
@@ -672,7 +727,12 @@ func upgradeToVer4(s Session, ver int64) {
 	if ver >= version4 {
 		return
 	}
+<<<<<<< HEAD
 	mustExecute(s, CreateStatsMetaTable)
+=======
+	sql := CreateStatsMetaTable
+	mustExecute(s, sql)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func upgradeToVer5(s Session, ver int64) {
@@ -687,7 +747,11 @@ func upgradeToVer6(s Session, ver int64) {
 	if ver >= version6 {
 		return
 	}
+<<<<<<< HEAD
 	doReentrantDDL(s, "ALTER TABLE mysql.user ADD COLUMN `Super_priv` ENUM('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Show_db_priv`", infoschema.ErrColumnExists)
+=======
+	doReentrantDDL(s, "ALTER TABLE mysql.user ADD COLUMN `Super_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Show_db_priv`", infoschema.ErrColumnExists)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// For reasons of compatibility, set the non-exists privilege column value to 'Y', as TiDB doesn't check them in older versions.
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Super_priv='Y'")
 }
@@ -696,7 +760,11 @@ func upgradeToVer7(s Session, ver int64) {
 	if ver >= version7 {
 		return
 	}
+<<<<<<< HEAD
 	doReentrantDDL(s, "ALTER TABLE mysql.user ADD COLUMN `Process_priv` ENUM('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Drop_priv`", infoschema.ErrColumnExists)
+=======
+	doReentrantDDL(s, "ALTER TABLE mysql.user ADD COLUMN `Process_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Drop_priv`", infoschema.ErrColumnExists)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// For reasons of compatibility, set the non-exists privilege column value to 'Y', as TiDB doesn't check them in older versions.
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Process_priv='Y'")
 }
@@ -706,7 +774,11 @@ func upgradeToVer8(s Session, ver int64) {
 		return
 	}
 	// This is a dummy upgrade, it checks whether upgradeToVer7 success, if not, do it again.
+<<<<<<< HEAD
 	if _, err := s.ExecuteInternal(context.Background(), "SELECT HIGH_PRIORITY `Process_priv` FROM mysql.user LIMIT 0"); err == nil {
+=======
+	if _, err := s.ExecuteInternal(context.Background(), "SELECT HIGH_PRIORITY `Process_priv` from mysql.user limit 0"); err == nil {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return
 	}
 	upgradeToVer7(s, ver)
@@ -716,7 +788,11 @@ func upgradeToVer9(s Session, ver int64) {
 	if ver >= version9 {
 		return
 	}
+<<<<<<< HEAD
 	doReentrantDDL(s, "ALTER TABLE mysql.user ADD COLUMN `Trigger_priv` ENUM('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_user_priv`", infoschema.ErrColumnExists)
+=======
+	doReentrantDDL(s, "ALTER TABLE mysql.user ADD COLUMN `Trigger_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_user_priv`", infoschema.ErrColumnExists)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// For reasons of compatibility, set the non-exists privilege column value to 'Y', as TiDB doesn't check them in older versions.
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Trigger_priv='Y'")
 }
@@ -748,7 +824,11 @@ func upgradeToVer11(s Session, ver int64) {
 	if ver >= version11 {
 		return
 	}
+<<<<<<< HEAD
 	_, err := s.ExecuteInternal(context.Background(), "ALTER TABLE mysql.user ADD COLUMN `References_priv` ENUM('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Grant_priv`")
+=======
+	_, err := s.ExecuteInternal(context.Background(), "ALTER TABLE mysql.user ADD COLUMN `References_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Grant_priv`")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		if terror.ErrorEqual(err, infoschema.ErrColumnExists) {
 			return
@@ -872,7 +952,11 @@ func upgradeToVer16(s Session, ver int64) {
 	if ver >= version16 {
 		return
 	}
+<<<<<<< HEAD
 	doReentrantDDL(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `cm_sketch` BLOB", infoschema.ErrColumnExists)
+=======
+	doReentrantDDL(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `cm_sketch` blob", infoschema.ErrColumnExists)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func upgradeToVer17(s Session, ver int64) {
@@ -886,7 +970,11 @@ func upgradeToVer18(s Session, ver int64) {
 	if ver >= version18 {
 		return
 	}
+<<<<<<< HEAD
 	doReentrantDDL(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `tot_col_size` BIGINT(64) NOT NULL DEFAULT 0", infoschema.ErrColumnExists)
+=======
+	doReentrantDDL(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `tot_col_size` bigint(64) NOT NULL DEFAULT 0", infoschema.ErrColumnExists)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func upgradeToVer19(s Session, ver int64) {
@@ -920,14 +1008,22 @@ func upgradeToVer22(s Session, ver int64) {
 	if ver >= version22 {
 		return
 	}
+<<<<<<< HEAD
 	doReentrantDDL(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `stats_ver` BIGINT(64) NOT NULL DEFAULT 0", infoschema.ErrColumnExists)
+=======
+	doReentrantDDL(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `stats_ver` bigint(64) NOT NULL DEFAULT 0", infoschema.ErrColumnExists)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func upgradeToVer23(s Session, ver int64) {
 	if ver >= version23 {
 		return
 	}
+<<<<<<< HEAD
 	doReentrantDDL(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `flag` BIGINT(64) NOT NULL DEFAULT 0", infoschema.ErrColumnExists)
+=======
+	doReentrantDDL(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `flag` bigint(64) NOT NULL DEFAULT 0", infoschema.ErrColumnExists)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // writeSystemTZ writes system timezone info into mysql.tidb
@@ -978,7 +1074,11 @@ func upgradeToVer27(s Session, ver int64) {
 	if ver >= version27 {
 		return
 	}
+<<<<<<< HEAD
 	doReentrantDDL(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `correlation` DOUBLE NOT NULL DEFAULT 0", infoschema.ErrColumnExists)
+=======
+	doReentrantDDL(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `correlation` double NOT NULL DEFAULT 0", infoschema.ErrColumnExists)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func upgradeToVer28(s Session, ver int64) {
@@ -993,9 +1093,15 @@ func upgradeToVer29(s Session, ver int64) {
 	if ver != version28 {
 		return
 	}
+<<<<<<< HEAD
 	doReentrantDDL(s, "ALTER TABLE mysql.bind_info CHANGE create_time create_time TIMESTAMP(3)")
 	doReentrantDDL(s, "ALTER TABLE mysql.bind_info CHANGE update_time update_time TIMESTAMP(3)")
 	doReentrantDDL(s, "ALTER TABLE mysql.bind_info ADD INDEX sql_index (original_sql(1024),default_db(1024))", ddl.ErrDupKeyName)
+=======
+	doReentrantDDL(s, "ALTER TABLE mysql.bind_info change create_time create_time timestamp(3)")
+	doReentrantDDL(s, "ALTER TABLE mysql.bind_info change update_time update_time timestamp(3)")
+	doReentrantDDL(s, "ALTER TABLE mysql.bind_info add index sql_index (original_sql(1024),default_db(1024))", ddl.ErrDupKeyName)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func upgradeToVer30(s Session, ver int64) {
@@ -1009,7 +1115,11 @@ func upgradeToVer31(s Session, ver int64) {
 	if ver >= version31 {
 		return
 	}
+<<<<<<< HEAD
 	doReentrantDDL(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `last_analyze_pos` BLOB DEFAULT NULL", infoschema.ErrColumnExists)
+=======
+	doReentrantDDL(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `last_analyze_pos` blob default null", infoschema.ErrColumnExists)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func upgradeToVer32(s Session, ver int64) {
@@ -1073,6 +1183,19 @@ func upgradeToVer38(s Session, ver int64) {
 	}
 }
 
+<<<<<<< HEAD
+=======
+func upgradeToVer39(s Session, ver int64) {
+	if ver >= version39 {
+		return
+	}
+	doReentrantDDL(s, "ALTER TABLE mysql.user ADD COLUMN `Reload_priv` ENUM('N','Y') DEFAULT 'N'", infoschema.ErrColumnExists)
+	doReentrantDDL(s, "ALTER TABLE mysql.user ADD COLUMN `File_priv` ENUM('N','Y') DEFAULT 'N'", infoschema.ErrColumnExists)
+	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Reload_priv='Y' where Super_priv='Y'")
+	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET File_priv='Y' where Super_priv='Y'")
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func writeNewCollationParameter(s Session, flag bool) {
 	comment := "If the new collations are enabled. Do not edit it."
 	b := varFalse
@@ -1110,13 +1233,19 @@ func upgradeToVer42(s Session, ver int64) {
 	if ver >= version42 {
 		return
 	}
+<<<<<<< HEAD
 	doReentrantDDL(s, "ALTER TABLE mysql.expr_pushdown_blacklist ADD COLUMN `store_type` CHAR(100) NOT NULL DEFAULT 'tikv,tiflash,tidb'", infoschema.ErrColumnExists)
 	doReentrantDDL(s, "ALTER TABLE mysql.expr_pushdown_blacklist ADD COLUMN `reason` VARCHAR(200)", infoschema.ErrColumnExists)
+=======
+	doReentrantDDL(s, "ALTER TABLE mysql.expr_pushdown_blacklist ADD COLUMN `store_type` char(100) NOT NULL DEFAULT 'tikv,tiflash,tidb'", infoschema.ErrColumnExists)
+	doReentrantDDL(s, "ALTER TABLE mysql.expr_pushdown_blacklist ADD COLUMN `reason` varchar(200)", infoschema.ErrColumnExists)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	writeDefaultExprPushDownBlacklist(s)
 }
 
 // Convert statement summary global variables to non-empty values.
 func writeStmtSummaryVars(s Session) {
+<<<<<<< HEAD
 	sql := "UPDATE %n.%n SET variable_value= %? WHERE variable_name= %? AND variable_value=''"
 	stmtSummaryConfig := config.GetGlobalConfig().StmtSummary
 	mustExecute(s, sql, mysql.SystemDB, mysql.GlobalVariablesTable, variable.BoolToOnOff(stmtSummaryConfig.Enable), variable.TiDBEnableStmtSummary)
@@ -1125,6 +1254,16 @@ func writeStmtSummaryVars(s Session) {
 	mustExecute(s, sql, mysql.SystemDB, mysql.GlobalVariablesTable, strconv.Itoa(stmtSummaryConfig.HistorySize), variable.TiDBStmtSummaryHistorySize)
 	mustExecute(s, sql, mysql.SystemDB, mysql.GlobalVariablesTable, strconv.FormatUint(uint64(stmtSummaryConfig.MaxStmtCount), 10), variable.TiDBStmtSummaryMaxStmtCount)
 	mustExecute(s, sql, mysql.SystemDB, mysql.GlobalVariablesTable, strconv.FormatUint(uint64(stmtSummaryConfig.MaxSQLLength), 10), variable.TiDBStmtSummaryMaxSQLLength)
+=======
+	sql := "UPDATE mysql.global_variables SET variable_value= %? WHERE variable_name= %? AND variable_value=''"
+	stmtSummaryConfig := config.GetGlobalConfig().StmtSummary
+	mustExecute(s, sql, variable.BoolToIntStr(stmtSummaryConfig.Enable), variable.TiDBEnableStmtSummary)
+	mustExecute(s, sql, variable.BoolToIntStr(stmtSummaryConfig.EnableInternalQuery), variable.TiDBStmtSummaryInternalQuery)
+	mustExecute(s, sql, strconv.Itoa(stmtSummaryConfig.RefreshInterval), variable.TiDBStmtSummaryRefreshInterval)
+	mustExecute(s, sql, strconv.Itoa(stmtSummaryConfig.HistorySize), variable.TiDBStmtSummaryHistorySize)
+	mustExecute(s, sql, strconv.FormatUint(uint64(stmtSummaryConfig.MaxStmtCount), 10), variable.TiDBStmtSummaryMaxStmtCount)
+	mustExecute(s, sql, strconv.FormatUint(uint64(stmtSummaryConfig.MaxSQLLength), 10), variable.TiDBStmtSummaryMaxSQLLength)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func upgradeToVer43(s Session, ver int64) {
@@ -1146,7 +1285,11 @@ func upgradeToVer45(s Session, ver int64) {
 		return
 	}
 	doReentrantDDL(s, "ALTER TABLE mysql.user ADD COLUMN `Config_priv` ENUM('N','Y') DEFAULT 'N'", infoschema.ErrColumnExists)
+<<<<<<< HEAD
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Config_priv='Y' WHERE Super_priv='Y'")
+=======
+	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Config_priv='Y' where Super_priv='Y'")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // In v3.1.1, we wrongly replace the context of upgradeToVer39 with upgradeToVer44. If we upgrade from v3.1.1 to a newer version,
@@ -1157,8 +1300,13 @@ func upgradeToVer46(s Session, ver int64) {
 	}
 	doReentrantDDL(s, "ALTER TABLE mysql.user ADD COLUMN `Reload_priv` ENUM('N','Y') DEFAULT 'N'", infoschema.ErrColumnExists)
 	doReentrantDDL(s, "ALTER TABLE mysql.user ADD COLUMN `File_priv` ENUM('N','Y') DEFAULT 'N'", infoschema.ErrColumnExists)
+<<<<<<< HEAD
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Reload_priv='Y' WHERE Super_priv='Y'")
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET File_priv='Y' WHERE Super_priv='Y'")
+=======
+	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Reload_priv='Y' where Super_priv='Y'")
+	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET File_priv='Y' where Super_priv='Y'")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func upgradeToVer47(s Session, ver int64) {
@@ -1168,6 +1316,7 @@ func upgradeToVer47(s Session, ver int64) {
 	doReentrantDDL(s, "ALTER TABLE mysql.bind_info ADD COLUMN `source` varchar(10) NOT NULL default 'unknown'", infoschema.ErrColumnExists)
 }
 
+<<<<<<< HEAD
 func upgradeToVer50(s Session, ver int64) {
 	if ver >= version50 {
 		return
@@ -1177,11 +1326,16 @@ func upgradeToVer50(s Session, ver int64) {
 
 func upgradeToVer52(s Session, ver int64) {
 	if ver >= version52 {
+=======
+func upgradeToVer48(s Session, ver int64) {
+	if ver >= version48 {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return
 	}
 	doReentrantDDL(s, "ALTER TABLE mysql.stats_histograms MODIFY cm_sketch BLOB(6291456)")
 }
 
+<<<<<<< HEAD
 func upgradeToVer53(s Session, ver int64) {
 	if ver >= version53 {
 		return
@@ -1194,6 +1348,10 @@ func upgradeToVer53(s Session, ver int64) {
 
 func upgradeToVer54(s Session, ver int64) {
 	if ver >= version54 {
+=======
+func upgradeToVer49(s Session, ver int64) {
+	if ver >= version49 {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return
 	}
 	// The mem-query-quota default value is 32GB by default in v3.0, and 1GB by
@@ -1209,6 +1367,7 @@ func upgradeToVer54(s Session, ver int64) {
 	}
 }
 
+<<<<<<< HEAD
 // When cherry-pick upgradeToVer52 to v4.0, we wrongly name it upgradeToVer48.
 // If we upgrade from v4.0 to a newer version, the real upgradeToVer48 will be missed.
 // So we redo upgradeToVer48 here to make sure the upgrading from v4.0 succeeds.
@@ -1271,6 +1430,10 @@ func upgradeToVer56(s Session, ver int64) {
 
 func upgradeToVer57(s Session, ver int64) {
 	if ver >= version57 {
+=======
+func upgradeToVer50(s Session, ver int64) {
+	if ver >= version50 {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return
 	}
 	insertBuiltinBindInfoRow(s)
@@ -1287,6 +1450,7 @@ func insertBuiltinBindInfoRow(s Session) {
 	)
 }
 
+<<<<<<< HEAD
 func upgradeToVer59(s Session, ver int64) {
 	if ver >= version59 {
 		return
@@ -1310,6 +1474,8 @@ func upgradeToVer60(s Session, ver int64) {
 	doReentrantDDL(s, CreateStatsExtended)
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 type bindInfo struct {
 	bindSQL    string
 	status     string
@@ -1319,8 +1485,13 @@ type bindInfo struct {
 	source     string
 }
 
+<<<<<<< HEAD
 func upgradeToVer61(s Session, ver int64) {
 	if ver >= version61 {
+=======
+func upgradeToVer51(s Session, ver int64) {
+	if ver >= version51 {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return
 	}
 	bindMap := make(map[string]bindInfo)
@@ -1346,9 +1517,13 @@ func upgradeToVer61(s Session, ver int64) {
 	if err != nil {
 		logutil.BgLogger().Fatal("upgradeToVer61 error", zap.Error(err))
 	}
+<<<<<<< HEAD
 	if rs != nil {
 		defer terror.Call(rs.Close)
 	}
+=======
+	defer terror.Call(rs.Close)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	req := rs.NewChunk()
 	iter := chunk.NewIterator4Chunk(req)
 	p := parser.New()
@@ -1411,12 +1586,17 @@ func updateBindInfo(iter *chunk.Iterator4Chunk, p *parser.Parser, bindMap map[st
 }
 
 func writeMemoryQuotaQuery(s Session) {
+<<<<<<< HEAD
 	comment := "memory_quota_query is 32GB by default in v3.0.x, 1GB by default in v4.0.x+"
+=======
+	comment := "memory_quota_query is 32GB by default in v3.0.x, 1GB by default in v4.0.x"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	mustExecute(s, `INSERT HIGH_PRIORITY INTO %n.%n VALUES (%?, %?, %?) ON DUPLICATE KEY UPDATE VARIABLE_VALUE=%?`,
 		mysql.SystemDB, mysql.TiDBTable, tidbDefMemoryQuotaQuery, 32<<30, comment, 32<<30,
 	)
 }
 
+<<<<<<< HEAD
 func upgradeToVer62(s Session, ver int64) {
 	if ver >= version62 {
 		return
@@ -1455,6 +1635,8 @@ func writeOOMAction(s Session) {
 	)
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // updateBootstrapVer updates bootstrap version variable in mysql.TiDB table.
 func updateBootstrapVer(s Session) {
 	// Update bootstrap version.
@@ -1534,7 +1716,11 @@ func doDMLWorks(s Session) {
 
 	// Insert a default user with empty password.
 	mustExecute(s, `INSERT HIGH_PRIORITY INTO mysql.user VALUES
+<<<<<<< HEAD
 		("%", "root", "", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "N", "Y", "Y", "Y", "Y", "Y", "Y", "Y")`)
+=======
+		("%", "root", "", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "N", "Y", "Y", "Y", "Y")`)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// Init global system variables table.
 	values := make([]string, 0, len(variable.GetSysVars()))

@@ -249,7 +249,11 @@ func (c *batchCommandsClient) send(request *tikvpb.BatchCommandsRequest, entries
 func (c *batchCommandsClient) recv() (resp *tikvpb.BatchCommandsResponse, err error) {
 	defer func() {
 		if r := recover(); r != nil {
+<<<<<<< HEAD
 			tidbmetrics.PanicCounter.WithLabelValues(metrics.LabelBatchRecvLoop).Inc()
+=======
+			metrics.PanicCounter.WithLabelValues(metrics.LabelBatchRecvLoop).Inc()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			logutil.BgLogger().Error("batchCommandsClient.recv panic",
 				zap.Reflect("r", r),
 				zap.Stack("stack"))
@@ -286,7 +290,11 @@ func (c *batchCommandsClient) waitConnReady() (err error) {
 	defer func() {
 		metrics.TiKVBatchClientWaitEstablish.Observe(time.Since(start).Seconds())
 	}()
+<<<<<<< HEAD
 	dialCtx, cancel := context.WithTimeout(context.Background(), c.dialTimeout)
+=======
+	dialCtx, cancel := context.WithTimeout(context.Background(), dialTimeout)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	for {
 		s := c.conn.GetState()
 		if s == connectivity.Ready {
@@ -370,7 +378,10 @@ func (c *batchCommandsClient) batchRecvLoop(cfg config.TiKVClient, tikvTransport
 				continue
 			}
 			entry := value.(*batchCommandsEntry)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			if trace.IsEnabled() {
 				trace.Log(entry.ctx, "rpc", "received")
 			}
@@ -645,7 +656,11 @@ func sendBatchRequest(
 	}
 }
 
+<<<<<<< HEAD
 func (c *RPCClient) recycleIdleConnArray() {
+=======
+func (c *rpcClient) recycleIdleConnArray() {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	var addrs []string
 	c.RLock()
 	for _, conn := range c.conns {

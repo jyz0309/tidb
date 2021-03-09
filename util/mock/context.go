@@ -307,6 +307,10 @@ func NewContext() *Context {
 	sctx.sessionVars.StmtCtx.TimeZone = time.UTC
 	sctx.sessionVars.StmtCtx.MemTracker = memory.NewTracker(-1, -1)
 	sctx.sessionVars.StmtCtx.DiskTracker = disk.NewTracker(-1, -1)
+<<<<<<< HEAD
+=======
+	sctx.sessionVars.StmtCtx.CheckKeyExists = make(map[string]struct{})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	sctx.sessionVars.GlobalVarsAccessor = variable.NewMockGlobalAccessor()
 	if err := sctx.GetSessionVars().SetSystemVar(variable.MaxAllowedPacket, "67108864"); err != nil {
 		panic(err)

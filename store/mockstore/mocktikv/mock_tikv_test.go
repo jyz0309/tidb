@@ -696,7 +696,11 @@ func (s *testMVCCLevelDB) TestCheckTxnStatus(c *C) {
 	c.Assert(action, Equals, kvrpcpb.Action_MinCommitTSPushed)
 
 	// MaxUint64 as callerStartTS shouldn't update minCommitTS but return Action_MinCommitTSPushed.
+<<<<<<< HEAD
 	ttl, commitTS, action, err = s.store.CheckTxnStatus([]byte("pk"), startTS, math.MaxUint64, 666, false, false)
+=======
+	ttl, commitTS, action, err = s.store.CheckTxnStatus([]byte("pk"), startTS, math.MaxUint64, 666, false)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	c.Assert(ttl, Equals, uint64(666))
 	c.Assert(commitTS, Equals, uint64(0))

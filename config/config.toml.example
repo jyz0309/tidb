@@ -49,7 +49,11 @@ tmp-storage-quota = -1
 
 # Specifies what operation TiDB performs when a single SQL statement exceeds the memory quota specified by mem-quota-query and cannot be spilled over to disk.
 # Valid options: ["log", "cancel"]
+<<<<<<< HEAD
 oom-action = "cancel"
+=======
+oom-action = "log"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 # Enable batch commit for the DMLs.
 enable-batch-dml = false
@@ -120,6 +124,7 @@ skip-register-to-dashboard = false
 # See PingCAP privacy policy for details: https://pingcap.com/en/privacy-policy/
 enable-telemetry = true
 
+<<<<<<< HEAD
 # deprecate-integer-display-length is used to be compatible with MySQL 8.0 in which the integer declared with display length will be returned with
 # a warning like `Integer display width is deprecated and will be removed in a future release`.
 deprecate-integer-display-length = false
@@ -131,6 +136,8 @@ deprecate-integer-display-length = false
 # See https://dev.mysql.com/doc/refman/8.0/en/string-type-syntax.html for more details.
 enable-enum-length-limit = true
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 [log]
 # Log level: debug, info, warn, error, fatal.
 level = "info"
@@ -238,6 +245,17 @@ server-memory-quota = 0
 # `memory-usage-alarm-ratio * server-memory-quota`; otherwise, it'll be `memory-usage-alarm-ratio * system memory size`.
 memory-usage-alarm-ratio = 0.8
 
+# Memory size quota for tidb server, 0 means unlimited
+server-memory-quota = 0
+
+# The alarm threshold when memory usage of the tidb-server exceeds. The valid value range is greater than or equal to 0
+# and less than or equal to 1. The default value is 0.8.
+# If this configuration is set to 0 or 1, it'll disable the alarm.
+# Otherwise, related information will be recorded in the directory `tmp-storage-path/record`.
+# Note: If the configuration `server-memory-quota` is set and larger than 0, the alarm threshold will be
+# `memory-usage-alarm-ratio * server-memory-quota`; otherwise, it'll be `memory-usage-alarm-ratio * system memory size`.
+memory-usage-alarm-ratio = 0.8
+
 # StmtCountLimit limits the max count of statement inside a transaction.
 stmt-count-limit = 5000
 
@@ -281,13 +299,17 @@ distinct-agg-push-down = false
 txn-total-size-limit = 104857600
 
 # The limitation of the size in byte for each entry in one transaction.
+<<<<<<< HEAD
 # NOTE: Increasing this limit may cause performance problems.
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 txn-entry-size-limit = 6291456
 
 # The max number of running concurrency two phase committer request for an SQL.
 committer-concurrency = 16
 
 # max lifetime of transaction ttl manager.
+<<<<<<< HEAD
 max-txn-ttl = 3600000
 
 # the interval duration between two memory profile into global tracker
@@ -297,6 +319,9 @@ mem-profile-interval = "1m"
 # Here we set to 0 to not dump index usage information to KV,
 # because we have not completed GC and other functions.
 index-usage-sync-lease = "0s"
+=======
+max-txn-ttl = 600000
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 # The Go GC trigger factor, you can get more information about it at https://golang.org/pkg/runtime.
 # If you encounter OOM when executing large query, you can decrease this value to trigger GC earlier.
@@ -413,6 +438,7 @@ store-limit = 0
 # store-liveness-timeout is used to control timeout for store liveness after sending request failed.
 store-liveness-timeout = "5s"
 
+<<<<<<< HEAD
 # ttl-refreshed-txn-size decides whether a transaction should update its lock TTL.
 # If the size(in byte) of a transaction is large than `ttl-refreshed-txn-size`, it update the lock TTL during the 2PC.
 ttl-refreshed-txn-size = 33554432
@@ -429,6 +455,12 @@ total-key-size-limit = 4096
 # Whether to enable the copr cache. The copr cache saves the result from TiKV Coprocessor in the memory and
 # reuses the result when corresponding data in TiKV is unchanged, on a region basis.
 enable = true
+=======
+[tikv-client.copr-cache]
+# Whether to enable the copr cache. The copr cache saves the result from TiKV Coprocessor in the memory and
+# reuses the result when corresponding data in TiKV is unchanged, on a region basis.
+enable = false
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 # The capacity in MB of the cache.
 capacity-mb = 1000.0

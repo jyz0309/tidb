@@ -25,6 +25,10 @@ import (
 	"github.com/pingcap/errors"
 	"github.com/pingcap/failpoint"
 	"github.com/pingcap/kvproto/pkg/kvrpcpb"
+<<<<<<< HEAD
+=======
+	"github.com/pingcap/tidb/config"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/kv"
 	"github.com/pingcap/tidb/store/tikv/config"
 	"github.com/pingcap/tidb/store/tikv/logutil"
@@ -32,6 +36,10 @@ import (
 	"github.com/pingcap/tidb/store/tikv/oracle"
 	"github.com/pingcap/tidb/store/tikv/tikvrpc"
 	"github.com/pingcap/tidb/util/execdetails"
+<<<<<<< HEAD
+=======
+	"github.com/pingcap/tidb/util/logutil"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	pd "github.com/tikv/pd/client"
 	"go.uber.org/zap"
 )
@@ -144,6 +152,12 @@ func (s TxnStatus) StatusCacheable() bool {
 	return false
 }
 
+// TTL returns the TTL of the transaction if the transaction is still alive.
+func (s TxnStatus) TTL() uint64 { return s.ttl }
+
+// Action returns what the CheckTxnStatus request have done to the transaction.
+func (s TxnStatus) Action() kvrpcpb.Action { return s.action }
+
 // By default, locks after 3000ms is considered unusual (the client created the
 // lock might be dead). Other client may cleanup this kind of lock.
 // For locks created recently, we will do backoff and retry.
@@ -240,7 +254,11 @@ func (lr *LockResolver) BatchResolveLocks(bo *Backoffer, locks []*Lock, loc Regi
 		metrics.LockResolverCountWithExpired.Inc()
 
 		// Use currentTS = math.MaxUint64 means rollback the txn, no matter the lock is expired or not!
+<<<<<<< HEAD
 		status, err := lr.getTxnStatus(bo, l.TxnID, l.Primary, callerStartTS, math.MaxUint64, true, false, l)
+=======
+		status, err := lr.getTxnStatus(bo, l.TxnID, l.Primary, callerStartTS, math.MaxUint64, true, l)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			return false, err
 		}
@@ -329,8 +347,12 @@ func (lr *LockResolver) ResolveLocks(bo *Backoffer, callerStartTS uint64, locks 
 	return lr.resolveLocks(bo, callerStartTS, locks, false, false)
 }
 
+<<<<<<< HEAD
 // ResolveLocksLite resolves locks while preventing scan whole region.
 func (lr *LockResolver) ResolveLocksLite(bo *Backoffer, callerStartTS uint64, locks []*Lock) (int64, []uint64 /*pushed*/, error) {
+=======
+func (lr *LockResolver) resolveLocksLite(bo *Backoffer, callerStartTS uint64, locks []*Lock) (int64, []uint64 /*pushed*/, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return lr.resolveLocks(bo, callerStartTS, locks, false, true)
 }
 
@@ -429,7 +451,11 @@ func (lr *LockResolver) resolveLocks(bo *Backoffer, callerStartTS uint64, locks 
 
 	if msBeforeTxnExpired.value() > 0 && len(pushed) == 0 {
 		// If len(pushed) > 0, the caller will not block on the locks, it push the minCommitTS instead.
+<<<<<<< HEAD
 		metrics.LockResolverCountWithWaitExpired.Inc()
+=======
+		tikvLockResolverCountWithWaitExpired.Inc()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	return msBeforeTxnExpired.value(), pushed, nil
 }
@@ -471,12 +497,21 @@ func (t *txnExpireTime) value() int64 {
 // seconds before calling it after Prewrite.
 func (lr *LockResolver) GetTxnStatus(txnID uint64, callerStartTS uint64, primary []byte) (TxnStatus, error) {
 	var status TxnStatus
+<<<<<<< HEAD
 	bo := NewBackoffer(context.Background(), cleanupMaxBackoff)
 	currentTS, err := lr.store.GetOracle().GetLowResolutionTimestamp(bo.ctx, &oracle.Option{TxnScope: oracle.GlobalTxnScope})
 	if err != nil {
 		return status, err
 	}
 	return lr.getTxnStatus(bo, txnID, primary, callerStartTS, currentTS, true, false, nil)
+=======
+	bo := NewBackofferWithVars(context.Background(), cleanupMaxBackoff, nil)
+	currentTS, err := lr.store.GetOracle().GetLowResolutionTimestamp(bo.ctx)
+	if err != nil {
+		return status, err
+	}
+	return lr.getTxnStatus(bo, txnID, primary, callerStartTS, currentTS, true, nil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (lr *LockResolver) getTxnStatusFromLock(bo *Backoffer, l *Lock, callerStartTS uint64, forceSyncCommit bool) (TxnStatus, error) {
@@ -506,7 +541,11 @@ func (lr *LockResolver) getTxnStatusFromLock(bo *Backoffer, l *Lock, callerStart
 		time.Sleep(100 * time.Millisecond)
 	})
 	for {
+<<<<<<< HEAD
 		status, err = lr.getTxnStatus(bo, l.TxnID, l.Primary, callerStartTS, currentTS, rollbackIfNotExist, forceSyncCommit, l)
+=======
+		status, err = lr.getTxnStatus(bo, l.TxnID, l.Primary, callerStartTS, currentTS, rollbackIfNotExist, l)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err == nil {
 			return status, nil
 		}
@@ -559,8 +598,13 @@ func (e txnNotFoundErr) Error() string {
 
 // getTxnStatus sends the CheckTxnStatus request to the TiKV server.
 // When rollbackIfNotExist is false, the caller should be careful with the txnNotFoundErr error.
+<<<<<<< HEAD
 func (lr *LockResolver) getTxnStatus(bo *Backoffer, txnID uint64, primary []byte,
 	callerStartTS, currentTS uint64, rollbackIfNotExist bool, forceSyncCommit bool, lockInfo *Lock) (TxnStatus, error) {
+=======
+func (lr *LockResolver) getTxnStatus(bo *Backoffer, txnID uint64, primary []byte, callerStartTS, currentTS uint64,
+	rollbackIfNotExist bool, lockInfo *Lock) (TxnStatus, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if s, ok := lr.getResolved(txnID); ok {
 		return s, nil
 	}
@@ -638,8 +682,25 @@ func (lr *LockResolver) getTxnStatus(bo *Backoffer, txnID uint64, primary []byte
 			}
 
 			status.commitTS = cmdResp.CommitVersion
+<<<<<<< HEAD
 			if status.StatusCacheable() {
 				lr.saveResolved(txnID, status)
+=======
+			// If the transaction is still valid with ttl greater than zero, do nothing.
+			// If its status is certain:
+			//     If transaction is already committed, the result could be cached.
+			//     Otherwise:
+			//       If l.LockType is pessimistic lock type:
+			//           - if its primary lock is pessimistic too, the check txn status result should not be cached.
+			//           - if its primary lock is prewrite lock type, the check txn status could be cached, todo.
+			//       If l.lockType is prewrite lock type:
+			//           - always cache the check txn status result.
+			// For prewrite locks, their primary keys should ALWAYS be the correct one and will NOT change.
+			if status.ttl == 0 {
+				if status.IsCommitted() || (lockInfo != nil && lockInfo.LockType != kvrpcpb.Op_PessimisticLock) {
+					lr.saveResolved(txnID, status)
+				}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 		}
 
@@ -647,6 +708,7 @@ func (lr *LockResolver) getTxnStatus(bo *Backoffer, txnID uint64, primary []byte
 	}
 }
 
+<<<<<<< HEAD
 // asyncResolveData is data contributed by multiple goroutines when resolving locks using the async commit protocol. All
 // data should be protected by the mutex field.
 type asyncResolveData struct {
@@ -902,6 +964,10 @@ func (lr *LockResolver) resolveRegionLocks(bo *Backoffer, l *Lock, region Region
 
 func (lr *LockResolver) resolveLock(bo *Backoffer, l *Lock, status TxnStatus, lite bool, cleanRegions map[RegionVerID]struct{}) error {
 	metrics.LockResolverCountWithResolveLocks.Inc()
+=======
+func (lr *LockResolver) resolveLock(bo *Backoffer, l *Lock, status TxnStatus, lite bool, cleanRegions map[RegionVerID]struct{}) error {
+	tikvLockResolverCountWithResolveLocks.Inc()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	resolveLite := lite || l.TxnSize < bigTxnThreshold
 	for {
 		loc, err := lr.store.GetRegionCache().LocateKey(bo, l.Key)

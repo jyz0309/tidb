@@ -156,6 +156,7 @@ func (s *testRegionCacheSuite) TestSimple(c *C) {
 	c.Assert(r.GetID(), Equals, s.region1)
 	c.Assert(s.getAddr(c, []byte("a"), kv.ReplicaReadLeader, 0), Equals, s.storeAddr(s.store1))
 	c.Assert(s.getAddr(c, []byte("a"), kv.ReplicaReadFollower, seed), Equals, s.storeAddr(s.store2))
+	c.Assert(s.getAddr(c, []byte("a"), kv.ReplicaReadMixed, 1<<31+1), Equals, s.storeAddr(s.store2))
 	s.checkCache(c, 1)
 	c.Assert(r.GetMeta(), DeepEquals, r.meta)
 	c.Assert(r.GetLeaderPeerID(), Equals, r.meta.Peers[r.getStore().workTiKVIdx].Id)
@@ -823,7 +824,11 @@ func (s *testRegionCacheSuite) TestRegionEpochOnTiFlash(c *C) {
 	ctxTiFlash, err := s.cache.GetTiFlashRPCContext(s.bo, loc1.Region)
 	c.Assert(err, IsNil)
 	c.Assert(ctxTiFlash.Peer.Id, Equals, s.peer1)
+<<<<<<< HEAD
 	ctxTiFlash.Peer.Role = metapb.PeerRole_Learner
+=======
+	ctxTiFlash.Peer.IsLearner = true
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	r := ctxTiFlash.Meta
 	reqSend := NewRegionRequestSender(s.cache, nil)
 	regionErr := &errorpb.Error{EpochNotMatch: &errorpb.EpochNotMatch{CurrentRegions: []*metapb.Region{r}}}
@@ -1337,7 +1342,11 @@ func BenchmarkOnRequestFail(b *testing.B) {
 				AccessIdx:  accessIdx,
 				Peer:       peer,
 				Store:      store,
+<<<<<<< HEAD
 				AccessMode: TiKVOnly,
+=======
+				AccessMode: TiKvOnly,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 			r := cache.getCachedRegionWithRLock(rpcCtx.Region)
 			if r != nil {

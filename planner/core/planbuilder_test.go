@@ -34,9 +34,13 @@ import (
 	"github.com/pingcap/tidb/planner/util"
 	"github.com/pingcap/tidb/statistics"
 	"github.com/pingcap/tidb/types"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/util/chunk"
 	"github.com/pingcap/tidb/util/hint"
 	"github.com/pingcap/tidb/util/mock"
+=======
+	"github.com/pingcap/tidb/util/hint"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 var _ = Suite(&testPlanBuilderSuite{})

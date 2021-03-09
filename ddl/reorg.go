@@ -319,12 +319,17 @@ func getTableTotalCount(w *worker, tblInfo *model.TableInfo) int64 {
 	if !ok {
 		return statistics.PseudoRowCount
 	}
+<<<<<<< HEAD
 	sql := "select table_rows from information_schema.tables where tidb_table_id=%?;"
 	stmt, err := executor.ParseWithParams(context.Background(), sql, tblInfo.ID)
 	if err != nil {
 		return statistics.PseudoRowCount
 	}
 	rows, _, err := executor.ExecRestrictedStmt(context.Background(), stmt)
+=======
+	sql := fmt.Sprintf("select table_rows from information_schema.tables where tidb_table_id=%v;", tblInfo.ID)
+	rows, _, err := executor.ExecRestrictedSQL(sql)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return statistics.PseudoRowCount
 	}
@@ -417,10 +422,16 @@ func getColumnsTypes(columns []*model.ColumnInfo) []*types.FieldType {
 }
 
 // buildDescTableScan builds a desc table scan upon tblInfo.
+<<<<<<< HEAD
 func (dc *ddlCtx) buildDescTableScan(ctx context.Context, startTS uint64, tbl table.PhysicalTable,
 	handleCols []*model.ColumnInfo, limit uint64) (distsql.SelectResult, error) {
 	sctx := newContext(dc.store)
 	dagPB, err := buildDescTableScanDAG(sctx, tbl, handleCols, limit)
+=======
+func (dc *ddlCtx) buildDescTableScan(ctx context.Context, startTS uint64, tbl table.PhysicalTable, columns []*model.ColumnInfo, limit uint64) (distsql.SelectResult, error) {
+	sctx := newContext(dc.store)
+	dagPB, err := buildDescTableScanDAG(sctx, tbl, columns, limit)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -454,6 +465,7 @@ func (dc *ddlCtx) buildDescTableScan(ctx context.Context, startTS uint64, tbl ta
 	return result, nil
 }
 
+<<<<<<< HEAD
 // GetTableMaxHandle gets the max handle of a PhysicalTable.
 func (dc *ddlCtx) GetTableMaxHandle(startTS uint64, tbl table.PhysicalTable) (maxHandle kv.Handle, emptyTable bool, err error) {
 	var handleCols []*model.ColumnInfo
@@ -461,6 +473,13 @@ func (dc *ddlCtx) GetTableMaxHandle(startTS uint64, tbl table.PhysicalTable) (ma
 	tblInfo := tbl.Meta()
 	switch {
 	case tblInfo.PKIsHandle:
+=======
+// GetTableMaxRowID gets the last row id of the table partition.
+func (dc *ddlCtx) GetTableMaxRowID(startTS uint64, tbl table.PhysicalTable) (maxRowID int64, emptyTable bool, err error) {
+	maxRowID = int64(math.MaxInt64)
+	var columns []*model.ColumnInfo
+	if tbl.Meta().PKIsHandle {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		for _, col := range tbl.Meta().Columns {
 			if mysql.HasPriKeyFlag(col.Flag) {
 				handleCols = []*model.ColumnInfo{col}
@@ -479,7 +498,11 @@ func (dc *ddlCtx) GetTableMaxHandle(startTS uint64, tbl table.PhysicalTable) (ma
 
 	ctx := context.Background()
 	// build a desc scan of tblInfo, which limit is 1, we can use it to retrieve the last handle of the table.
+<<<<<<< HEAD
 	result, err := dc.buildDescTableScan(ctx, startTS, tbl, handleCols, 1)
+=======
+	result, err := dc.buildDescTableScan(ctx, startTS, tbl, columns, 1)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return nil, false, errors.Trace(err)
 	}

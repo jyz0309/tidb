@@ -97,11 +97,14 @@ func BuildWindowFunctions(ctx sessionctx.Context, windowFuncDesc *aggregation.Ag
 		return buildLead(ctx, windowFuncDesc, ordinal)
 	case ast.WindowFuncLag:
 		return buildLag(ctx, windowFuncDesc, ordinal)
+<<<<<<< HEAD
 	case ast.AggFuncMax:
 		// The max/min aggFunc using in the window function will using the sliding window algo.
 		return buildMaxMinInWindowFunction(windowFuncDesc, ordinal, true)
 	case ast.AggFuncMin:
 		return buildMaxMinInWindowFunction(windowFuncDesc, ordinal, false)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	default:
 		return Build(ctx, windowFuncDesc, ordinal)
 	}
@@ -500,10 +503,17 @@ func buildGroupConcat(ctx sessionctx.Context, aggFuncDesc *aggregation.AggFuncDe
 				return &groupConcatDistinctOrder{base}
 			}
 			return &groupConcatDistinct{base}
+<<<<<<< HEAD
 		}
 		if len(aggFuncDesc.OrderByItems) > 0 {
 			return &groupConcatOrder{base}
 		}
+=======
+		}
+		if len(aggFuncDesc.OrderByItems) > 0 {
+			return &groupConcatOrder{base}
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return &groupConcat{base}
 	}
 }

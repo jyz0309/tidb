@@ -267,7 +267,11 @@ func (q *QueryFeedback) Actual() int64 {
 
 // Update updates the query feedback. `startKey` is the start scan key of the partial result, used to find
 // the range for update. `counts` is the scan counts of each range, used to update the feedback count info.
+<<<<<<< HEAD
 func (q *QueryFeedback) Update(startKey kv.Key, counts, ndvs []int64) {
+=======
+func (q *QueryFeedback) Update(startKey kv.Key, counts []int64) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Older versions do not have the counts info.
 	if len(counts) == 0 {
 		q.Invalidate()
@@ -313,6 +317,43 @@ func (q *QueryFeedback) Update(startKey kv.Key, counts, ndvs []int64) {
 		q.Feedback[i+idx].Count += count
 		q.Feedback[i+idx].Ndv += ndvs[i]
 	}
+}
+
+// NonOverlappedFeedbacks extracts a set of feedbacks which are not overlapped with each other.
+func NonOverlappedFeedbacks(sc *stmtctx.StatementContext, fbs []Feedback) ([]Feedback, bool) {
+	// Sort feedbacks by end point and start point incrementally, then pick every feedback that is not overlapped
+	// with the previous chosen feedbacks.
+	var existsErr bool
+	sort.Slice(fbs, func(i, j int) bool {
+		res, err := fbs[i].Upper.CompareDatum(sc, fbs[j].Upper)
+		if err != nil {
+			existsErr = true
+		}
+		if existsErr || res != 0 {
+			return res < 0
+		}
+		res, err = fbs[i].Lower.CompareDatum(sc, fbs[j].Lower)
+		if err != nil {
+			existsErr = true
+		}
+		return res < 0
+	})
+	if existsErr {
+		return fbs, false
+	}
+	resFBs := make([]Feedback, 0, len(fbs))
+	previousEnd := &types.Datum{}
+	for _, fb := range fbs {
+		res, err := previousEnd.CompareDatum(sc, fb.Lower)
+		if err != nil {
+			return fbs, false
+		}
+		if res <= 0 {
+			resFBs = append(resFBs, fb)
+			previousEnd = fb.Upper
+		}
+	}
+	return resFBs, true
 }
 
 // NonOverlappedFeedbacks extracts a set of feedbacks which are not overlapped with each other.
@@ -584,6 +625,7 @@ func (b *BucketFeedback) mergeFullyContainedFeedback(sc *stmtctx.StatementContex
 		feedbacks = append(feedbacks, fb)
 	}
 	if len(feedbacks) == 0 {
+<<<<<<< HEAD
 		return 0, 0, 0, false
 	}
 	sortedFBs, ok := NonOverlappedFeedbacks(sc, feedbacks)
@@ -594,13 +636,27 @@ func (b *BucketFeedback) mergeFullyContainedFeedback(sc *stmtctx.StatementContex
 		sumFraction, sumCount float64
 		ndv                   int64
 	)
+=======
+		return 0, 0, false
+	}
+	sortedFBs, ok := NonOverlappedFeedbacks(sc, feedbacks)
+	if !ok {
+		return 0, 0, false
+	}
+	var sumFraction, sumCount float64
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	for _, fb := range sortedFBs {
 		fraction, _ := getOverlapFraction(fb, bkt)
 		sumFraction += fraction
 		sumCount += float64(fb.Count)
+<<<<<<< HEAD
 		ndv += fb.Ndv
 	}
 	return sumFraction, sumCount, ndv, true
+=======
+	}
+	return sumFraction, sumCount, true
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // refineBucketCount refine the newly split bucket count. It uses the feedback that overlaps most

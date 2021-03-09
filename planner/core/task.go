@@ -557,6 +557,7 @@ func (p *PhysicalHashJoin) attach2Task(tasks ...task) task {
 	return task
 }
 
+<<<<<<< HEAD
 func (p *PhysicalHashJoin) attach2TaskForMpp(tasks ...task) task {
 	lTask, lok := tasks[0].(*mppTask)
 	rTask, rok := tasks[1].(*mppTask)
@@ -588,6 +589,45 @@ func (p *PhysicalHashJoin) attach2TaskForTiFlash(tasks ...task) task {
 	rTask, rok := tasks[1].(*copTask)
 	if !lok || !rok {
 		return p.attach2TaskForMpp(tasks...)
+=======
+// GetCost computes cost of broadcast join operator itself.
+func (p *PhysicalBroadCastJoin) GetCost(lCnt, rCnt float64) float64 {
+	buildCnt := lCnt
+	if p.InnerChildIdx == 1 {
+		buildCnt = rCnt
+	}
+	sessVars := p.ctx.GetSessionVars()
+	// Cost of building hash table.
+	cpuCost := buildCnt * sessVars.CopCPUFactor
+	memoryCost := buildCnt * sessVars.MemoryFactor
+	// Number of matched row pairs regarding the equal join conditions.
+	helper := &fullJoinRowCountHelper{
+		cartesian:     false,
+		leftProfile:   p.children[0].statsInfo(),
+		rightProfile:  p.children[1].statsInfo(),
+		leftJoinKeys:  p.LeftJoinKeys,
+		rightJoinKeys: p.RightJoinKeys,
+		leftSchema:    p.children[0].Schema(),
+		rightSchema:   p.children[1].Schema(),
+	}
+	numPairs := helper.estimate()
+	probeCost := numPairs * sessVars.CopCPUFactor
+	// should divided by the concurrency in tiflash, which should be the number of core in tiflash nodes.
+	probeCost /= float64(sessVars.CopTiFlashConcurrencyFactor)
+	cpuCost += probeCost
+
+	// todo since TiFlash join is significant faster than TiDB join, maybe
+	//  need to add a variable like 'tiflash_accelerate_factor', and divide
+	//  the final cost by that factor
+	return cpuCost + memoryCost
+}
+
+func (p *PhysicalBroadCastJoin) attach2Task(tasks ...task) task {
+	lTask, lok := tasks[0].(*copTask)
+	rTask, rok := tasks[1].(*copTask)
+	if !lok || !rok || (lTask.getStoreType() != kv.TiFlash && rTask.getStoreType() != kv.TiFlash) {
+		return invalidTask
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	p.SetChildren(lTask.plan(), rTask.plan())
 	p.schema = BuildPhysicalJoinSchema(p.JoinType, p)
@@ -743,6 +783,7 @@ func (t *copTask) convertToRootTaskImpl(ctx sessionctx.Context) *rootTask {
 
 		tp := t.tablePlan
 		for len(tp.Children()) > 0 {
+<<<<<<< HEAD
 			if len(tp.Children()) == 1 {
 				tp = tp.Children()[0]
 			} else {
@@ -758,6 +799,12 @@ func (t *copTask) convertToRootTaskImpl(ctx sessionctx.Context) *rootTask {
 			// Add an projection to make sure not to output extract columns.
 			needExtraProj = true
 		}
+=======
+			tp = tp.Children()[0]
+		}
+		ts := tp.(*PhysicalTableScan)
+		ts.Columns = ExpandVirtualColumn(ts.Columns, ts.schema, ts.Table.Columns)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	t.cst /= copIterWorkers
 	newTask := &rootTask{
@@ -786,7 +833,11 @@ func (t *copTask) convertToRootTaskImpl(ctx sessionctx.Context) *rootTask {
 			if len(tp.Children()) == 1 {
 				tp = tp.Children()[0]
 			} else {
+<<<<<<< HEAD
 				join := tp.(*PhysicalHashJoin)
+=======
+				join := tp.(*PhysicalBroadCastJoin)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				tp = join.children[1-join.InnerChildIdx]
 			}
 		}
@@ -798,6 +849,7 @@ func (t *copTask) convertToRootTaskImpl(ctx sessionctx.Context) *rootTask {
 		}.Init(ctx, t.tablePlan.SelectBlockOffset())
 		p.PartitionInfo = t.partitionInfo
 		p.stats = t.tablePlan.statsInfo()
+<<<<<<< HEAD
 		if needExtraProj {
 			proj := PhysicalProjection{Exprs: expression.Column2Exprs(prevSchema.Columns)}.Init(ts.ctx, ts.stats, ts.SelectBlockOffset(), nil)
 			proj.SetSchema(prevSchema)
@@ -806,6 +858,9 @@ func (t *copTask) convertToRootTaskImpl(ctx sessionctx.Context) *rootTask {
 		} else {
 			newTask.p = p
 		}
+=======
+		newTask.p = p
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	if len(t.rootTaskConds) > 0 {
@@ -1145,7 +1200,11 @@ type AggInfo struct {
 // returns the information of partial and final agg.
 // partialIsCop means whether partial agg is a cop task.
 func BuildFinalModeAggregation(
+<<<<<<< HEAD
 	sctx sessionctx.Context, original *AggInfo, partialIsCop bool, isMPPTask bool) (partial, final *AggInfo, funcMap map[*aggregation.AggFuncDesc]*aggregation.AggFuncDesc) {
+=======
+	sctx sessionctx.Context, original *AggInfo, partialIsCop bool) (partial, final *AggInfo, funcMap map[*aggregation.AggFuncDesc]*aggregation.AggFuncDesc) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	funcMap = make(map[*aggregation.AggFuncDesc]*aggregation.AggFuncDesc, len(original.AggFuncs))
 	partial = &AggInfo{
@@ -1239,6 +1298,7 @@ func BuildFinalModeAggregation(
 			finalAggFunc.Mode = aggregation.CompleteMode
 		} else {
 			if aggregation.NeedCount(finalAggFunc.Name) {
+<<<<<<< HEAD
 				if isMPPTask && finalAggFunc.Name == ast.AggFuncCount {
 					// For MPP Task, the final count() is changed to sum().
 					// Note: MPP mode does not run avg() directly, instead, avg() -> sum()/(case when count() = 0 then 1 else count() end),
@@ -1254,6 +1314,16 @@ func BuildFinalModeAggregation(
 					args = append(args, partial.Schema.Columns[partialCursor])
 					partialCursor++
 				}
+=======
+				ft := types.NewFieldType(mysql.TypeLonglong)
+				ft.Flen, ft.Charset, ft.Collate = 21, charset.CharsetBin, charset.CollationBin
+				partial.Schema.Append(&expression.Column{
+					UniqueID: sctx.GetSessionVars().AllocPlanColumnID(),
+					RetType:  ft,
+				})
+				args = append(args, partial.Schema.Columns[partialCursor])
+				partialCursor++
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 			if finalAggFunc.Name == ast.AggFuncApproxCountDistinct {
 				ft := types.NewFieldType(mysql.TypeString)
@@ -1378,7 +1448,11 @@ func (p *basePhysicalAgg) newPartialAggregate(copTaskType kv.StoreType, isMPPTas
 		AggFuncs:     p.AggFuncs,
 		GroupByItems: p.GroupByItems,
 		Schema:       p.Schema().Clone(),
+<<<<<<< HEAD
 	}, true, isMPPTask)
+=======
+	}, true)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if p.tp == plancodec.TypeStreamAgg && len(partialPref.GroupByItems) != len(finalPref.GroupByItems) {
 		return nil, p.self
 	}
@@ -1406,7 +1480,10 @@ func (p *basePhysicalAgg) newPartialAggregate(copTaskType kv.StoreType, isMPPTas
 		finalAgg := basePhysicalAgg{
 			AggFuncs:     finalPref.AggFuncs,
 			GroupByItems: finalPref.GroupByItems,
+<<<<<<< HEAD
 			MppRunMode:   p.MppRunMode,
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}.initForStream(p.ctx, p.stats, p.blockOffset, prop)
 		finalAgg.schema = finalPref.Schema
 		return partialAgg, finalAgg
@@ -1415,7 +1492,10 @@ func (p *basePhysicalAgg) newPartialAggregate(copTaskType kv.StoreType, isMPPTas
 	finalAgg := basePhysicalAgg{
 		AggFuncs:     finalPref.AggFuncs,
 		GroupByItems: finalPref.GroupByItems,
+<<<<<<< HEAD
 		MppRunMode:   p.MppRunMode,
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}.initForHash(p.ctx, p.stats, p.blockOffset, prop)
 	finalAgg.schema = finalPref.Schema
 	return partialAgg, finalAgg

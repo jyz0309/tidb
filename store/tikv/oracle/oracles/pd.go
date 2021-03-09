@@ -24,7 +24,12 @@ import (
 	"github.com/pingcap/tidb/metrics"
 	"github.com/pingcap/tidb/store/tikv/logutil"
 	"github.com/pingcap/tidb/store/tikv/oracle"
+<<<<<<< HEAD
 	pd "github.com/tikv/pd/client"
+=======
+	"github.com/pingcap/tidb/util/logutil"
+	"github.com/tikv/pd/client"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"go.uber.org/zap"
 )
 

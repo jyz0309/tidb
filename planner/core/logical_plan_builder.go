@@ -137,6 +137,33 @@ func (a *aggOrderByResolver) Enter(inNode ast.Node) (ast.Node, bool) {
 	return inNode, false
 }
 
+<<<<<<< HEAD
+=======
+// aggOrderByResolver is currently resolving expressions of order by clause
+// in aggregate function GROUP_CONCAT.
+type aggOrderByResolver struct {
+	ctx       sessionctx.Context
+	err       error
+	args      []ast.ExprNode
+	exprDepth int // exprDepth is the depth of current expression in expression tree.
+}
+
+func (a *aggOrderByResolver) Enter(inNode ast.Node) (ast.Node, bool) {
+	a.exprDepth++
+	switch n := inNode.(type) {
+	case *driver.ParamMarkerExpr:
+		if a.exprDepth == 1 {
+			_, isNull, isExpectedType := getUintFromNode(a.ctx, n)
+			// For constant uint expression in top level, it should be treated as position expression.
+			if !isNull && isExpectedType {
+				return expression.ConstructPositionExpr(n), true
+			}
+		}
+	}
+	return inNode, false
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (a *aggOrderByResolver) Leave(inNode ast.Node) (ast.Node, bool) {
 	switch v := inNode.(type) {
 	case *ast.PositionExpr:
@@ -585,10 +612,16 @@ func (p *LogicalJoin) setPreferredJoinType(hintInfo *tableHintInfo) {
 		p.preferJoinType |= preferRightAsINLHJInner
 	}
 	if hintInfo.ifPreferINLMJ(lhsAlias) {
-		p.preferJoinType |= preferLeftAsINLMJInner
+		// TODO: reopen index merge join change to preferLeftAsINLMJInner in future
+		p.preferJoinType |= preferLeftAsINLJInner
 	}
 	if hintInfo.ifPreferINLMJ(rhsAlias) {
+<<<<<<< HEAD
 		p.preferJoinType |= preferRightAsINLMJInner
+=======
+		// TODO: reopen index merge join change to preferRightAsINLMJInner in future
+		p.preferJoinType |= preferRightAsINLJInner
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	if containDifferentJoinTypes(p.preferJoinType) {
 		errMsg := "Join hints are conflict, you can only specify one type of join"
@@ -1184,11 +1217,18 @@ func findColFromNaturalUsingJoin(p LogicalPlan, col *expression.Column) (name *t
 }
 
 // buildProjection returns a Projection plan and non-aux columns length.
+<<<<<<< HEAD
 func (b *PlanBuilder) buildProjection(ctx context.Context, p LogicalPlan, fields []*ast.SelectField, mapper map[*ast.AggregateFuncExpr]int,
 	windowMapper map[*ast.WindowFuncExpr]int, considerWindow bool, expandGenerateColumn bool) (LogicalPlan, []expression.Expression, int, error) {
 	err := b.preprocessUserVarTypes(ctx, p, fields, mapper)
 	if err != nil {
 		return nil, nil, 0, err
+=======
+func (b *PlanBuilder) buildProjection(ctx context.Context, p LogicalPlan, fields []*ast.SelectField, mapper map[*ast.AggregateFuncExpr]int, windowMapper map[*ast.WindowFuncExpr]int, considerWindow bool, expandGenerateColumn bool) (LogicalPlan, int, error) {
+	err := b.preprocessUserVarTypes(ctx, p, fields, mapper)
+	if err != nil {
+		return nil, 0, err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	b.optFlag |= flagEliminateProjection
 	b.curClause = fieldList
@@ -2032,7 +2072,11 @@ func (a *havingWindowAndOrderbyExprResolver) Leave(n ast.Node) (node ast.Node, o
 						// For SQLs like:
 						//   select a+1 from t having t.a;
 						field := a.selectFields[index]
+<<<<<<< HEAD
 						if field.Auxiliary { // having can't use auxiliary field
+=======
+						if field.Auxiliary { //having can't use auxiliary field
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 							index = -1
 						}
 					}
@@ -2258,10 +2302,13 @@ func (r *correlatedAggregateResolver) resolveSelect(sel *ast.SelectStmt) (err er
 	if err != nil {
 		return err
 	}
+<<<<<<< HEAD
 	// do not use cache when for update read
 	if isForUpdateReadSelectLock(sel.LockInfo) {
 		useCache = false
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// we cannot use cache if there are correlated aggregates inside FROM clause,
 	// since the plan we are building now is not correct and need to be rebuild later.
 	p, err := r.b.buildTableRefs(r.ctx, sel.From, useCache)
@@ -2392,7 +2439,11 @@ func (r *correlatedAggregateResolver) Leave(n ast.Node) (ast.Node, bool) {
 			r.b.outerNames = r.b.outerNames[0 : len(r.b.outerNames)-1]
 		}
 	}
+<<<<<<< HEAD
 	return n, r.err == nil
+=======
+	return n, true
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // resolveCorrelatedAggregates finds and collects all correlated aggregates which should be evaluated
@@ -2836,6 +2887,7 @@ func (b *PlanBuilder) checkOnlyFullGroupByWithGroupClause(p LogicalPlan, sel *as
 					continue
 				}
 			}
+<<<<<<< HEAD
 			checkExprInGroupByOrIsSingleValue(p, item.Expr, offset, ErrExprInOrderBy, gbyOrSingleValueColNames, gbyExprs, notInGbyOrSingleValueColNames)
 		}
 	}
@@ -2894,6 +2946,9 @@ func (b *PlanBuilder) checkOnlyFullGroupByWithOutGroupClause(p LogicalPlan, sel 
 				resolver.exprIdx = idx
 				byItem.Expr.Accept(&resolver)
 			}
+=======
+			checkExprInGroupBy(p, item.Expr, offset, ErrExprInOrderBy, gbyColNames, gbyExprs, notInGbyColNames)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 	}
 	if resolver.firstOrderByAggColIdx != -1 && len(resolver.nonAggCols) > 0 {
@@ -2935,7 +2990,51 @@ func (b *PlanBuilder) checkOnlyFullGroupByWithOutGroupClause(p LogicalPlan, sel 
 			tblMap[tblInfo] = struct{}{}
 			continue
 		}
+<<<<<<< HEAD
 		return ErrMixOfGroupFuncAndFields.GenWithStackByArgs(resolver.nonAggColIdxs[i]+1, colName.Name.O)
+=======
+		switch errExprLoc.Loc {
+		case ErrExprInSelect:
+			return ErrFieldNotInGroupBy.GenWithStackByArgs(errExprLoc.Offset+1, errExprLoc.Loc, name.DBName.O+"."+name.TblName.O+"."+name.OrigColName.O)
+		case ErrExprInOrderBy:
+			return ErrFieldNotInGroupBy.GenWithStackByArgs(errExprLoc.Offset+1, errExprLoc.Loc, sel.OrderBy.Items[errExprLoc.Offset].Expr.Text())
+		}
+		return nil
+	}
+	return nil
+}
+
+func (b *PlanBuilder) checkOnlyFullGroupByWithOutGroupClause(p LogicalPlan, sel *ast.SelectStmt) error {
+	resolver := colResolverForOnlyFullGroupBy{}
+	resolver.curClause = fieldList
+	for idx, field := range sel.Fields.Fields {
+		resolver.exprIdx = idx
+		field.Accept(&resolver)
+		err := resolver.Check()
+		if err != nil {
+			return err
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
+	}
+	if resolver.firstNonAggCol != nil {
+		if sel.Having != nil {
+			sel.Having.Expr.Accept(&resolver)
+			err := resolver.Check()
+			if err != nil {
+				return err
+			}
+		}
+		if sel.OrderBy != nil {
+			resolver.curClause = orderByClause
+			for idx, byItem := range sel.OrderBy.Items {
+				resolver.exprIdx = idx
+				byItem.Expr.Accept(&resolver)
+				err := resolver.Check()
+				if err != nil {
+					return err
+				}
+			}
+		}
 	}
 	return nil
 }
@@ -2943,9 +3042,15 @@ func (b *PlanBuilder) checkOnlyFullGroupByWithOutGroupClause(p LogicalPlan, sel 
 // colResolverForOnlyFullGroupBy visits Expr tree to find out if an Expr tree is an aggregation function.
 // If so, find out the first column name that not in an aggregation function.
 type colResolverForOnlyFullGroupBy struct {
+<<<<<<< HEAD
 	nonAggCols            []*ast.ColumnName
 	exprIdx               int
 	nonAggColIdxs         []int
+=======
+	firstNonAggCol        *ast.ColumnName
+	exprIdx               int
+	firstNonAggColIdx     int
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	hasAggFuncOrAnyValue  bool
 	firstOrderByAggColIdx int
 	curClause             clauseCode
@@ -2979,6 +3084,20 @@ func (c *colResolverForOnlyFullGroupBy) Leave(node ast.Node) (ast.Node, bool) {
 	return node, true
 }
 
+<<<<<<< HEAD
+=======
+func (c *colResolverForOnlyFullGroupBy) Check() error {
+	if c.hasAggFuncOrAnyValue && c.firstNonAggCol != nil {
+		if c.curClause == fieldList {
+			return ErrMixOfGroupFuncAndFields.GenWithStackByArgs(c.firstNonAggColIdx+1, c.firstNonAggCol.Name.O)
+		} else if c.curClause == orderByClause {
+			return ErrAggregateOrderNonAggQuery.GenWithStackByArgs(c.firstOrderByAggColIdx + 1)
+		}
+	}
+	return nil
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 type colNameResolver struct {
 	p     LogicalPlan
 	names map[*types.FieldName]struct{}
@@ -3325,7 +3444,11 @@ func (b *PlanBuilder) buildSelect(ctx context.Context, sel *ast.SelectStmt) (p L
 	)
 
 	// set for update read to true before building result set node
+<<<<<<< HEAD
 	if isForUpdateReadSelectLock(sel.LockInfo) {
+=======
+	if isForUpdateReadSelectLock(sel.LockTp) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		b.isForUpdateRead = true
 	}
 
@@ -3361,9 +3484,12 @@ func (b *PlanBuilder) buildSelect(ctx context.Context, sel *ast.SelectStmt) (p L
 	}
 
 	hasWindowFuncField := b.detectSelectWindow(sel)
+<<<<<<< HEAD
 	// Some SQL statements define WINDOW but do not use them. But we also need to check the window specification list.
 	// For example: select id from t group by id WINDOW w AS (ORDER BY uids DESC) ORDER BY id;
 	// We don't use the WINDOW w, but if the 'uids' column is not in the table t, we still need to report an error.
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if hasWindowFuncField || sel.WindowSpecs != nil {
 		windowAggMap, err = b.resolveWindowFunction(sel, p)
 		if err != nil {
@@ -3402,12 +3528,22 @@ func (b *PlanBuilder) buildSelect(ctx context.Context, sel *ast.SelectStmt) (p L
 			return nil, err
 		}
 	}
+<<<<<<< HEAD
 	if sel.LockInfo != nil && sel.LockInfo.LockType != ast.SelectLockNone {
 		if sel.LockInfo.LockType == ast.SelectLockForShare && !enableNoopFuncs {
 			err = expression.ErrFunctionsNoopImpl.GenWithStackByArgs("LOCK IN SHARE MODE")
 			return nil, err
 		}
 		p = b.buildSelectLock(p, sel.LockInfo)
+=======
+
+	if sel.LockTp != ast.SelectLockNone {
+		if sel.LockTp == ast.SelectLockInShareMode && !enableNoopFuncs {
+			err = expression.ErrFunctionsNoopImpl.GenWithStackByArgs("LOCK IN SHARE MODE")
+			return nil, err
+		}
+		p = b.buildSelectLock(p, sel.LockTp)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	b.handleHelper.popMap()
 	b.handleHelper.pushMap(nil)
@@ -3474,7 +3610,11 @@ func (b *PlanBuilder) buildSelect(ctx context.Context, sel *ast.SelectStmt) (p L
 		// In such case plan `p` is not changed, so we don't have to build another projection.
 		if hasWindowFuncField {
 			// Now we build the window function fields.
+<<<<<<< HEAD
 			p, projExprs, oldLen, err = b.buildProjection(ctx, p, sel.Fields.Fields, windowAggMap, windowMapper, true, false)
+=======
+			p, oldLen, err = b.buildProjection(ctx, p, sel.Fields.Fields, windowAggMap, windowMapper, true, false)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			if err != nil {
 				return nil, err
 			}
@@ -3604,18 +3744,25 @@ func (b *PlanBuilder) buildDataSource(ctx context.Context, tn *ast.TableName, as
 	}
 
 	if tableInfo.IsView() {
+<<<<<<< HEAD
 		if tn.TableSample != nil {
 			return nil, expression.ErrInvalidTableSample.GenWithStackByArgs("Unsupported TABLESAMPLE in views")
 		}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return b.BuildDataSourceFromView(ctx, dbName, tableInfo)
 	}
 
 	if tableInfo.GetPartitionInfo() != nil {
+<<<<<<< HEAD
 		// Use the new partition implementation, clean up the code here when it's full implemented.
 		if !b.ctx.GetSessionVars().UseDynamicPartitionPrune() {
 			b.optFlag = b.optFlag | flagPartitionProcessor
 		}
 
+=======
+		b.optFlag = b.optFlag | flagPartitionProcessor
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		pt := tbl.(table.PartitionedTable)
 		// check partition by name.
 		if len(tn.PartitionNames) > 0 {
@@ -3693,7 +3840,11 @@ func (b *PlanBuilder) buildDataSource(ctx context.Context, tn *ast.TableName, as
 				for _, idxName := range hint.indexHint.IndexNames {
 					hasIdxName := false
 					for _, path := range possiblePaths {
+<<<<<<< HEAD
 						if path.IsTablePath() {
+=======
+						if path.IsTablePath {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 							if idxName.L == "primary" {
 								hasIdxName = true
 								break
@@ -3808,7 +3959,11 @@ func (b *PlanBuilder) buildDataSource(ctx context.Context, tn *ast.TableName, as
 	var result LogicalPlan = ds
 	dirty := tableHasDirtyContent(b.ctx, tableInfo)
 	if dirty {
+<<<<<<< HEAD
 		us := LogicalUnionScan{handleCols: handleCols}.Init(b.ctx, b.getSelectOffset())
+=======
+		us := LogicalUnionScan{handleCol: handleCol}.Init(b.ctx, b.getSelectOffset())
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		us.SetChildren(ds)
 		result = us
 	}
@@ -3932,10 +4087,17 @@ func (b *PlanBuilder) buildMemTable(_ context.Context, dbName model.CIStr, table
 			p.QueryTimeRange = b.timeRangeForSummaryTable()
 		case infoschema.TableSlowQuery:
 			p.Extractor = &SlowQueryExtractor{}
+<<<<<<< HEAD
 		case infoschema.TableStorageStats:
 			p.Extractor = &TableStorageStatsExtractor{}
 		case infoschema.TableTiFlashTables, infoschema.TableTiFlashSegments:
 			p.Extractor = &TiFlashSystemTableExtractor{}
+=======
+		case infoschema.TableTiFlashTables, infoschema.TableTiFlashSegments:
+			p.Extractor = &TiFlashSystemTableExtractor{}
+		case infoschema.TableStorageStats:
+			p.Extractor = &TableStorageStatsExtractor{}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 	}
 	return p, nil
@@ -4297,9 +4459,13 @@ func (b *PlanBuilder) buildUpdate(ctx context.Context, update *ast.UpdateStmt) (
 			// buildSelectLock is an optimization that can reduce RPC call.
 			// We only need do this optimization for single table update which is the most common case.
 			// When TableRefs.Right is nil, it is single table update.
+<<<<<<< HEAD
 			p = b.buildSelectLock(p, &ast.SelectLockInfo{
 				LockType: ast.SelectLockForUpdate,
 			})
+=======
+			p = b.buildSelectLock(p, ast.SelectLockForUpdate)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 	}
 
@@ -4388,15 +4554,24 @@ func checkUpdateList(ctx sessionctx.Context, tblID2table map[int64]table.Table, 
 	if err != nil {
 		return err
 	}
+<<<<<<< HEAD
 	updateFromOtherAlias := make(map[int64]tblUpdateInfo)
 	for _, content := range updt.TblColPosInfos {
 		tbl := tblID2table[content.TblID]
 		flags := assignFlags[content.Start:content.End]
 		var update, updatePK bool
+=======
+	isPKUpdated := make(map[int64]model.CIStr)
+	for _, content := range updt.TblColPosInfos {
+		tbl := tblID2table[content.TblID]
+		flags := assignFlags[content.Start:content.End]
+		var updatePK bool
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		for i, col := range tbl.WritableCols() {
 			if flags[i] && col.State != model.StatePublic {
 				return ErrUnknownColumn.GenWithStackByArgs(col.Name, clauseMsg[fieldList])
 			}
+<<<<<<< HEAD
 			if flags[i] {
 				update = true
 				if mysql.HasPriKeyFlag(col.Flag) {
@@ -4417,6 +4592,22 @@ func checkUpdateList(ctx sessionctx.Context, tblID2table map[int64]table.Table, 
 					pkUpdated: updatePK,
 				}
 			}
+=======
+			// Check for multi-updates on primary key,
+			// see https://dev.mysql.com/doc/mysql-errors/5.7/en/server-error-reference.html#error_er_multi_update_key_conflict
+			if !flags[i] {
+				continue
+			}
+			if mysql.HasPriKeyFlag(col.Flag) {
+				updatePK = true
+			}
+		}
+		if updatePK {
+			if otherTblName, ok := isPKUpdated[tbl.Meta().ID]; ok {
+				return ErrMultiUpdateKeyConflict.GenWithStackByArgs(otherTblName.O, updt.names[content.Start].TblName.O)
+			}
+			isPKUpdated[tbl.Meta().ID] = updt.names[content.Start].TblName
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 	}
 	return nil
@@ -5220,7 +5411,11 @@ func (b *PlanBuilder) buildWindowFunctions(ctx context.Context, p LogicalPlan, g
 
 // checkOriginWindowFuncs checks the validity for original window specifications for a group of functions.
 // Because the grouped specification is different from them, we should especially check them before build window frame.
+<<<<<<< HEAD
 func (b *PlanBuilder) checkOriginWindowFuncs(funcs []*ast.WindowFuncExpr, orderByItems []property.SortItem) error {
+=======
+func (b *PlanBuilder) checkOriginWindowFuncs(funcs []*ast.WindowFuncExpr, orderByItems []property.Item) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	for _, f := range funcs {
 		if f.IgnoreNull {
 			return ErrNotSupportedYet.GenWithStackByArgs("IGNORE NULLS")
@@ -5243,7 +5438,11 @@ func (b *PlanBuilder) checkOriginWindowFuncs(funcs []*ast.WindowFuncExpr, orderB
 }
 
 // checkOriginWindowSpec checks the validity for given window specification.
+<<<<<<< HEAD
 func (b *PlanBuilder) checkOriginWindowSpec(spec *ast.WindowSpec, orderByItems []property.SortItem) error {
+=======
+func (b *PlanBuilder) checkOriginWindowSpec(spec *ast.WindowSpec, orderByItems []property.Item) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if spec.Frame == nil {
 		return nil
 	}
@@ -5275,7 +5474,11 @@ func (b *PlanBuilder) checkOriginWindowSpec(spec *ast.WindowSpec, orderByItems [
 	return nil
 }
 
+<<<<<<< HEAD
 func (b *PlanBuilder) checkOriginWindowFrameBound(bound *ast.FrameBound, spec *ast.WindowSpec, orderByItems []property.SortItem) error {
+=======
+func (b *PlanBuilder) checkOriginWindowFrameBound(bound *ast.FrameBound, spec *ast.WindowSpec, orderByItems []property.Item) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if bound.Type == ast.CurrentRow || bound.UnBounded {
 		return nil
 	}

@@ -19,7 +19,10 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+<<<<<<< HEAD
 	"strings"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"sync"
 
 	. "github.com/pingcap/check"
@@ -65,6 +68,7 @@ func (msm *mockSessionManager1) KillAllConnections() {
 func (msm *mockSessionManager1) UpdateTLSConfig(cfg *tls.Config) {
 }
 
+<<<<<<< HEAD
 func (msm *mockSessionManager1) ServerID() uint64 {
 	return 1
 }
@@ -73,6 +77,12 @@ func (s *testSerialSuite) TestExplainFor(c *C) {
 	tkRoot := testkit.NewTestKitWithInit(c, s.store)
 	tkUser := testkit.NewTestKitWithInit(c, s.store)
 	tkRoot.MustExec("drop table if exists t1, t2;")
+=======
+func (s *testSuite9) TestExplainFor(c *C) {
+	tkRoot := testkit.NewTestKitWithInit(c, s.store)
+	tkUser := testkit.NewTestKitWithInit(c, s.store)
+	tkRoot.MustExec("drop table if exists t1,t2")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tkRoot.MustExec("create table t1(c1 int, c2 int)")
 	tkRoot.MustExec("create table t2(c1 int, c2 int)")
 	tkRoot.MustExec("create user tu@'%'")
@@ -111,8 +121,13 @@ func (s *testSerialSuite) TestExplainFor(c *C) {
 			}
 		}
 		c.Assert(buf.String(), Matches, ""+
+<<<<<<< HEAD
 			"TableReader_5 10000.00 0 root  time:.*, loops:1, cop_task: {num:.*, max:.*, proc_keys: 0, rpc_num: 1, rpc_time:.*} data:TableFullScan_4 N/A N/A\n"+
 			"└─TableFullScan_4 10000.00 0 cop.* table:t1 tikv_task:{time:.*, loops:0}, scan_detail:.* keep order:false, stats:pseudo N/A N/A")
+=======
+			"TableReader_5 10000.00 0 root  time:.*, loops:1, cop_task:.*num: 1, max:.*, proc_keys: 0, rpc_num: 1, rpc_time: .*data:TableFullScan_4 N/A N/A\n"+
+			"└─TableFullScan_4 10000.00 0 cop.* table:t1 .*keep order:false, stats:pseudo N/A N/A")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	tkRoot.MustQuery("select * from t1;")
 	check()
@@ -129,7 +144,11 @@ func (s *testSerialSuite) TestExplainFor(c *C) {
 	tkRoot.MustExec(fmt.Sprintf("explain for connection %d", tkRootProcess.ID))
 }
 
+<<<<<<< HEAD
 func (s *testSerialSuite) TestIssue11124(c *C) {
+=======
+func (s *testSuite9) TestIssue11124(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk := testkit.NewTestKitWithInit(c, s.store)
 	tk2 := testkit.NewTestKitWithInit(c, s.store)
 	tk.MustExec("set @@tidb_enable_collect_execution_info=0;")
@@ -173,6 +192,7 @@ func (s *testSuite) TestExplainMemTablePredicate(c *C) {
 		"MemTableScan_5 10000.00 root table:SLOW_QUERY start_time:2019-12-23 16:10:13.000000, end_time:2019-12-23 16:30:13.000000"))
 }
 
+<<<<<<< HEAD
 func (s *testSuite) TestExplainClusterTable(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.store)
 	tk.MustQuery(fmt.Sprintf("desc select * from information_schema.cluster_config where type in ('tikv', 'tidb')")).Check(testkit.Rows(
@@ -205,6 +225,8 @@ func (s *testSuite) TestInspectionRuleTable(c *C) {
 		`MemTableScan_5 10000.00 root table:INSPECTION_RULES skip_request: true`))
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 type testPrepareSerialSuite struct {
 	*baseTestSuite
 }
@@ -316,9 +338,15 @@ func (s *testPrepareSerialSuite) TestExplainDotForExplainPlan(c *C) {
 	rows := tk.MustQuery("select connection_id()").Rows()
 	c.Assert(len(rows), Equals, 1)
 	connID := rows[0][0].(string)
+<<<<<<< HEAD
 	tk.MustQuery("explain format = 'brief' select 1").Check(testkit.Rows(
 		"Projection 1.00 root  1->Column#1",
 		"└─TableDual 1.00 root  rows:1",
+=======
+	tk.MustQuery("explain select 1").Check(testkit.Rows(
+		"Projection_3 1.00 root  1->Column#1",
+		"└─TableDual_4 1.00 root  rows:1",
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	))
 
 	tkProcess := tk.Se.ShowProcess()
@@ -328,6 +356,7 @@ func (s *testPrepareSerialSuite) TestExplainDotForExplainPlan(c *C) {
 	tk.MustQuery(fmt.Sprintf("explain format=\"dot\" for connection %s", connID)).Check(nil)
 }
 
+<<<<<<< HEAD
 func (s *testPrepareSerialSuite) TestExplainDotForQuery(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk2 := testkit.NewTestKit(c, s.store)
@@ -410,6 +439,8 @@ func (s *testSuite) TestInspectionSummaryTable(c *C) {
 	))
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testSuite) TestExplainTiFlashSystemTables(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.store)
 	tiflashInstance := "192.168.1.7:3930"
@@ -433,6 +464,19 @@ func (s *testSuite) TestExplainTiFlashSystemTables(c *C) {
 		fmt.Sprintf("MemTableScan_5 10000.00 root table:TIFLASH_SEGMENTS tiflash_instances:[\"%s\"], tidb_databases:[\"%s\"], tidb_tables:[\"%s\"]", tiflashInstance, database, table)))
 }
 
+<<<<<<< HEAD
+=======
+func (s *testSuite) TestExplainTableStorage(c *C) {
+	tk := testkit.NewTestKitWithInit(c, s.store)
+	tk.MustQuery(fmt.Sprintf("desc select * from information_schema.TABLE_STORAGE_STATS where TABLE_SCHEMA = 'information_schema'")).Check(testkit.Rows(
+		fmt.Sprintf("MemTableScan_5 10000.00 root table:TABLE_STORAGE_STATS schema:[\"information_schema\"]")))
+	tk.MustQuery(fmt.Sprintf("desc select * from information_schema.TABLE_STORAGE_STATS where TABLE_NAME = 'schemata'")).Check(testkit.Rows(
+		fmt.Sprintf("MemTableScan_5 10000.00 root table:TABLE_STORAGE_STATS table:[\"schemata\"]")))
+	tk.MustQuery(fmt.Sprintf("desc select * from information_schema.TABLE_STORAGE_STATS where TABLE_SCHEMA = 'information_schema' and TABLE_NAME = 'schemata'")).Check(testkit.Rows(
+		fmt.Sprintf("MemTableScan_5 10000.00 root table:TABLE_STORAGE_STATS schema:[\"information_schema\"], table:[\"schemata\"]")))
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testPrepareSerialSuite) TestPointGetUserVarPlanCache(c *C) {
 	orgEnable := core.PreparedPlanCacheEnabled()
 	defer func() {
@@ -445,7 +489,10 @@ func (s *testPrepareSerialSuite) TestPointGetUserVarPlanCache(c *C) {
 
 	tk.MustExec("use test")
 	tk.MustExec("set @@tidb_enable_collect_execution_info=0;")
+<<<<<<< HEAD
 	tk.Se.GetSessionVars().EnableClusteredIndex = true
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("drop table if exists t1")
 	tk.MustExec("CREATE TABLE t1 (a BIGINT, b VARCHAR(40), PRIMARY KEY (a, b))")
 	tk.MustExec("INSERT INTO t1 VALUES (1,'3'),(2,'4')")
@@ -461,10 +508,21 @@ func (s *testPrepareSerialSuite) TestPointGetUserVarPlanCache(c *C) {
 	ps := []*util.ProcessInfo{tkProcess}
 	tk.Se.SetSessionManager(&mockSessionManager1{PS: ps})
 	// t2 should use PointGet.
+<<<<<<< HEAD
 	rows := tk.MustQuery(fmt.Sprintf("explain for connection %d", tkProcess.ID)).Rows()
 	c.Assert(strings.Contains(fmt.Sprintf("%v", rows[3][0]), "Point_Get"), IsTrue)
 	c.Assert(strings.Contains(fmt.Sprintf("%v", rows[3][3]), "table:t2"), IsTrue)
 
+=======
+	tk.MustQuery(fmt.Sprintf("explain for connection %d", tkProcess.ID)).Check(testkit.Rows(
+		"Projection_7 1.00 root  test.t1.a, test.t1.b, test.t2.a, test.t2.b",
+		"└─MergeJoin_8 1.00 root  inner join, left key:test.t2.a, right key:test.t1.a",
+		"  ├─IndexReader_27(Build) 10.00 root  index:IndexRangeScan_26",
+		"  │ └─IndexRangeScan_26 10.00 cop[tikv] table:t1, index:PRIMARY(a, b) range:[1,1], keep order:true, stats:pseudo",
+		"  └─Selection_25(Probe) 0.80 root  not(isnull(test.t2.a))",
+		"    └─Point_Get_24 1.00 root table:t2, index:idx_a(a) ",
+	))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("set @a=2")
 	tk.MustQuery("execute stmt using @a").Check(testkit.Rows(
 		"2 4 2 2",
@@ -473,9 +531,20 @@ func (s *testPrepareSerialSuite) TestPointGetUserVarPlanCache(c *C) {
 	ps = []*util.ProcessInfo{tkProcess}
 	tk.Se.SetSessionManager(&mockSessionManager1{PS: ps})
 	// t2 should use PointGet, range is changed to [2,2].
+<<<<<<< HEAD
 	rows = tk.MustQuery(fmt.Sprintf("explain for connection %d", tkProcess.ID)).Rows()
 	c.Assert(strings.Contains(fmt.Sprintf("%v", rows[3][0]), "Point_Get"), IsTrue)
 	c.Assert(strings.Contains(fmt.Sprintf("%v", rows[3][3]), "table:t2"), IsTrue)
+=======
+	tk.MustQuery(fmt.Sprintf("explain for connection %d", tkProcess.ID)).Check(testkit.Rows(
+		"Projection_7 1.00 root  test.t1.a, test.t1.b, test.t2.a, test.t2.b",
+		"└─MergeJoin_8 1.00 root  inner join, left key:test.t2.a, right key:test.t1.a",
+		"  ├─IndexReader_27(Build) 10.00 root  index:IndexRangeScan_26",
+		"  │ └─IndexRangeScan_26 10.00 cop[tikv] table:t1, index:PRIMARY(a, b) range:[2,2], keep order:true, stats:pseudo",
+		"  └─Selection_25(Probe) 1.00 root  not(isnull(test.t2.a))",
+		"    └─Point_Get_24 1.00 root table:t2, index:idx_a(a) ",
+	))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustQuery("execute stmt using @a").Check(testkit.Rows(
 		"2 4 2 2",
 	))

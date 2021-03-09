@@ -173,7 +173,11 @@ func (s *testSuite) TestDetach(c *C) {
 	c.Assert(child.BytesConsumed(), Equals, int64(100))
 	c.Assert(parent.BytesConsumed(), Equals, int64(0))
 	c.Assert(len(parent.mu.children), Equals, 0)
+<<<<<<< HEAD
 	c.Assert(child.getParent(), IsNil)
+=======
+	c.Assert(child.parent, IsNil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testSuite) TestReplaceChild(c *C) {
@@ -190,15 +194,25 @@ func (s *testSuite) TestReplaceChild(c *C) {
 	c.Assert(parent.BytesConsumed(), Equals, int64(500))
 	c.Assert(len(parent.mu.children), Equals, 1)
 	c.Assert(parent.mu.children[newChild.label][0], DeepEquals, newChild)
+<<<<<<< HEAD
 	c.Assert(newChild.getParent(), DeepEquals, parent)
 	c.Assert(oldChild.getParent(), IsNil)
+=======
+	c.Assert(newChild.parent, DeepEquals, parent)
+	c.Assert(oldChild.parent, IsNil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	parent.ReplaceChild(oldChild, nil)
 	c.Assert(parent.BytesConsumed(), Equals, int64(500))
 	c.Assert(len(parent.mu.children), Equals, 1)
 	c.Assert(parent.mu.children[newChild.label][0], DeepEquals, newChild)
+<<<<<<< HEAD
 	c.Assert(newChild.getParent(), DeepEquals, parent)
 	c.Assert(oldChild.getParent(), IsNil)
+=======
+	c.Assert(newChild.parent, DeepEquals, parent)
+	c.Assert(oldChild.parent, IsNil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	parent.ReplaceChild(newChild, nil)
 	c.Assert(parent.BytesConsumed(), Equals, int64(0))
@@ -292,15 +306,25 @@ func (s *testSuite) TestGlobalTracker(c *C) {
 	c1.AttachToGlobalTracker(r)
 	c2.AttachToGlobalTracker(r)
 	c.Assert(r.BytesConsumed(), Equals, int64(300))
+<<<<<<< HEAD
 	c.Assert(c1.getParent(), DeepEquals, r)
 	c.Assert(c2.getParent(), DeepEquals, r)
+=======
+	c.Assert(c1.parent, DeepEquals, r)
+	c.Assert(c2.parent, DeepEquals, r)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(len(r.mu.children), Equals, 0)
 
 	c1.DetachFromGlobalTracker()
 	c2.DetachFromGlobalTracker()
 	c.Assert(r.BytesConsumed(), Equals, int64(0))
+<<<<<<< HEAD
 	c.Assert(c1.getParent(), IsNil)
 	c.Assert(c2.getParent(), IsNil)
+=======
+	c.Assert(c1.parent, IsNil)
+	c.Assert(c2.parent, IsNil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(len(r.mu.children), Equals, 0)
 
 	defer func() {
@@ -313,13 +337,21 @@ func (s *testSuite) TestGlobalTracker(c *C) {
 	c1.AttachTo(commonTracker)
 	c.Assert(commonTracker.BytesConsumed(), Equals, int64(100))
 	c.Assert(len(commonTracker.mu.children), Equals, 1)
+<<<<<<< HEAD
 	c.Assert(c1.getParent(), DeepEquals, commonTracker)
+=======
+	c.Assert(c1.parent, DeepEquals, commonTracker)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	c1.AttachToGlobalTracker(r)
 	c.Assert(commonTracker.BytesConsumed(), Equals, int64(0))
 	c.Assert(len(commonTracker.mu.children), Equals, 0)
 	c.Assert(r.BytesConsumed(), Equals, int64(100))
+<<<<<<< HEAD
 	c.Assert(c1.getParent(), DeepEquals, r)
+=======
+	c.Assert(c1.parent, DeepEquals, r)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(len(r.mu.children), Equals, 0)
 
 	defer func() {
@@ -442,6 +474,7 @@ func (s *testSuite) TestOOMActionPriority(c *C) {
 		actions[i] = &mockAction{priority: int64(i)}
 	}
 
+<<<<<<< HEAD
 	randomSuffle := make([]int, n)
 	for i := 0; i < n; i++ {
 		randomSuffle[i] = i
@@ -451,6 +484,17 @@ func (s *testSuite) TestOOMActionPriority(c *C) {
 
 	for i := 0; i < n; i++ {
 		tracker.FallbackOldAndSetNewAction(actions[randomSuffle[i]])
+=======
+	randomShuffle := make([]int, n)
+	for i := 0; i < n; i++ {
+		randomShuffle[i] = i
+		pos := rand.Int() % (i + 1)
+		randomShuffle[i], randomShuffle[pos] = randomShuffle[pos], randomShuffle[i]
+	}
+
+	for i := 0; i < n; i++ {
+		tracker.FallbackOldAndSetNewAction(actions[randomShuffle[i]])
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	for i := n - 1; i >= 0; i-- {
 		tracker.Consume(100)

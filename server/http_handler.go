@@ -51,6 +51,7 @@ import (
 	"github.com/pingcap/tidb/store/gcworker"
 	"github.com/pingcap/tidb/store/helper"
 	"github.com/pingcap/tidb/store/tikv"
+	"github.com/pingcap/tidb/store/tikv/gcworker"
 	"github.com/pingcap/tidb/store/tikv/tikvrpc"
 	"github.com/pingcap/tidb/table"
 	"github.com/pingcap/tidb/table/tables"
@@ -781,11 +782,27 @@ func (h flashReplicaHandler) getTiFlashReplicaInfo(tblInfo *model.TableInfo, rep
 	}
 	if pi := tblInfo.GetPartitionInfo(); pi != nil {
 		for _, p := range pi.Definitions {
+<<<<<<< HEAD
 			replicaInfos = append(replicaInfos, &tableFlashReplicaInfo{
 				ID:             p.ID,
 				ReplicaCount:   tblInfo.TiFlashReplica.Count,
 				LocationLabels: tblInfo.TiFlashReplica.LocationLabels,
 				Available:      tblInfo.TiFlashReplica.IsPartitionAvailable(p.ID),
+			})
+		}
+		for _, p := range pi.AddingDefinitions {
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
+			replicaInfos = append(replicaInfos, &tableFlashReplicaInfo{
+				ID:             p.ID,
+				ReplicaCount:   tblInfo.TiFlashReplica.Count,
+				LocationLabels: tblInfo.TiFlashReplica.LocationLabels,
+				Available:      tblInfo.TiFlashReplica.IsPartitionAvailable(p.ID),
+<<<<<<< HEAD
+				HighPriority:   true,
+			})
+		}
+=======
 			})
 		}
 		for _, p := range pi.AddingDefinitions {
@@ -797,6 +814,7 @@ func (h flashReplicaHandler) getTiFlashReplicaInfo(tblInfo *model.TableInfo, rep
 				HighPriority:   true,
 			})
 		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return replicaInfos
 	}
 	replicaInfos = append(replicaInfos, &tableFlashReplicaInfo{
@@ -1110,7 +1128,11 @@ func (h ddlResignOwnerHandler) ServeHTTP(w http.ResponseWriter, req *http.Reques
 }
 
 func (h tableHandler) getPDAddr() ([]string, error) {
+<<<<<<< HEAD
 	etcd, ok := h.Store.(kv.EtcdBackend)
+=======
+	etcd, ok := h.Store.(tikv.EtcdBackend)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if !ok {
 		return nil, errors.New("not implemented")
 	}

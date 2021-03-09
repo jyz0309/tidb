@@ -36,8 +36,11 @@ var (
 	ErrBadGeneratedColumn              = dbterror.ClassOptimizer.NewStd(mysql.ErrBadGeneratedColumn)
 	ErrFieldNotInGroupBy               = dbterror.ClassOptimizer.NewStd(mysql.ErrFieldNotInGroupBy)
 	ErrAggregateOrderNonAggQuery       = dbterror.ClassOptimizer.NewStd(mysql.ErrAggregateOrderNonAggQuery)
+<<<<<<< HEAD
 	ErrFieldInOrderNotSelect           = dbterror.ClassOptimizer.NewStd(mysql.ErrFieldInOrderNotSelect)
 	ErrAggregateInOrderNotSelect       = dbterror.ClassOptimizer.NewStd(mysql.ErrAggregateInOrderNotSelect)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	ErrBadTable                        = dbterror.ClassOptimizer.NewStd(mysql.ErrBadTable)
 	ErrKeyDoesNotExist                 = dbterror.ClassOptimizer.NewStd(mysql.ErrKeyDoesNotExist)
 	ErrOperandColumns                  = dbterror.ClassOptimizer.NewStd(mysql.ErrOperandColumns)
@@ -85,10 +88,15 @@ var (
 	ErrCartesianProductUnsupported     = dbterror.ClassOptimizer.NewStd(mysql.ErrCartesianProductUnsupported)
 	ErrStmtNotFound                    = dbterror.ClassOptimizer.NewStd(mysql.ErrPreparedStmtNotFound)
 	ErrAmbiguous                       = dbterror.ClassOptimizer.NewStd(mysql.ErrNonUniq)
+<<<<<<< HEAD
 	ErrUnresolvedHintName              = dbterror.ClassOptimizer.NewStd(mysql.ErrUnresolvedHintName)
 	ErrNotHintUpdatable                = dbterror.ClassOptimizer.NewStd(mysql.ErrNotHintUpdatable)
 	ErrWarnConflictingHint             = dbterror.ClassOptimizer.NewStd(mysql.ErrWarnConflictingHint)
 	// Since we cannot know if user logged in with a password, use message of ErrAccessDeniedNoPassword instead
 	ErrAccessDenied = dbterror.ClassOptimizer.NewStdErr(mysql.ErrAccessDenied, mysql.MySQLErrName[mysql.ErrAccessDeniedNoPassword])
 	ErrBadNull      = dbterror.ClassOptimizer.NewStd(mysql.ErrBadNull)
+=======
+	// Since we cannot know if user logged in with a password, use message of ErrAccessDeniedNoPassword instead
+	ErrAccessDenied = dbterror.ClassOptimizer.NewStdErr(mysql.ErrAccessDenied, mysql.MySQLErrName[mysql.ErrAccessDeniedNoPassword])
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )

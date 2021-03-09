@@ -103,6 +103,7 @@ func getPotentialEqOrInColOffset(expr expression.Expression, cols []*expression.
 		return -1
 	}
 	_, collation := expr.CharsetAndCollation(f.GetCtx())
+<<<<<<< HEAD
 	switch f.FuncName.L {
 	case ast.LogicOr:
 		dnfItems := expression.FlattenDNFConditions(f)
@@ -119,6 +120,9 @@ func getPotentialEqOrInColOffset(expr expression.Expression, cols []*expression.
 		}
 		return offset
 	case ast.EQ, ast.NullEQ, ast.LE, ast.GE, ast.LT, ast.GT:
+=======
+	if f.FuncName.L == ast.EQ {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if c, ok := f.GetArgs()[0].(*expression.Column); ok {
 			if c.RetType.EvalType() == types.ETString && !collate.CompatibleCollate(c.RetType.Collate, collation) {
 				return -1
@@ -577,10 +581,17 @@ func (d *rangeDetacher) detachDNFCondAndBuildRangeForIndex(condition *expression
 	}
 
 	// Take prefix index into consideration.
+<<<<<<< HEAD
 	if hasPrefix(d.lengths) {
 		fixPrefixColRange(totalRanges, d.lengths, newTpSlice)
 	}
 	totalRanges, err := UnionRanges(sc, totalRanges, d.mergeConsecutive)
+=======
+	if hasPrefix(lengths) {
+		fixPrefixColRange(totalRanges, lengths, newTpSlice)
+	}
+	totalRanges, err := UnionRanges(sc, totalRanges)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return nil, nil, false, errors.Trace(err)
 	}

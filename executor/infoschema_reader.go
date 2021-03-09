@@ -32,7 +32,10 @@ import (
 	"github.com/pingcap/parser/model"
 	"github.com/pingcap/parser/mysql"
 	"github.com/pingcap/parser/terror"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/ddl/placement"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/domain"
 	"github.com/pingcap/tidb/domain/infosync"
 	"github.com/pingcap/tidb/infoschema"
@@ -55,7 +58,10 @@ import (
 	"github.com/pingcap/tidb/util/set"
 	"github.com/pingcap/tidb/util/sqlexec"
 	"github.com/pingcap/tidb/util/stmtsummary"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/util/stringutil"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"go.etcd.io/etcd/clientv3"
 )
 
@@ -134,15 +140,21 @@ func (e *memtableRetriever) retrieve(ctx context.Context, sctx sessionctx.Contex
 			err = e.setDataForServersInfo()
 		case infoschema.TableTiFlashReplica:
 			e.dataForTableTiFlashReplica(sctx, dbs)
+<<<<<<< HEAD
 		case infoschema.TableTiKVStoreStatus:
 			err = e.dataForTiKVStoreStatus(sctx)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		case infoschema.TableStatementsSummary,
 			infoschema.TableStatementsSummaryHistory,
 			infoschema.ClusterTableStatementsSummary,
 			infoschema.ClusterTableStatementsSummaryHistory:
 			err = e.setDataForStatementsSummary(sctx, e.table.Name.O)
+<<<<<<< HEAD
 		case infoschema.TablePlacementPolicy:
 			err = e.setDataForPlacementPolicy(sctx)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		if err != nil {
 			return nil, err
@@ -553,8 +565,13 @@ func (e *memtableRetriever) setDataFromTables(ctx sessionctx.Context, schemas []
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *hugeMemTableRetriever) setDataForColumns(ctx context.Context, sctx sessionctx.Context) error {
 	checker := privilege.GetPrivilegeManager(sctx)
+=======
+func (e *hugeMemTableRetriever) setDataForColumns(ctx sessionctx.Context) error {
+	checker := privilege.GetPrivilegeManager(ctx)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	e.rows = e.rows[:0]
 	batch := 1024
 	for ; e.dbsIdx < len(e.dbs); e.dbsIdx++ {
@@ -562,11 +579,19 @@ func (e *hugeMemTableRetriever) setDataForColumns(ctx context.Context, sctx sess
 		for e.tblIdx < len(schema.Tables) {
 			table := schema.Tables[e.tblIdx]
 			e.tblIdx++
+<<<<<<< HEAD
 			if checker != nil && !checker.RequestVerification(sctx.GetSessionVars().ActiveRoles, schema.Name.L, table.Name.L, "", mysql.AllPrivMask) {
 				continue
 			}
 
 			e.dataForColumnsInTable(ctx, sctx, schema, table)
+=======
+			if checker != nil && !checker.RequestVerification(ctx.GetSessionVars().ActiveRoles, schema.Name.L, table.Name.L, "", mysql.AllPrivMask) {
+				continue
+			}
+
+			e.dataForColumnsInTable(schema, table)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			if len(e.rows) >= batch {
 				return nil
 			}
@@ -576,11 +601,15 @@ func (e *hugeMemTableRetriever) setDataForColumns(ctx context.Context, sctx sess
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *hugeMemTableRetriever) dataForColumnsInTable(ctx context.Context, sctx sessionctx.Context, schema *model.DBInfo, tbl *model.TableInfo) {
 	if err := tryFillViewColumnType(ctx, sctx, infoschema.GetInfoSchema(sctx), schema.Name, tbl); err != nil {
 		sctx.GetSessionVars().StmtCtx.AppendWarning(err)
 		return
 	}
+=======
+func (e *hugeMemTableRetriever) dataForColumnsInTable(schema *model.DBInfo, tbl *model.TableInfo) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	for i, col := range tbl.Columns {
 		if col.Hidden {
 			continue
@@ -772,6 +801,7 @@ func (e *memtableRetriever) setDataFromPartitions(ctx sessionctx.Context, schema
 					}
 
 					record := types.MakeDatums(
+<<<<<<< HEAD
 						infoschema.CatalogVal, // TABLE_CATALOG
 						schema.Name.O,         // TABLE_SCHEMA
 						table.Name.O,          // TABLE_NAME
@@ -798,6 +828,34 @@ func (e *memtableRetriever) setDataFromPartitions(ctx sessionctx.Context, schema
 						nil,                   // NODEGROUP
 						nil,                   // TABLESPACE_NAME
 						pi.ID,                 // TIDB_PARTITION_ID
+=======
+						infoschema.CatalogVal,         // TABLE_CATALOG
+						schema.Name.O,                 // TABLE_SCHEMA
+						table.Name.O,                  // TABLE_NAME
+						pi.Name.O,                     // PARTITION_NAME
+						nil,                           // SUBPARTITION_NAME
+						i+1,                           // PARTITION_ORDINAL_POSITION
+						nil,                           // SUBPARTITION_ORDINAL_POSITION
+						table.Partition.Type.String(), // PARTITION_METHOD
+						nil,                           // SUBPARTITION_METHOD
+						table.Partition.Expr,          // PARTITION_EXPRESSION
+						nil,                           // SUBPARTITION_EXPRESSION
+						partitionDesc,                 // PARTITION_DESCRIPTION
+						rowCount,                      // TABLE_ROWS
+						avgRowLength,                  // AVG_ROW_LENGTH
+						dataLength,                    // DATA_LENGTH
+						uint64(0),                     // MAX_DATA_LENGTH
+						indexLength,                   // INDEX_LENGTH
+						uint64(0),                     // DATA_FREE
+						createTime,                    // CREATE_TIME
+						nil,                           // UPDATE_TIME
+						nil,                           // CHECK_TIME
+						nil,                           // CHECKSUM
+						pi.Comment,                    // PARTITION_COMMENT
+						nil,                           // NODEGROUP
+						nil,                           // TABLESPACE_NAME
+						pi.ID,                         // TIDB_PARTITION_ID
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 					)
 					rows = append(rows, record)
 				}
@@ -1107,7 +1165,10 @@ func (e *memtableRetriever) dataForTiDBClusterInfo(ctx sessionctx.Context) error
 			server.GitHash,
 			startTimeStr,
 			upTimeStr,
+<<<<<<< HEAD
 			server.ServerID,
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		)
 		rows = append(rows, row)
 	}
@@ -1570,7 +1631,11 @@ func (e *tableStorageStatsRetriever) initialize(sctx sessionctx.Context) error {
 
 	// Filter the sys or memory schema.
 	for schema := range schemas {
+<<<<<<< HEAD
 		if !util.IsMemDB(schema) {
+=======
+		if !util.IsMemOrSysDB(schema) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			databases = append(databases, schema)
 		}
 	}
@@ -1836,6 +1901,7 @@ func (e *memtableRetriever) setDataForStatementsSummary(ctx sessionctx.Context, 
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *memtableRetriever) setDataForPlacementPolicy(ctx sessionctx.Context) error {
 	checker := privilege.GetPrivilegeManager(ctx)
 	is := infoschema.GetInfoSchema(ctx)
@@ -1935,6 +2001,8 @@ func adjustColumns(input [][]types.Datum, outColumns []*model.ColumnInfo, table 
 	return rows
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // TiFlashSystemTableRetriever is used to read system table from tiflash.
 type TiFlashSystemTableRetriever struct {
 	dummyCloser
@@ -1982,7 +2050,11 @@ type tiflashInstanceInfo struct {
 
 func (e *TiFlashSystemTableRetriever) initialize(sctx sessionctx.Context, tiflashInstances set.StringSet) error {
 	store := sctx.GetStore()
+<<<<<<< HEAD
 	if etcd, ok := store.(kv.EtcdBackend); ok {
+=======
+	if etcd, ok := store.(tikv.EtcdBackend); ok {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		var addrs []string
 		var err error
 		if addrs, err = etcd.EtcdAddrs(); err != nil {
@@ -2120,3 +2192,61 @@ func (e *TiFlashSystemTableRetriever) dataForTiFlashSystemTables(ctx sessionctx.
 	}
 	return rows, nil
 }
+<<<<<<< HEAD
+=======
+
+type hugeMemTableRetriever struct {
+	dummyCloser
+	table       *model.TableInfo
+	columns     []*model.ColumnInfo
+	retrieved   bool
+	initialized bool
+	rows        [][]types.Datum
+	dbs         []*model.DBInfo
+	dbsIdx      int
+	tblIdx      int
+}
+
+// retrieve implements the infoschemaRetriever interface
+func (e *hugeMemTableRetriever) retrieve(ctx context.Context, sctx sessionctx.Context) ([][]types.Datum, error) {
+	if e.retrieved {
+		return nil, nil
+	}
+
+	if !e.initialized {
+		is := infoschema.GetInfoSchema(sctx)
+		dbs := is.AllSchemas()
+		sort.Sort(infoschema.SchemasSorter(dbs))
+		e.dbs = dbs
+		e.initialized = true
+		e.rows = make([][]types.Datum, 0, 1024)
+	}
+
+	var err error
+	switch e.table.Name.O {
+	case infoschema.TableColumns:
+		err = e.setDataForColumns(sctx)
+	}
+	if err != nil {
+		return nil, err
+	}
+	e.retrieved = len(e.rows) == 0
+
+	return adjustColumns(e.rows, e.columns, e.table), nil
+}
+
+func adjustColumns(input [][]types.Datum, outColumns []*model.ColumnInfo, table *model.TableInfo) [][]types.Datum {
+	if len(outColumns) == len(table.Columns) {
+		return input
+	}
+	rows := make([][]types.Datum, len(input))
+	for i, fullRow := range input {
+		row := make([]types.Datum, len(outColumns))
+		for j, col := range outColumns {
+			row[j] = fullRow[col.Offset]
+		}
+		rows[i] = row
+	}
+	return rows
+}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

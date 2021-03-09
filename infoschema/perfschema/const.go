@@ -415,7 +415,10 @@ const tableEventsStatementsSummaryByDigest = "CREATE TABLE if not exists perform
 	"LAST_SEEN timestamp(6) NOT NULL DEFAULT '0000-00-00 00:00:00.000000'," +
 	"PLAN_IN_CACHE bool NOT NULL," +
 	"PLAN_CACHE_HITS bigint unsigned NOT NULL," +
+<<<<<<< HEAD
 	"PLAN_IN_BINDING bool NOT NULL," +
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"QUANTILE_95 bigint unsigned NOT NULL," +
 	"QUANTILE_99 bigint unsigned NOT NULL," +
 	"QUANTILE_999 bigint unsigned NOT NULL," +

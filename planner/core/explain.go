@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/pingcap/parser/ast"
+<<<<<<< HEAD
 	"github.com/pingcap/parser/model"
 	"github.com/pingcap/parser/mysql"
 	"github.com/pingcap/tidb/expression"
@@ -29,6 +30,13 @@ import (
 	"github.com/pingcap/tidb/sessionctx"
 	"github.com/pingcap/tidb/statistics"
 	"github.com/pingcap/tidb/table"
+=======
+	"github.com/pingcap/parser/mysql"
+	"github.com/pingcap/tidb/expression"
+	"github.com/pingcap/tidb/expression/aggregation"
+	"github.com/pingcap/tidb/planner/util"
+	"github.com/pingcap/tidb/statistics"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/types"
 	"github.com/pingcap/tidb/util/plancodec"
 	"github.com/pingcap/tidb/util/stringutil"
@@ -59,9 +67,12 @@ func (p *PhysicalLock) ExplainInfo() string {
 // ExplainID overrides the ExplainID in order to match different range.
 func (p *PhysicalIndexScan) ExplainID() fmt.Stringer {
 	return stringutil.MemoizeStr(func() string {
+<<<<<<< HEAD
 		if p.ctx != nil && p.ctx.GetSessionVars().StmtCtx.IgnoreExplainIDSuffix {
 			return p.TP()
 		}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return p.TP() + "_" + strconv.Itoa(p.id)
 	})
 }
@@ -175,9 +186,12 @@ func (p *PhysicalIndexScan) isFullScan() bool {
 // ExplainID overrides the ExplainID in order to match different range.
 func (p *PhysicalTableScan) ExplainID() fmt.Stringer {
 	return stringutil.MemoizeStr(func() string {
+<<<<<<< HEAD
 		if p.ctx != nil && p.ctx.GetSessionVars().StmtCtx.IgnoreExplainIDSuffix {
 			return p.TP()
 		}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return p.TP() + "_" + strconv.Itoa(p.id)
 	})
 }
@@ -297,6 +311,7 @@ func (p *PhysicalTableReader) ExplainInfo() string {
 // ExplainNormalizedInfo implements Plan interface.
 func (p *PhysicalTableReader) ExplainNormalizedInfo() string {
 	return ""
+<<<<<<< HEAD
 }
 
 func (p *PhysicalTableReader) accessObject(sctx sessionctx.Context) string {
@@ -346,6 +361,8 @@ func partitionAccessObject(sctx sessionctx.Context, tbl table.PartitionedTable, 
 // OperatorInfo return other operator information to be explained.
 func (p *PhysicalTableReader) OperatorInfo(normalized bool) string {
 	return "data:" + p.tablePlan.ExplainID().String()
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // ExplainInfo implements Plan interface.
@@ -508,6 +525,7 @@ func (p *basePhysicalAgg) ExplainNormalizedInfo() string {
 // ExplainInfo implements Plan interface.
 func (p *PhysicalIndexJoin) ExplainInfo() string {
 	return p.explainInfo(false, false)
+<<<<<<< HEAD
 }
 
 // ExplainInfo implements Plan interface.
@@ -515,6 +533,15 @@ func (p *PhysicalIndexMergeJoin) ExplainInfo() string {
 	return p.explainInfo(false, true)
 }
 
+=======
+}
+
+// ExplainInfo implements Plan interface.
+func (p *PhysicalIndexMergeJoin) ExplainInfo() string {
+	return p.explainInfo(false, true)
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (p *PhysicalIndexJoin) explainInfo(normalized bool, isIndexMergeJoin bool) string {
 	sortedExplainExpressionList := expression.SortedExplainExpressionList
 	if normalized {
@@ -535,7 +562,10 @@ func (p *PhysicalIndexJoin) explainInfo(normalized bool, isIndexMergeJoin bool) 
 		fmt.Fprintf(buffer, ", inner key:%s",
 			expression.ExplainColumnList(p.InnerJoinKeys))
 	}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if len(p.OuterHashKeys) > 0 && !isIndexMergeJoin {
 		exprs := make([]expression.Expression, 0, len(p.OuterHashKeys))
 		for i := range p.OuterHashKeys {
@@ -662,6 +692,32 @@ func (p *PhysicalMergeJoin) explainInfo(normalized bool) string {
 // ExplainNormalizedInfo implements Plan interface.
 func (p *PhysicalMergeJoin) ExplainNormalizedInfo() string {
 	return p.explainInfo(true)
+}
+
+// ExplainInfo implements Plan interface.
+func (p *PhysicalBroadCastJoin) ExplainInfo() string {
+	return p.explainInfo()
+}
+
+// ExplainNormalizedInfo implements Plan interface.
+func (p *PhysicalBroadCastJoin) ExplainNormalizedInfo() string {
+	return p.explainInfo()
+}
+
+func (p *PhysicalBroadCastJoin) explainInfo() string {
+	buffer := new(bytes.Buffer)
+
+	buffer.WriteString(p.JoinType.String())
+
+	if len(p.LeftJoinKeys) > 0 {
+		fmt.Fprintf(buffer, ", left key:%s",
+			expression.ExplainColumnList(p.LeftJoinKeys))
+	}
+	if len(p.RightJoinKeys) > 0 {
+		fmt.Fprintf(buffer, ", right key:%s",
+			expression.ExplainColumnList(p.RightJoinKeys))
+	}
+	return buffer.String()
 }
 
 // ExplainInfo implements Plan interface.

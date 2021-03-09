@@ -45,10 +45,20 @@ func (e Enum) ToNumber() float64 {
 	return float64(e.Value)
 }
 
+<<<<<<< HEAD
 // ParseEnum creates a Enum with item name or value.
 func ParseEnum(elems []string, name string, collation string) (Enum, error) {
 	if enumName, err := ParseEnumName(elems, name, collation); err == nil {
 		return enumName, nil
+=======
+// ParseEnumName creates a Enum with item name.
+func ParseEnumName(elems []string, name string, collation string) (Enum, error) {
+	ctor := collate.GetCollator(collation)
+	for i, n := range elems {
+		if ctor.Compare(n, name) == 0 {
+			return Enum{Name: n, Value: uint64(i) + 1}, nil
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	// name doesn't exist, maybe an integer?
 	if num, err := strconv.ParseUint(name, 0, 64); err == nil {

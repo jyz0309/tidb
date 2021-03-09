@@ -23,13 +23,19 @@ import (
 
 	. "github.com/pingcap/check"
 	"github.com/pingcap/parser/terror"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/errno"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/executor"
 	"github.com/pingcap/tidb/meta/autoid"
 	"github.com/pingcap/tidb/sessionctx/variable"
 	"github.com/pingcap/tidb/table"
 	"github.com/pingcap/tidb/types"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/util/collate"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/util/execdetails"
 	"github.com/pingcap/tidb/util/testkit"
 	"github.com/pingcap/tidb/util/testutil"
@@ -316,6 +322,7 @@ func (s *testSuite3) TestInsertWrongValueForField(c *C) {
 	_, err := tk.Exec(`insert into t1 values("asfasdfsajhlkhlksdaf");`)
 	c.Assert(terror.ErrorEqual(err, table.ErrTruncatedWrongValueForField), IsTrue)
 
+<<<<<<< HEAD
 	tk.MustExec(`drop table if exists t1;`)
 	tk.MustExec(`create table t1(a varchar(10)) charset ascii;`)
 	_, err = tk.Exec(`insert into t1 values('我');`)
@@ -331,6 +338,12 @@ func (s *testSuite3) TestInsertWrongValueForField(c *C) {
 	tk.MustExec(`create table t (a year);`)
 	_, err = tk.Exec(`insert into t values(2156);`)
 	c.Assert(err.Error(), Equals, `[types:8033]invalid year`)
+=======
+	tk.MustExec(`drop table if exists t;`)
+	tk.MustExec(`create table t (a year);`)
+	_, err = tk.Exec(`insert into t values(2156);`)
+	c.Assert(err.Error(), Equals, `[types:1264]Out of range value for column 'a' at row 1`)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testSuite3) TestInsertDateTimeWithTimeZone(c *C) {
@@ -1296,6 +1309,7 @@ func (s *testSuite9) TestIssue16366(c *C) {
 	c.Assert(strings.Contains(err.Error(), "Duplicate entry '0' for key 'PRIMARY'"), IsTrue, Commentf("%v", err))
 }
 
+<<<<<<< HEAD
 var _ = SerialSuites(&testSuite10{&baseTestSuite{}})
 
 type testSuite10 struct {
@@ -1435,6 +1449,9 @@ func (s *testSuite10) TestClusterPrimaryKeyForIndexScan(c *C) {
 }
 
 func (s *testSuite10) TestInsertRuntimeStat(c *C) {
+=======
+func (s *testSuite9) TestInsertRuntimeStat(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	stats := &executor.InsertRuntimeStat{
 		BasicRuntimeStats:    &execdetails.BasicRuntimeStats{},
 		SnapshotRuntimeStats: nil,
@@ -1448,6 +1465,7 @@ func (s *testSuite10) TestInsertRuntimeStat(c *C) {
 	c.Assert(stats.String(), Equals, "prepare:6s, check_insert: {total_time: 4s, mem_insert_time: 2s, prefetch: 2s}")
 }
 
+<<<<<<< HEAD
 func (s *testSerialSuite) TestDuplicateEntryMessage(c *C) {
 	collate.SetNewCollationEnabledForTest(true)
 	defer collate.SetNewCollationEnabledForTest(false)
@@ -1517,6 +1535,9 @@ func (s *testSerialSuite) TestDuplicateEntryMessage(c *C) {
 }
 
 func (s *testSerialSuite) TestIssue20768(c *C) {
+=======
+func (s *testSuite9) TestIssue20768(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
 	tk.MustExec("drop table if exists t1, t2")
@@ -1548,6 +1569,7 @@ func (s *testSuite9) TestIssue10402(c *C) {
 	tk.MustQuery("select length(v), length(c) from vctt").Check(testkit.Rows("4 4", "4 4", "4 2", "4 4"))
 }
 
+<<<<<<< HEAD
 func combination(items []string) func() []string {
 	current := 1
 	buf := make([]string, len(items))
@@ -1567,6 +1589,9 @@ func combination(items []string) func() []string {
 }
 
 func (s *testSuite10) TestBinaryLiteralInsertToEnum(c *C) {
+=======
+func (s *testSuite9) TestBinaryLiteralInsertToEnum(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec(`use test`)
 	tk.MustExec("drop table if exists bintest")
@@ -1576,7 +1601,11 @@ func (s *testSuite10) TestBinaryLiteralInsertToEnum(c *C) {
 	tk.MustQuery("select * from bintest").Check(testkit.Rows("a"))
 }
 
+<<<<<<< HEAD
 func (s *testSuite10) TestBinaryLiteralInsertToSet(c *C) {
+=======
+func (s *testSuite9) TestBinaryLiteralInsertToSet(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec(`use test`)
 	tk.MustExec("drop table if exists bintest")

@@ -15,9 +15,14 @@ package mockstore
 
 import (
 	"github.com/pingcap/errors"
+<<<<<<< HEAD
+=======
+	"github.com/pingcap/tidb/config"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/kv"
 	"github.com/pingcap/tidb/store/mockstore/mocktikv"
 	"github.com/pingcap/tidb/store/tikv"
+	"github.com/tikv/pd/client"
 )
 
 // newMockTikvStore creates a mocked tikv store, the path is the file path to store the data.

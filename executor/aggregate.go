@@ -257,6 +257,25 @@ func (e *HashAggExec) Close() error {
 	for range e.finalOutputCh {
 	}
 	e.executed = false
+<<<<<<< HEAD
+=======
+
+	if e.runtimeStats != nil {
+		var partialConcurrency, finalConcurrency int
+		if e.isUnparallelExec {
+			partialConcurrency = 0
+			finalConcurrency = 0
+		} else {
+			partialConcurrency = cap(e.partialWorkers)
+			finalConcurrency = cap(e.finalWorkers)
+		}
+		partialConcurrencyInfo := execdetails.NewConcurrencyInfo("PartialConcurrency", partialConcurrency)
+		finalConcurrencyInfo := execdetails.NewConcurrencyInfo("FinalConcurrency", finalConcurrency)
+		runtimeStats := &execdetails.RuntimeStatsWithConcurrencyInfo{}
+		runtimeStats.SetConcurrencyInfo(partialConcurrencyInfo, finalConcurrencyInfo)
+		e.ctx.GetSessionVars().StmtCtx.RuntimeStatsColl.RegisterStats(e.id, runtimeStats)
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return e.baseExecutor.Close()
 }
 
@@ -1507,7 +1526,19 @@ func (e *vecGroupChecker) evalGroupItemsAndResolveGroups(item expression.Express
 		return err
 	}
 
+<<<<<<< HEAD
 	previousIsNull := col.IsNull(0)
+=======
+	var firstRowDatum, lastRowDatum types.Datum
+	firstRowIsNull, lastRowIsNull := col.IsNull(0), col.IsNull(numRows-1)
+	if firstRowIsNull {
+		firstRowDatum.SetNull()
+	}
+	if lastRowIsNull {
+		lastRowDatum.SetNull()
+	}
+	previousIsNull := firstRowIsNull
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	switch eType {
 	case types.ETInt:
 		vals := col.Int64s()
@@ -1525,6 +1556,15 @@ func (e *vecGroupChecker) evalGroupItemsAndResolveGroups(item expression.Express
 			}
 			previousIsNull = isNull
 		}
+<<<<<<< HEAD
+=======
+		if !firstRowIsNull {
+			firstRowDatum.SetInt64(vals[0])
+		}
+		if !lastRowIsNull {
+			lastRowDatum.SetInt64(vals[numRows-1])
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case types.ETReal:
 		vals := col.Float64s()
 		for i := 1; i < numRows; i++ {
@@ -1541,6 +1581,15 @@ func (e *vecGroupChecker) evalGroupItemsAndResolveGroups(item expression.Express
 			}
 			previousIsNull = isNull
 		}
+<<<<<<< HEAD
+=======
+		if !firstRowIsNull {
+			firstRowDatum.SetFloat64(vals[0])
+		}
+		if !lastRowIsNull {
+			lastRowDatum.SetFloat64(vals[numRows-1])
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case types.ETDecimal:
 		vals := col.Decimals()
 		for i := 1; i < numRows; i++ {
@@ -1557,6 +1606,19 @@ func (e *vecGroupChecker) evalGroupItemsAndResolveGroups(item expression.Express
 			}
 			previousIsNull = isNull
 		}
+<<<<<<< HEAD
+=======
+		if !firstRowIsNull {
+			// make a copy to avoid DATA RACE
+			firstDatum := vals[0]
+			firstRowDatum.SetMysqlDecimal(&firstDatum)
+		}
+		if !lastRowIsNull {
+			// make a copy to avoid DATA RACE
+			lastDatum := vals[numRows-1]
+			lastRowDatum.SetMysqlDecimal(&lastDatum)
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case types.ETDatetime, types.ETTimestamp:
 		vals := col.Times()
 		for i := 1; i < numRows; i++ {
@@ -1573,6 +1635,15 @@ func (e *vecGroupChecker) evalGroupItemsAndResolveGroups(item expression.Express
 			}
 			previousIsNull = isNull
 		}
+<<<<<<< HEAD
+=======
+		if !firstRowIsNull {
+			firstRowDatum.SetMysqlTime(vals[0])
+		}
+		if !lastRowIsNull {
+			lastRowDatum.SetMysqlTime(vals[numRows-1])
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case types.ETDuration:
 		vals := col.GoDurations()
 		for i := 1; i < numRows; i++ {
@@ -1589,6 +1660,15 @@ func (e *vecGroupChecker) evalGroupItemsAndResolveGroups(item expression.Express
 			}
 			previousIsNull = isNull
 		}
+<<<<<<< HEAD
+=======
+		if !firstRowIsNull {
+			firstRowDatum.SetMysqlDuration(types.Duration{Duration: vals[0], Fsp: int8(item.GetType().Decimal)})
+		}
+		if !lastRowIsNull {
+			lastRowDatum.SetMysqlDuration(types.Duration{Duration: vals[numRows-1], Fsp: int8(item.GetType().Decimal)})
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case types.ETJson:
 		var previousKey, key json.BinaryJSON
 		if !previousIsNull {
@@ -1613,6 +1693,17 @@ func (e *vecGroupChecker) evalGroupItemsAndResolveGroups(item expression.Express
 			}
 			previousIsNull = isNull
 		}
+<<<<<<< HEAD
+=======
+		if !firstRowIsNull {
+			// make a copy to avoid DATA RACE
+			firstRowDatum.SetMysqlJSON(col.GetJSON(0).Copy())
+		}
+		if !lastRowIsNull {
+			// make a copy to avoid DATA RACE
+			lastRowDatum.SetMysqlJSON(col.GetJSON(numRows - 1).Copy())
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case types.ETString:
 		previousKey := codec.ConvertByCollationStr(col.GetString(0), tp)
 		for i := 1; i < numRows; i++ {
@@ -1626,6 +1717,17 @@ func (e *vecGroupChecker) evalGroupItemsAndResolveGroups(item expression.Express
 			previousKey = key
 			previousIsNull = isNull
 		}
+<<<<<<< HEAD
+=======
+		if !firstRowIsNull {
+			// don't use col.GetString since it will cause DATA RACE
+			firstRowDatum.SetString(string(col.GetBytes(0)), tp.Collate)
+		}
+		if !lastRowIsNull {
+			// don't use col.GetString since it will cause DATA RACE
+			lastRowDatum.SetString(string(col.GetBytes(numRows-1)), tp.Collate)
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	default:
 		err = errors.New(fmt.Sprintf("invalid eval type %v", eType))
 	}

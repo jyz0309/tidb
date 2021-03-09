@@ -446,6 +446,32 @@ func (ts *testSuite) TestCreatePartitionTableNotSupport(c *C) {
 	c.Assert(ddl.ErrPartitionFunctionIsNotAllowed.Equal(err), IsTrue)
 }
 
+<<<<<<< HEAD
+=======
+func (ts *testSuite) TestHashPartitionAndConditionConflict(c *C) {
+	tk := testkit.NewTestKitWithInit(c, ts.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t1, t2, t3;")
+	tk.MustExec("create table t1 (a int, b tinyint)  partition by range (a) (" +
+		"    partition p0 values less than (10)," +
+		"    partition p1 values less than (20)," +
+		"    partition p2 values less than (30)," +
+		"    partition p3 values less than (40)," +
+		"    partition p4 values less than MAXVALUE" +
+		");")
+
+	tk.MustExec("insert into t1 values(NULL, NULL), (0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (10, 10), (11, 11), (12, 12), (13, 13), (14, 14), (15, 15), (20, 20), (21, 21), (22, 22), (23, 23), (24, 24), (25, 25), (30, 30), (31, 31), (32, 32), (33, 33), (34, 34), (35, 35), (36, 36), (40, 40), (50, 50), (80, 80), (90, 90), (100, 100);")
+	tk.MustExec("create table t2 (a int, b bigint) partition by hash(a) partitions 10;")
+	tk.MustExec("insert into t2 values (NULL, NULL), (0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10), (11, 11), (12, 12), (13, 13), (14, 14), (15, 15), (16, 16), (17, 17), (18, 18), (19, 19), (20, 20), (21, 21), (22, 22), (23, 23);")
+	tk.MustQuery("select /*+ HASH_JOIN(t1, t2) */ * from t1 partition (p0) left join t2 partition (p1) on t1.a = t2.a where t1.a = 6 order by t1.a, t1.b, t2.a, t2.b;").
+		Check(testkit.Rows("6 6 <nil> <nil>"))
+	tk.MustQuery("select /*+ HASH_JOIN(t1, t2) */ * from t2 partition (p1) left join t1 partition (p0) on t2.a = t1.a where t2.a = 6 order by t1.a, t1.b, t2.a, t2.b;").
+		Check(testkit.Rows())
+
+	tk.MustQuery("select * from t2 partition (p1) where t2.a = 6;").Check(testkit.Rows())
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (ts *testSuite) TestIntUint(c *C) {
 	tk := testkit.NewTestKitWithInit(c, ts.store)
 	tk.MustExec("use test")
@@ -480,6 +506,7 @@ partition p4 values less than (9223372036854775806))`)
 	tk.MustQuery("select * from t_int where id < -12345 order by id desc").Check(testkit.Rows("-429496729312", "-9223372036854775803"))
 }
 
+<<<<<<< HEAD
 func (ts *testSuite) TestHashPartitionAndConditionConflict(c *C) {
 	tk := testkit.NewTestKitWithInit(c, ts.store)
 	tk.MustExec("use test")
@@ -503,6 +530,8 @@ func (ts *testSuite) TestHashPartitionAndConditionConflict(c *C) {
 	tk.MustQuery("select * from t2 partition (p1) where t2.a = 6;").Check(testkit.Rows())
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (ts *testSuite) TestHashPartitionInsertValue(c *C) {
 	tk := testkit.NewTestKitWithInit(c, ts.store)
 	tk.MustExec("use test")
@@ -518,6 +547,7 @@ func (ts *testSuite) TestHashPartitionInsertValue(c *C) {
 	result := tk.MustQuery("SELECT * FROM t4 WHERE a = 1")
 	result.Check(testkit.Rows("\x01 1"))
 }
+<<<<<<< HEAD
 
 func (ts *testSuite) TestIssue21574(c *C) {
 	tk := testkit.NewTestKitWithInit(c, ts.store)
@@ -529,3 +559,5 @@ func (ts *testSuite) TestIssue21574(c *C) {
 	tk.MustExec("drop table t_21574")
 	tk.MustExec("create table t_21574 (`key` int, `table` int) partition by list columns (`key`,`table`) (partition p0 values in ((1,1)));")
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

@@ -51,6 +51,7 @@ const (
 	// tidb_opt_distinct_agg_push_down is used to decide whether agg with distinct should be pushed to tikv/tiflash.
 	TiDBOptDistinctAggPushDown = "tidb_opt_distinct_agg_push_down"
 
+<<<<<<< HEAD
 	// tidb_broadcast_join_threshold_size is used to limit the size of small table for mpp broadcast join.
 	// It's unit is bytes, if the size of small table is larger than it, we will not use bcj.
 	TiDBBCJThresholdSize = "tidb_broadcast_join_threshold_size"
@@ -59,6 +60,8 @@ const (
 	// If we can't estimate the size of one side of join child, we will check if its row number exceeds this limitation.
 	TiDBBCJThresholdCount = "tidb_broadcast_join_threshold_count"
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// tidb_opt_write_row_id is used to enable/disable the operations of insert、replace and update to _tidb_rowid.
 	TiDBOptWriteRowID = "tidb_opt_write_row_id"
 
@@ -81,9 +84,12 @@ const (
 	// TiDBLastTxnInfo is used to get the last transaction info within the current session.
 	TiDBLastTxnInfo = "tidb_last_txn_info"
 
+<<<<<<< HEAD
 	// TiDBLastTxnInfo is used to get the last query info within the current session.
 	TiDBLastQueryInfo = "tidb_last_query_info"
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// tidb_config is a read-only variable that shows the config of the current server.
 	TiDBConfig = "tidb_config"
 
@@ -145,9 +151,14 @@ const (
 	TiDBRowFormatVersion = "tidb_row_format_version"
 
 	// tidb_enable_table_partition is used to control table partition feature.
+<<<<<<< HEAD
 	// The valid value include auto/on/off/nightly:
 	// on or auto: enable range/hash partition table.
 	// nightly: enable table partition if the partition type is implemented.
+=======
+	// The valid value include auto/on/off:
+	// on or auto: enable table partition if the partition type is implemented.
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// off: always disable table partition.
 	TiDBEnableTablePartition = "tidb_enable_table_partition"
 
@@ -194,6 +205,7 @@ const (
 	// TiDBFoundInPlanCache indicates whether the last statement was found in plan cache
 	TiDBFoundInPlanCache = "last_plan_from_cache"
 
+<<<<<<< HEAD
 	// TiDBFoundInBinding indicates whether the last statement was matched with the hints in the binding.
 	TiDBFoundInBinding = "last_plan_from_binding"
 
@@ -202,6 +214,10 @@ const (
 
 	// TiDBTxnScope indicates whether using global transactions or local transactions.
 	TiDBTxnScope = "txn_scope"
+=======
+	// TiDBAllowAutoRandExplicitInsert indicates whether explicit insertion on auto_random column is allowed.
+	TiDBAllowAutoRandExplicitInsert = "allow_auto_random_explicit_insert"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 // TiDB system variable names that both in session and global scope.
@@ -289,8 +305,11 @@ const (
 	// The default value is 0
 	TiDBAllowBatchCop = "tidb_allow_batch_cop"
 
+<<<<<<< HEAD
 	TiDBAllowMPPExecution = "tidb_allow_mpp"
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// TiDBInitChunkSize is used to control the init chunk size during query execution.
 	TiDBInitChunkSize = "tidb_init_chunk_size"
 
@@ -330,6 +349,7 @@ const (
 	// tidb_window_concurrency is deprecated, use tidb_executor_concurrency instead.
 	TiDBWindowConcurrency = "tidb_window_concurrency"
 
+<<<<<<< HEAD
 	// tidb_merge_join_concurrency is used for merge join parallel executor
 	TiDBMergeJoinConcurrency = "tidb_merge_join_concurrency"
 
@@ -339,6 +359,10 @@ const (
 
 	// tidb_enable_parallel_apply is used for parallel apply.
 	TiDBEnableParallelApply = "tidb_enable_parallel_apply"
+=======
+	// tidb_union_concurrency is used for union executor.
+	TiDBUnionConcurrency = "tidb_union_concurrency"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// tidb_backoff_lock_fast is used for tikv backoff base time in milliseconds.
 	TiDBBackoffLockFast = "tidb_backoff_lock_fast"
@@ -473,6 +497,7 @@ const (
 	// TiDBEnableCollectExecutionInfo indicates that whether execution info is collected.
 	TiDBEnableCollectExecutionInfo = "tidb_enable_collect_execution_info"
 
+<<<<<<< HEAD
 	// DefExecutorConcurrency is used for controlling the concurrency of all types of executors.
 	TiDBExecutorConcurrency = "tidb_executor_concurrency"
 
@@ -482,6 +507,8 @@ const (
 	// TiDBPartitionPruneMode indicates the partition prune mode used.
 	TiDBPartitionPruneMode = "tidb_partition_prune_mode"
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// TiDBSlowLogMasking is deprecated and a alias of TiDBRedactLog.
 	// Deprecated: use TiDBRedactLog instead.
 	TiDBSlowLogMasking = "tidb_slow_log_masking"
@@ -489,14 +516,18 @@ const (
 	// TiDBRedactLog indicates that whether redact log.
 	TiDBRedactLog = "tidb_redact_log"
 
+<<<<<<< HEAD
 	// TiDBShardAllocateStep indicates the max size of continuous rowid shard in one transaction.
 	TiDBShardAllocateStep = "tidb_shard_allocate_step"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// TiDBEnableTelemetry indicates that whether usage data report to PingCAP is enabled.
 	TiDBEnableTelemetry = "tidb_enable_telemetry"
 
 	// TiDBEnableAmendPessimisticTxn indicates if amend pessimistic transactions is enabled.
 	TiDBEnableAmendPessimisticTxn = "tidb_enable_amend_pessimistic_txn"
 
+<<<<<<< HEAD
 	// TiDBMemoryUsageAlarmRatio indicates the alarm threshold when memory usage of the tidb-server exceeds.
 	TiDBMemoryUsageAlarmRatio = "tidb_memory_usage_alarm_ratio"
 
@@ -541,6 +572,13 @@ const (
 	TiDBGCConcurrency = "tidb_gc_concurrency"
 	// TiDBGCScanLockMode enables the green GC feature (default)
 	TiDBGCScanLockMode = "tidb_gc_scan_lock_mode"
+=======
+	// TiDBEnableRateLimitAction indicates whether enabled ratelimit action
+	TiDBEnableRateLimitAction = "tidb_enable_rate_limit_action"
+
+	// TiDBMemoryUsageAlarmRatio indicates the alarm threshold when memory usage of the tidb-server exceeds.
+	TiDBMemoryUsageAlarmRatio = "tidb_memory_usage_alarm_ratio"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 // Default TiDB system variable values.
@@ -606,7 +644,10 @@ const (
 	DefBroadcastJoinThresholdCount     = 10 * 1024
 	DefTiDBOptimizerSelectivityLevel   = 0
 	DefTiDBAllowBatchCop               = 1
+<<<<<<< HEAD
 	DefTiDBAllowMPPExecution           = false
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	DefTiDBTxnMode                     = ""
 	DefTiDBRowFormatV1                 = 1
 	DefTiDBRowFormatV2                 = 2
@@ -614,6 +655,7 @@ const (
 	DefTiDBDDLReorgBatchSize           = 256
 	DefTiDBDDLErrorCountLimit          = 512
 	DefTiDBMaxDeltaSchemaCount         = 1024
+<<<<<<< HEAD
 	DefTiDBChangeColumnType            = false
 	DefTiDBChangeMultiSchema           = false
 	DefTiDBPointGetCache               = false
@@ -623,6 +665,12 @@ const (
 	DefTiDBWindowConcurrency           = ConcurrencyUnset
 	DefTiDBMergeJoinConcurrency        = 1 // disable optimization by default
 	DefTiDBStreamAggConcurrency        = 1
+=======
+	DefTiDBHashAggPartialConcurrency   = 4
+	DefTiDBHashAggFinalConcurrency     = 4
+	DefTiDBWindowConcurrency           = 4
+	DefTiDBUnionConcurrency            = 4
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	DefTiDBForcePriority               = mysql.NoPriority
 	DefTiDBUseRadixJoin                = false
 	DefEnableWindowFunction            = true
@@ -648,6 +696,7 @@ const (
 	DefTiDBMetricSchemaStep            = 60 // 60s
 	DefTiDBMetricSchemaRangeDuration   = 60 // 60s
 	DefTiDBFoundInPlanCache            = false
+<<<<<<< HEAD
 	DefTiDBFoundInBinding              = false
 	DefTiDBEnableCollectExecutionInfo  = true
 	DefTiDBAllowAutoRandExplicitInsert = false
@@ -667,6 +716,14 @@ const (
 	DefTiDBTrackAggregateMemoryUsage   = false
 	DefTiDBEnableExchangePartition     = false
 	DefTiDBEnableTiFlashFallbackTiKV   = false
+=======
+	DefTiDBEnableCollectExecutionInfo  = true
+	DefTiDBAllowAutoRandExplicitInsert = false
+	DefTiDBRedactLog                   = false
+	DefTiDBEnableTelemetry             = true
+	DefTiDBEnableAmendPessimisticTxn   = false
+	DefTiDBEnableRateLimitAction       = true
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 // Process global variables.
@@ -688,9 +745,14 @@ var (
 	ServerHostname, _                     = os.Hostname()
 	MaxOfMaxAllowedPacket          uint64 = 1073741824
 	ExpensiveQueryTimeThreshold    uint64 = DefTiDBExpensiveQueryTimeThreshold
+<<<<<<< HEAD
 	MinExpensiveQueryTimeThreshold uint64 = 10 // 10s
 	CapturePlanBaseline                   = serverGlobalVariable{globalVal: BoolOff}
 	DefExecutorConcurrency                = 5
+=======
+	MinExpensiveQueryTimeThreshold uint64 = 10 //10s
+	CapturePlanBaseline                   = serverGlobalVariable{globalVal: "0"}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	MemoryUsageAlarmRatio                 = atomic.NewFloat64(config.GetGlobalConfig().Performance.MemoryUsageAlarmRatio)
 )
 

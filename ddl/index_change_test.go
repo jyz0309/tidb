@@ -233,7 +233,11 @@ func (s *testIndexChangeSuite) checkAddWriteOnly(d *ddl, ctx sessionctx.Context,
 	}
 
 	// WriteOnlyTable: update t set c2 = 1 where c1 = 4 and c2 = 4
+<<<<<<< HEAD
 	err = writeOnlyTbl.UpdateRecord(context.Background(), ctx, kv.IntHandle(4), types.MakeDatums(4, 4), types.MakeDatums(4, 1), touchedSlice(writeOnlyTbl))
+=======
+	err = writeOnlyTbl.UpdateRecord(context.Background(), ctx, 4, types.MakeDatums(4, 4), types.MakeDatums(4, 1), touchedSlice(writeOnlyTbl))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -243,7 +247,11 @@ func (s *testIndexChangeSuite) checkAddWriteOnly(d *ddl, ctx sessionctx.Context,
 	}
 
 	// DeleteOnlyTable: update t set c2 = 3 where c1 = 4 and c2 = 1
+<<<<<<< HEAD
 	err = delOnlyTbl.UpdateRecord(context.Background(), ctx, kv.IntHandle(4), types.MakeDatums(4, 1), types.MakeDatums(4, 3), touchedSlice(writeOnlyTbl))
+=======
+	err = delOnlyTbl.UpdateRecord(context.Background(), ctx, 4, types.MakeDatums(4, 1), types.MakeDatums(4, 3), touchedSlice(writeOnlyTbl))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -305,7 +313,11 @@ func (s *testIndexChangeSuite) checkAddPublic(d *ddl, ctx sessionctx.Context, wr
 	}
 
 	// WriteOnlyTable: update t set c2 = 5 where c1 = 7 and c2 = 7
+<<<<<<< HEAD
 	err = writeTbl.UpdateRecord(context.Background(), ctx, kv.IntHandle(7), types.MakeDatums(7, 7), types.MakeDatums(7, 5), touchedSlice(writeTbl))
+=======
+	err = writeTbl.UpdateRecord(context.Background(), ctx, 7, types.MakeDatums(7, 7), types.MakeDatums(7, 5), touchedSlice(writeTbl))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -368,7 +380,11 @@ func (s *testIndexChangeSuite) checkDropWriteOnly(d *ddl, ctx sessionctx.Context
 	}
 
 	// WriteOnlyTable update t set c2 = 7 where c1 = 8 and c2 = 8
+<<<<<<< HEAD
 	err = writeTbl.UpdateRecord(context.Background(), ctx, kv.IntHandle(8), types.MakeDatums(8, 8), types.MakeDatums(8, 7), touchedSlice(writeTbl))
+=======
+	err = writeTbl.UpdateRecord(context.Background(), ctx, 8, types.MakeDatums(8, 8), types.MakeDatums(8, 7), touchedSlice(writeTbl))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -423,7 +439,11 @@ func (s *testIndexChangeSuite) checkDropDeleteOnly(d *ddl, ctx sessionctx.Contex
 	}
 
 	// DeleteOnlyTable update t set c2 = 10 where c1 = 9
+<<<<<<< HEAD
 	err = delTbl.UpdateRecord(context.Background(), ctx, kv.IntHandle(9), types.MakeDatums(9, 9), types.MakeDatums(9, 10), touchedSlice(delTbl))
+=======
+	err = delTbl.UpdateRecord(context.Background(), ctx, 9, types.MakeDatums(9, 9), types.MakeDatums(9, 10), touchedSlice(delTbl))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return errors.Trace(err)
 	}

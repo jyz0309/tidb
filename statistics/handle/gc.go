@@ -188,6 +188,7 @@ func (h *Handle) DeleteTableStatsFromKV(physicalID int64) (err error) {
 	}
 	ctx := context.Background()
 	startTS := txn.StartTS()
+<<<<<<< HEAD
 	// We only update the version so that other tidb will know that this table is deleted.
 	if _, err = exec.ExecuteInternal(ctx, "update mysql.stats_meta set version = %? where table_id = %? ", startTS, physicalID); err != nil {
 		return err
@@ -225,4 +226,14 @@ func (h *Handle) removeDeletedExtendedStats(version uint64) (err error) {
 	const sql = "delete from mysql.stats_extended where status = %? and version < %?"
 	_, err = exec.ExecuteInternal(ctx, sql, StatsStatusDeleted, version)
 	return
+=======
+	sqls := make([]string, 0, 5)
+	// We only update the version so that other tidb will know that this table is deleted.
+	sqls = append(sqls, fmt.Sprintf("update mysql.stats_meta set version = %d where table_id = %d ", startTS, physicalID))
+	sqls = append(sqls, fmt.Sprintf("delete from mysql.stats_histograms where table_id = %d", physicalID))
+	sqls = append(sqls, fmt.Sprintf("delete from mysql.stats_buckets where table_id = %d", physicalID))
+	sqls = append(sqls, fmt.Sprintf("delete from mysql.stats_top_n where table_id = %d", physicalID))
+	sqls = append(sqls, fmt.Sprintf("delete from mysql.stats_feedback where table_id = %d", physicalID))
+	return execSQLs(context.Background(), exec, sqls)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

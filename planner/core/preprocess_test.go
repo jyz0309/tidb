@@ -24,7 +24,10 @@ import (
 	"github.com/pingcap/parser/terror"
 	"github.com/pingcap/tidb/ddl"
 	"github.com/pingcap/tidb/domain"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/expression"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/infoschema"
 	"github.com/pingcap/tidb/kv"
 	"github.com/pingcap/tidb/meta/autoid"
@@ -263,6 +266,7 @@ func (s *testValidatorSuite) TestValidator(c *C) {
 		{"CREATE TABLE origin (a int unique auto_increment, b int);", false, nil},
 		{"CREATE TABLE origin (a int key auto_increment, b int);", false, nil},
 
+<<<<<<< HEAD
 		// issue 18149
 		{"CREATE TABLE t (a int, index ``(a));", true, errors.New("[ddl:1280]Incorrect index name ''")},
 		{"CREATE TABLE t (a int, b int, index ``((a+1), (b+1)));", true, errors.New("[ddl:1280]Incorrect index name ''")},
@@ -279,6 +283,8 @@ func (s *testValidatorSuite) TestValidator(c *C) {
 		{"ALTER TABLE t ENGINE=InnoDB;", false, nil},
 		{"ALTER TABLE t ENGINE=Unknown;", false, ddl.ErrUnknownEngine},
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		// issue 20295
 		// issue 11193
 		{"select cast(1.23 as decimal(65,65))", true, types.ErrTooBigScale.GenWithStackByArgs(65, "1.23", mysql.MaxDecimalScale)},
@@ -287,12 +293,15 @@ func (s *testValidatorSuite) TestValidator(c *C) {
 		{"select CONVERT( 2, DECIMAL(28,29) )", true, types.ErrMBiggerThanD.GenWithStackByArgs("2")},
 		{"select CONVERT( 2, DECIMAL(30,65) )", true, types.ErrMBiggerThanD.GenWithStackByArgs("2")},
 		{"select CONVERT( 2, DECIMAL(66,99) )", true, types.ErrMBiggerThanD.GenWithStackByArgs("2")},
+<<<<<<< HEAD
 
 		// TABLESAMPLE
 		{"select * from t tablesample bernoulli();", false, expression.ErrInvalidTableSample},
 		{"select * from t tablesample bernoulli(10 rows);", false, expression.ErrInvalidTableSample},
 		{"select * from t tablesample bernoulli(23 percent) repeatable (23);", false, expression.ErrInvalidTableSample},
 		{"select * from t tablesample system() repeatable (10);", false, expression.ErrInvalidTableSample},
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	_, err := s.se.Execute(context.Background(), "use test")
@@ -311,6 +320,7 @@ func (s *testValidatorSuite) TestForeignKey(c *C) {
 	}()
 
 	_, err := s.se.Execute(context.Background(), "create table test.t1(a int, b int, c int)")
+<<<<<<< HEAD
 	c.Assert(err, IsNil)
 
 	_, err = s.se.Execute(context.Background(), "create table test.t2(d int)")
@@ -319,6 +329,16 @@ func (s *testValidatorSuite) TestForeignKey(c *C) {
 	_, err = s.se.Execute(context.Background(), "create database test2")
 	c.Assert(err, IsNil)
 
+=======
+	c.Assert(err, IsNil)
+
+	_, err = s.se.Execute(context.Background(), "create table test.t2(d int)")
+	c.Assert(err, IsNil)
+
+	_, err = s.se.Execute(context.Background(), "create database test2")
+	c.Assert(err, IsNil)
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	_, err = s.se.Execute(context.Background(), "create table test2.t(e int)")
 	c.Assert(err, IsNil)
 

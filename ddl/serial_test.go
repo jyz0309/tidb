@@ -99,9 +99,12 @@ func (s *testSerialSuite) TestChangeMaxIndexLength(c *C) {
 	config.UpdateGlobal(func(conf *config.Config) {
 		conf.MaxIndexLength = config.DefMaxOfMaxIndexLength
 	})
+<<<<<<< HEAD
 
 	tk.MustExec("drop table if exists t;")
 	tk.MustExec("drop table if exists t1;")
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	tk.MustExec("create table t (c1 varchar(3073), index(c1)) charset = ascii;")
 	tk.MustExec(fmt.Sprintf("create table t1 (c1 varchar(%d), index(c1)) charset = ascii;", config.DefMaxOfMaxIndexLength))
@@ -182,6 +185,14 @@ func (s *testSerialSuite) TestPrimaryKey(c *C) {
 	})
 	errMsg := "[ddl:8200]Unsupported drop primary key when the table is using clustered index"
 	tk.MustGetErrMsg("alter table t drop primary key;", errMsg)
+}
+
+func (s *testSerialSuite) TestDropAutoIncrementIndex(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t1")
+	tk.MustExec("create table t1 (a int(11) not null auto_increment key, b int(11), c bigint, unique key (a, b, c))")
+	tk.MustExec("alter table t1 drop index a")
 }
 
 func (s *testSerialSuite) TestDropAutoIncrementIndex(c *C) {
@@ -884,6 +895,27 @@ func (s *testSerialSuite) TestTruncateTableUpdateSchemaVersionErr(c *C) {
 	tk.MustExec("truncate table t")
 }
 
+func (s *testSerialSuite) TestTruncateTableUpdateSchemaVersionErr(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	c.Assert(failpoint.Enable("github.com/pingcap/tidb/ddl/mockTruncateTableUpdateVersionError", `return(true)`), IsNil)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t")
+
+	limit := variable.GetDDLErrorCountLimit()
+	tk.MustExec("set @@global.tidb_ddl_error_count_limit = 5")
+	err := ddlutil.LoadDDLVars(tk.Se)
+	c.Assert(err, IsNil)
+	defer tk.MustExec(fmt.Sprintf("set @@global.tidb_ddl_error_count_limit = %d", limit))
+
+	tk.MustExec("create table t (a int)")
+	_, err = tk.Exec("truncate table t")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[ddl:8214]Cancelled DDL job")
+	// Disable fail point.
+	c.Assert(failpoint.Disable("github.com/pingcap/tidb/ddl/mockTruncateTableUpdateVersionError"), IsNil)
+	tk.MustExec("truncate table t")
+}
+
 func (s *testSerialSuite) TestCanceledJobTakeTime(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -975,11 +1007,14 @@ func (s *testSerialSuite) TestAutoRandom(c *C) {
 	assertBigIntOnly := func(sql, colType string) {
 		assertInvalidAutoRandomErr(sql, autoid.AutoRandomOnNonBigIntColumn, colType)
 	}
+<<<<<<< HEAD
 	assertAddColumn := func(sql, colName string) {
 		{
 			assertInvalidAutoRandomErr(sql, autoid.AutoRandomAlterAddColumn, colName, databaseName, tableName)
 		}
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	mustExecAndDrop := func(sql string, fns ...func()) {
 		tk.MustExec(sql)
 		for _, f := range fns {
@@ -988,8 +1023,13 @@ func (s *testSerialSuite) TestAutoRandom(c *C) {
 		tk.MustExec("drop table t")
 	}
 
+<<<<<<< HEAD
 	ConfigTestUtils.SetupAutoRandomTestConfig()
 	defer ConfigTestUtils.RestoreAutoRandomTestConfig()
+=======
+	testutil.ConfigTestUtils.SetupAutoRandomTestConfig()
+	defer testutil.ConfigTestUtils.RestoreAutoRandomTestConfig()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// Only bigint column can set auto_random
 	assertBigIntOnly("create table t (a char primary key auto_random(3), b int)", "char")
@@ -1029,7 +1069,10 @@ func (s *testSerialSuite) TestAutoRandom(c *C) {
 	assertDefault("create table t (a bigint auto_random(2) primary key default 5)")
 	mustExecAndDrop("create table t (a bigint auto_random primary key)", func() {
 		assertDefault("alter table t modify column a bigint auto_random default 3")
+<<<<<<< HEAD
 		assertDefault("alter table t alter column a set default 3")
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	})
 
 	// Overflow data type max length.
@@ -1039,11 +1082,19 @@ func (s *testSerialSuite) TestAutoRandom(c *C) {
 		assertMaxOverflow("alter table t modify a bigint auto_random(64)", "a", 64)
 		assertMaxOverflow("alter table t modify a bigint auto_random(16)", "a", 16)
 	})
+<<<<<<< HEAD
 
 	assertNonPositive("create table t (a bigint auto_random(0) primary key)")
 	tk.MustGetErrMsg("create table t (a bigint auto_random(-1) primary key)",
 		`[parser:1064]You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 38 near "-1) primary key)" `)
 
+=======
+
+	assertNonPositive("create table t (a bigint auto_random(0) primary key)")
+	tk.MustGetErrMsg("create table t (a bigint auto_random(-1) primary key)",
+		`[parser:1064]You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 38 near "-1) primary key)" `)
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Basic usage.
 	mustExecAndDrop("create table t (a bigint auto_random(1) primary key)")
 	mustExecAndDrop("create table t (a bigint auto_random(4) primary key)")
@@ -1075,11 +1126,40 @@ func (s *testSerialSuite) TestAutoRandom(c *C) {
 	})
 	mustExecAndDrop("create table t (a bigint primary key)", func() {
 		assertAlterValue("alter table t modify column a bigint auto_random(3)")
+<<<<<<< HEAD
+	})
+	mustExecAndDrop("create table t (a bigint, b bigint, primary key(a, b))", func() {
+		assertAlterValue("alter table t modify column a bigint auto_random(3)")
+		assertAlterValue("alter table t modify column b bigint auto_random(3)")
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	})
 	mustExecAndDrop("create table t (a bigint, b bigint, primary key(a, b))", func() {
 		assertAlterValue("alter table t modify column a bigint auto_random(3)")
 		assertAlterValue("alter table t modify column b bigint auto_random(3)")
 	})
+
+	// Decrease auto_random bits is not allowed.
+	mustExecAndDrop("create table t (a bigint auto_random(10) primary key)", func() {
+		assertDecreaseBitErr("alter table t modify column a bigint auto_random(6)")
+	})
+	mustExecAndDrop("create table t (a bigint auto_random(10) primary key)", func() {
+		assertDecreaseBitErr("alter table t modify column a bigint auto_random(1)")
+	})
+
+	originStep := autoid.GetStep()
+	autoid.SetStep(1)
+	// Increase auto_random bits but it will overlap with incremental bits.
+	mustExecAndDrop("create table t (a bigint unsigned auto_random(5) primary key)", func() {
+		const alterTryCnt, rebaseOffset = 3, 1
+		insertSQL := fmt.Sprintf("insert into t values (%d)", ((1<<(64-10))-1)-rebaseOffset-alterTryCnt)
+		tk.MustExec(insertSQL)
+		// Try to rebase to 0..0011..1111 (54 `1`s).
+		tk.MustExec("alter table t modify a bigint unsigned auto_random(6)")
+		tk.MustExec("alter table t modify a bigint unsigned auto_random(10)")
+		assertOverflow("alter table t modify a bigint unsigned auto_random(11)", "a", 10, 11)
+	})
+	autoid.SetStep(originStep)
 
 	// Add auto_random column is not allowed.
 	mustExecAndDrop("create table t (a bigint)", func() {
@@ -1159,6 +1239,7 @@ func (s *testSerialSuite) TestAutoRandom(c *C) {
 	})
 }
 
+<<<<<<< HEAD
 func (s *testSerialSuite) TestAutoRandomExchangePartition(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("create database if not exists auto_random_db")
@@ -1196,6 +1277,8 @@ func (s *testSerialSuite) TestAutoRandomExchangePartition(c *C) {
 	tk.MustQuery("select count(*) from e4").Check(testkit.Rows("4"))
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testSerialSuite) TestAutoRandomIncBitsIncrementAndOffset(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("create database if not exists auto_random_db")
@@ -1203,8 +1286,13 @@ func (s *testSerialSuite) TestAutoRandomIncBitsIncrementAndOffset(c *C) {
 	tk.MustExec("use auto_random_db")
 	tk.MustExec("drop table if exists t")
 
+<<<<<<< HEAD
 	ConfigTestUtils.SetupAutoRandomTestConfig()
 	defer ConfigTestUtils.RestoreAutoRandomTestConfig()
+=======
+	testutil.ConfigTestUtils.SetupAutoRandomTestConfig()
+	defer testutil.ConfigTestUtils.RestoreAutoRandomTestConfig()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	recreateTable := func() {
 		tk.MustExec("drop table if exists t")
@@ -1254,6 +1342,7 @@ func (s *testSerialSuite) TestAutoRandomIncBitsIncrementAndOffset(c *C) {
 		}
 		assertIncBitsValues(tc.results...)
 	}
+<<<<<<< HEAD
 }
 
 func (s *testSerialSuite) TestAutoRandomWithPreSplitRegion(c *C) {
@@ -1279,6 +1368,8 @@ func (s *testSerialSuite) TestAutoRandomWithPreSplitRegion(c *C) {
 	c.Assert(rows[1][1], Equals, fmt.Sprintf("t_%d_r_2305843009213693952", tbl.Meta().ID))
 	c.Assert(rows[2][1], Equals, fmt.Sprintf("t_%d_r_4611686018427387904", tbl.Meta().ID))
 	c.Assert(rows[3][1], Equals, fmt.Sprintf("t_%d_r_6917529027641081856", tbl.Meta().ID))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testSerialSuite) TestModifyingColumn4NewCollations(c *C) {
@@ -1312,7 +1403,10 @@ func (s *testSerialSuite) TestModifyingColumn4NewCollations(c *C) {
 	tk.MustExec("alter table t collate utf8mb4_general_ci")
 	tk.MustExec("alter table t charset utf8mb4 collate utf8mb4_bin")
 	tk.MustExec("alter table t charset utf8mb4 collate utf8mb4_unicode_ci")
+<<<<<<< HEAD
 	tk.MustExec("alter table t charset utf8mb4 collate utf8mb4_zh_pinyin_tidb_as_cs")
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Change the default collation of database is allowed.
 	tk.MustExec("alter database dct charset utf8mb4 collate utf8mb4_general_ci")
 }
@@ -1353,6 +1447,7 @@ func (s *testSerialSuite) TestForbidUnsupportedCollations(c *C) {
 	// mustGetUnsupportedCollation("alter table t convert to collate utf8mb4_unicode_ci", "utf8mb4_unicode_ci")
 }
 
+<<<<<<< HEAD
 func (s *testSerialSuite) TestInvisibleIndex(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 
@@ -1491,6 +1586,8 @@ func (s *testSerialSuite) TestCreateClusteredIndex(c *C) {
 	c.Assert(tbl.Meta().IsCommonHandle, IsFalse)
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testSerialSuite) TestCreateTableNoBlock(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.store)
 	c.Assert(failpoint.Enable("github.com/pingcap/tidb/ddl/checkOwnerCheckAllVersionsWaitTime", `return(true)`), IsNil)
@@ -1507,6 +1604,7 @@ func (s *testSerialSuite) TestCreateTableNoBlock(c *C) {
 	_, err := tk.Exec("create table t(a int)")
 	c.Assert(err, NotNil)
 }
+<<<<<<< HEAD
 
 func (s *testSerialSuite) TestCheckEnumLength(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.store)
@@ -1533,3 +1631,5 @@ func (s *testSerialSuite) TestCheckEnumLength(c *C) {
 	tk.MustGetErrCode("create table t5 (a set('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'))", errno.ErrTooLongValueForType)
 	tk.MustExec("drop table if exists t1,t2,t3,t4,t5")
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

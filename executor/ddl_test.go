@@ -303,6 +303,19 @@ func (s *testSuite6) TestViewRecursion(c *C) {
 	tk.MustExec("drop view recursive_view1, t")
 }
 
+<<<<<<< HEAD
+=======
+func (s *testSuite6) TestIssue23027(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t23027")
+	tk.MustExec("create table t23027(a char(10))")
+	tk.MustExec("insert into t23027 values ('a'), ('a')")
+	tk.MustExec("create definer='root'@'localhost' view v23027 as select group_concat(a) from t23027;")
+	tk.MustQuery("select * from v23027").Check(testkit.Rows("a,a"))
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testSuite6) TestIssue16250(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -480,6 +493,7 @@ func (s *testSuite6) TestAlterTableAddColumn(c *C) {
 	_, err = tk.Exec("alter table alter_seq add column c int")
 	c.Assert(err.Error(), Equals, ddl.ErrWrongObject.GenWithStackByArgs("test", "alter_seq", "BASE TABLE").Error())
 	tk.MustExec("drop sequence alter_seq")
+<<<<<<< HEAD
 }
 
 func (s *testSuite6) TestAlterTableAddColumns(c *C) {
@@ -506,6 +520,8 @@ func (s *testSuite6) TestAlterTableAddColumns(c *C) {
 	_, err = tk.Exec("alter table alter_seq add column (c1 int, c2 varchar(10))")
 	c.Assert(err.Error(), Equals, ddl.ErrWrongObject.GenWithStackByArgs("test", "alter_seq", "BASE TABLE").Error())
 	tk.MustExec("drop sequence alter_seq")
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testSuite6) TestAddNotNullColumnNoDefault(c *C) {
@@ -880,7 +896,10 @@ func (s *testAutoRandomSuite) TestAutoRandomBitsData(c *C) {
 		c.Assert(err, IsNil)
 		return allHds
 	}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("set @@allow_auto_random_explicit_insert = true")
 
 	tk.MustExec("create table t (a bigint primary key auto_random(15), b int)")
@@ -940,8 +959,15 @@ func (s *testAutoRandomSuite) TestAutoRandomBitsData(c *C) {
 		tk.MustExec("insert into t(b) values (?)", i)
 		tk.MustExec("insert into t(a, b) values (?, ?)", -i, i)
 	}
+<<<<<<< HEAD
 	// orderedHandles should be [-100, -99, ..., -2, -1, 1, 2, ..., 99, 100]
 	orderedHandles = testutil.ConfigTestUtils.MaskSortHandles(extractAllHandles(), 15, mysql.TypeLonglong)
+=======
+	allHandles, err = ddltestutil.ExtractAllTableHandles(tk.Se, "test_auto_random_bits", "t")
+	c.Assert(err, IsNil)
+	// orderedHandles should be [-100, -99, ..., -2, -1, 1, 2, ..., 99, 100]
+	orderedHandles = testutil.ConfigTestUtils.MaskSortHandles(allHandles, 15, mysql.TypeLonglong)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	size = int64(len(allHandles))
 	for i := int64(0); i < 100; i++ {
 		c.Assert(orderedHandles[i], Equals, i-100)
@@ -949,6 +975,7 @@ func (s *testAutoRandomSuite) TestAutoRandomBitsData(c *C) {
 	for i := int64(100); i < size; i++ {
 		c.Assert(orderedHandles[i], Equals, i-99)
 	}
+<<<<<<< HEAD
 	tk.MustExec("drop table t")
 
 	// Test signed/unsigned types.
@@ -974,6 +1001,35 @@ func (s *testAutoRandomSuite) TestAutoRandomBitsData(c *C) {
 	c.Assert(signBitUnused, IsFalse)
 	tk.MustExec("drop table t;")
 
+=======
+	tk.MustExec("drop table t")
+
+	// Test signed/unsigned types.
+	tk.MustExec("create table t (a bigint primary key auto_random(10), b int)")
+	for i := 0; i < 100; i++ {
+		tk.MustExec("insert into t (b) values(?)", i)
+	}
+	allHandles, err = ddltestutil.ExtractAllTableHandles(tk.Se, "test_auto_random_bits", "t")
+	for _, h := range allHandles {
+		// Sign bit should be reserved.
+		c.Assert(h > 0, IsTrue)
+	}
+	tk.MustExec("drop table t")
+
+	tk.MustExec("create table t (a bigint unsigned primary key auto_random(10), b int)")
+	for i := 0; i < 100; i++ {
+		tk.MustExec("insert into t (b) values(?)", i)
+	}
+	allHandles, err = ddltestutil.ExtractAllTableHandles(tk.Se, "test_auto_random_bits", "t")
+	signBitUnused := true
+	for _, h := range allHandles {
+		signBitUnused = signBitUnused && (h > 0)
+	}
+	// Sign bit should be used for shard.
+	c.Assert(signBitUnused, IsFalse)
+	tk.MustExec("drop table t")
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Test rename table does not affect incremental part of auto_random ID.
 	tk.MustExec("create database test_auto_random_bits_rename;")
 	tk.MustExec("create table t (a bigint auto_random primary key);")
@@ -1011,6 +1067,10 @@ func (s *testAutoRandomSuite) TestAutoRandomTableOption(c *C) {
 	allHandles, err := ddltestutil.ExtractAllTableHandles(tk.Se, "test", "auto_random_table_option")
 	c.Assert(err, IsNil)
 	c.Assert(len(allHandles), Equals, 5)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Test non-shard-bits part of auto random id is monotonic increasing and continuous.
 	orderedHandles := testutil.ConfigTestUtils.MaskSortHandles(allHandles, 5, mysql.TypeLonglong)
 	size := int64(len(allHandles))
@@ -1470,6 +1530,7 @@ func (s *testSuite6) TestAutoIncrementColumnErrorMessage(c *C) {
 	_, err = tk.Exec("CREATE INDEX idx1 ON t1 ((t1_id + t1_id));")
 	c.Assert(err.Error(), Equals, ddl.ErrExpressionIndexCanNotRefer.GenWithStackByArgs("idx1").Error())
 }
+<<<<<<< HEAD
 
 func (s *testRecoverTable) TestRenameMultiTables(c *C) {
 	c.Assert(failpoint.Enable("github.com/pingcap/tidb/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
@@ -1523,3 +1584,5 @@ func (s *testRecoverTable) TestRenameMultiTables(c *C) {
 	tk.MustExec("drop database rename2")
 	tk.MustExec("drop database rename3")
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

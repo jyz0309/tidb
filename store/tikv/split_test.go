@@ -37,6 +37,7 @@ func (s *testSplitSuite) SetUpTest(c *C) {
 	mocktikv.BootstrapWithSingleStore(cluster)
 	s.cluster = cluster
 	store, err := NewTestTiKVStore(client, pdClient, nil, nil, 0)
+<<<<<<< HEAD
 	c.Assert(err, IsNil)
 
 	// TODO: make this possible
@@ -48,6 +49,10 @@ func (s *testSplitSuite) SetUpTest(c *C) {
 	// )
 	// c.Assert(err, IsNil)
 	s.store = store
+=======
+	c.Check(err, IsNil)
+	s.store = store.(*tikvStore)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	s.bo = NewBackofferWithVars(context.Background(), 5000, nil)
 }
 

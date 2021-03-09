@@ -19,7 +19,10 @@ import (
 	"errors"
 	"sort"
 
+<<<<<<< HEAD
 	"github.com/cznic/mathutil"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/failpoint"
 	"github.com/pingcap/tidb/config"
 	"github.com/pingcap/tidb/expression"
@@ -408,6 +411,7 @@ func (e *TopNExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	if e.Idx >= len(e.rowPtrs) {
 		return nil
 	}
+<<<<<<< HEAD
 	if !req.IsFull() {
 		numToAppend := mathutil.Min(len(e.rowPtrs)-e.Idx, req.RequiredRows()-req.NumRows())
 		rows := make([]chunk.Row, numToAppend)
@@ -416,6 +420,12 @@ func (e *TopNExec) Next(ctx context.Context, req *chunk.Chunk) error {
 			e.Idx++
 		}
 		req.AppendRows(rows)
+=======
+	for !req.IsFull() && e.Idx < len(e.rowPtrs) {
+		row := e.rowChunks.GetRow(e.rowPtrs[e.Idx])
+		req.AppendRow(row)
+		e.Idx++
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	return nil
 }

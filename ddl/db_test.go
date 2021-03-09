@@ -53,7 +53,10 @@ import (
 	"github.com/pingcap/tidb/tablecodec"
 	"github.com/pingcap/tidb/types"
 	"github.com/pingcap/tidb/util/admin"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/util/codec"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/util/collate"
 	"github.com/pingcap/tidb/util/domainutil"
 	"github.com/pingcap/tidb/util/israce"
@@ -211,6 +214,33 @@ func (s *testDBSuite5) TestAddIndexWithDupIndex(c *C) {
 	tk.MustExec("drop table test_add_index_with_dup")
 }
 
+func (s *testDBSuite5) TestAddIndexWithDupIndex(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use " + s.schemaName)
+
+	err1 := ddl.ErrDupKeyName.GenWithStack("index already exist %s", "idx")
+	err2 := ddl.ErrDupKeyName.GenWithStack("index already exist %s; "+
+		"a background job is trying to add the same index, "+
+		"please check by `ADMIN SHOW DDL JOBS`", "idx")
+
+	// When there is already an duplicate index, show error message.
+	tk.MustExec("create table test_add_index_with_dup (a int, key idx (a))")
+	_, err := tk.Exec("alter table test_add_index_with_dup add index idx (a)")
+	c.Check(errors.Cause(err1).(*terror.Error).Equal(err), Equals, true)
+	c.Assert(errors.Cause(err1).Error() == err.Error(), IsTrue)
+
+	// When there is another session adding duplicate index with state other than
+	// StatePublic, show explicit error message.
+	t := s.testGetTable(c, "test_add_index_with_dup")
+	indexInfo := t.Meta().FindIndexByName("idx")
+	indexInfo.State = model.StateNone
+	_, err = tk.Exec("alter table test_add_index_with_dup add index idx (a)")
+	c.Check(errors.Cause(err2).(*terror.Error).Equal(err), Equals, true)
+	c.Assert(errors.Cause(err2).Error() == err.Error(), IsTrue)
+
+	tk.MustExec("drop table test_add_index_with_dup")
+}
+
 func (s *testDBSuite1) TestRenameIndex(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use " + s.schemaName)
@@ -328,10 +358,13 @@ func (s *testSerialDBSuite) TestAddExpressionIndexRollback(c *C) {
 
 	d := s.dom.DDL()
 	hook := &ddl.TestDDLCallback{Do: s.dom}
+<<<<<<< HEAD
 	var currJob *model.Job
 	ctx := mock.NewContext()
 	ctx.Store = s.store
 	times := 0
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	hook.OnJobUpdatedExported = func(job *model.Job) {
 		if job.SchemaState == model.StateDeleteOnly {
 			if checkErr != nil {
@@ -760,6 +793,7 @@ func (s *testDBSuite5) TestCancelTruncateTable(c *C) {
 }
 
 func (s *testDBSuite5) TestParallelDropSchemaAndDropTable(c *C) {
+<<<<<<< HEAD
 	tk := testkit.NewTestKit(c, s.store)
 	s.mustExec(tk, c, "create database if not exists test_drop_schema_table")
 	s.mustExec(tk, c, "use test_drop_schema_table")
@@ -767,6 +801,15 @@ func (s *testDBSuite5) TestParallelDropSchemaAndDropTable(c *C) {
 	var checkErr error
 	hook := &ddl.TestDDLCallback{Do: s.dom}
 	dbInfo := testGetSchemaByName(c, tk.Se, "test_drop_schema_table")
+=======
+	s.tk = testkit.NewTestKit(c, s.store)
+	s.mustExec(c, "create database if not exists test_drop_schema_table")
+	s.mustExec(c, "use test_drop_schema_table")
+	s.mustExec(c, "create table t(c1 int, c2 int)")
+	var checkErr error
+	hook := &ddl.TestDDLCallback{Do: s.dom}
+	dbInfo := testGetSchemaByName(c, s.tk.Se, "test_drop_schema_table")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	done := false
 	var wg sync.WaitGroup
 	tk2 := testkit.NewTestKit(c, s.store)
@@ -785,11 +828,16 @@ func (s *testDBSuite5) TestParallelDropSchemaAndDropTable(c *C) {
 	}
 	originalHook := s.dom.DDL().GetHook()
 	s.dom.DDL().(ddl.DDLForTest).SetHook(hook)
+<<<<<<< HEAD
 	s.mustExec(tk, c, "drop database test_drop_schema_table")
+=======
+	s.mustExec(c, "drop database test_drop_schema_table")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	s.dom.DDL().(ddl.DDLForTest).SetHook(originalHook)
 	wg.Wait()
 	c.Assert(done, IsTrue)
 	c.Assert(checkErr, NotNil)
+<<<<<<< HEAD
 	// There are two possible assert result because:
 	// 1: If drop-database is finished before drop-table being put into the ddl job queue, it will return "unknown table" error directly in the previous check.
 	// 2: If drop-table has passed the previous check and been put into the ddl job queue, then drop-database finished, it will return schema change error.
@@ -799,6 +847,9 @@ func (s *testDBSuite5) TestParallelDropSchemaAndDropTable(c *C) {
 		checkErr.Error() == "[schema:1051]Unknown table 'test_drop_schema_table.t'"
 
 	c.Assert(assertRes, Equals, true)
+=======
+	c.Assert(checkErr.Error(), Equals, "[schema:1051]Unknown table 'test_drop_schema_table.t'")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// Below behaviour is use to mock query `curl "http://$IP:10080/tiflash/replica"`
 	fn := func(jobs []*model.Job) (bool, error) {
@@ -806,9 +857,15 @@ func (s *testDBSuite5) TestParallelDropSchemaAndDropTable(c *C) {
 			return false, nil
 		})
 	}
+<<<<<<< HEAD
 	err := tk.Se.NewTxn(context.Background())
 	c.Assert(err, IsNil)
 	txn, err := tk.Se.Txn(true)
+=======
+	err := s.tk.Se.NewTxn(context.Background())
+	c.Assert(err, IsNil)
+	txn, err := s.tk.Se.Txn(true)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	err = admin.IterHistoryDDLJobs(txn, fn)
 	c.Assert(err, IsNil)
@@ -1334,6 +1391,11 @@ func (s *testDBSuite1) TestCancelAddTableAndDropTablePartition(c *C) {
 		{model.ActionDropTablePartition, model.JobStateNone, model.StateNone, true},
 		// Add table partition now can be cancelled in ReplicaOnly state.
 		{model.ActionAddTablePartition, model.JobStateRunning, model.StateReplicaOnly, true},
+<<<<<<< HEAD
+=======
+		{model.ActionAddTablePartition, model.JobStateRunning, model.StatePublic, false},
+		{model.ActionDropTablePartition, model.JobStateRunning, model.StatePublic, false},
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	var checkErr error
 	hook := &ddl.TestDDLCallback{Do: s.dom}
@@ -2421,6 +2483,7 @@ func (s *testDBSuite5) TestRenameColumn(c *C) {
 
 func (s *testDBSuite7) TestSelectInViewFromAnotherDB(c *C) {
 	_, _ = s.s.Execute(context.Background(), "create database test_db2")
+<<<<<<< HEAD
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use " + s.schemaName)
 	tk.MustExec("create table t(a int)")
@@ -2432,6 +2495,19 @@ func (s *testDBSuite7) TestSelectInViewFromAnotherDB(c *C) {
 
 func (s *testDBSuite) mustExec(tk *testkit.TestKit, c *C, query string, args ...interface{}) {
 	tk.MustExec(query, args...)
+=======
+	s.tk = testkit.NewTestKit(c, s.store)
+	s.tk.MustExec("use " + s.schemaName)
+	s.tk.MustExec("create table t(a int)")
+	s.tk.MustExec("use test_db2")
+	s.tk.MustExec("create sql security invoker view v as select * from " + s.schemaName + ".t")
+	s.tk.MustExec("use " + s.schemaName)
+	s.tk.MustExec("select test_db2.v.a from test_db2.v")
+}
+
+func (s *testDBSuite) mustExec(c *C, query string, args ...interface{}) {
+	s.tk.MustExec(query, args...)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testDBSuite) mustQuery(tk *testkit.TestKit, c *C, query string, args ...interface{}) [][]interface{} {
@@ -2457,11 +2533,19 @@ func match(c *C, row []interface{}, expected ...interface{}) {
 
 // TestCreateTableWithLike2 tests create table with like when refer table have non-public column/index.
 func (s *testSerialDBSuite) TestCreateTableWithLike2(c *C) {
+<<<<<<< HEAD
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test_db")
 	tk.MustExec("drop table if exists t1,t2;")
 	defer tk.MustExec("drop table if exists t1,t2;")
 	tk.MustExec("create table t1 (a int, b int, c int, index idx1(c));")
+=======
+	s.tk = testkit.NewTestKit(c, s.store)
+	s.tk.MustExec("use test_db")
+	s.tk.MustExec("drop table if exists t1,t2;")
+	defer s.tk.MustExec("drop table if exists t1,t2;")
+	s.tk.MustExec("create table t1 (a int, b int, c int, index idx1(c));")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	tbl1 := testGetTableByName(c, s.s, "test_db", "t1")
 	doneCh := make(chan error, 2)
@@ -2603,6 +2687,7 @@ func (s *testSerialDBSuite) TestCreateTable(c *C) {
 	// test for enum column
 	tk.MustExec("use test")
 	failSQL := "create table t_enum (a enum('e','e'));"
+<<<<<<< HEAD
 	tk.MustGetErrCode(failSQL, errno.ErrDuplicatedValueInType)
 	collate.SetNewCollationEnabledForTest(true)
 	defer collate.SetNewCollationEnabledForTest(false)
@@ -2653,6 +2738,38 @@ func (s *testSerialDBSuite) TestCreateTable(c *C) {
 	tk.MustGetErrCode(failSQL, errno.ErrTableOptionInsertMethodUnsupported)
 	tk.MustExec("drop table x;")
 	tk.MustExec("drop table y;")
+=======
+	s.tk.MustGetErrCode(failSQL, errno.ErrDuplicatedValueInType)
+}
+
+func (s *testSerialDBSuite) TestCreateTableWithCollation(c *C) {
+	collate.SetNewCollationEnabledForTest(true)
+	defer collate.SetNewCollationEnabledForTest(false)
+	s.tk.MustExec("use test")
+	failSQL := "create table t_enum (a enum('e','E')) charset=utf8 collate=utf8_general_ci;"
+	s.tk.MustGetErrCode(failSQL, errno.ErrDuplicatedValueInType)
+	failSQL = "create table t_enum (a enum('abc','Abc')) charset=utf8 collate=utf8_general_ci;"
+	s.tk.MustGetErrCode(failSQL, errno.ErrDuplicatedValueInType)
+	failSQL = "create table t_enum (a enum('e','E')) charset=utf8 collate=utf8_unicode_ci;"
+	s.tk.MustGetErrCode(failSQL, errno.ErrDuplicatedValueInType)
+	failSQL = "create table t_enum (a enum('ss','ß')) charset=utf8 collate=utf8_unicode_ci;"
+	s.tk.MustGetErrCode(failSQL, errno.ErrDuplicatedValueInType)
+	// test for set column
+	failSQL = "create table t_enum (a set('e','e'));"
+	s.tk.MustGetErrCode(failSQL, errno.ErrDuplicatedValueInType)
+	failSQL = "create table t_enum (a set('e','E')) charset=utf8 collate=utf8_general_ci;"
+	s.tk.MustGetErrCode(failSQL, errno.ErrDuplicatedValueInType)
+	failSQL = "create table t_enum (a set('abc','Abc')) charset=utf8 collate=utf8_general_ci;"
+	s.tk.MustGetErrCode(failSQL, errno.ErrDuplicatedValueInType)
+	_, err := s.tk.Exec("create table t_enum (a enum('B','b')) charset=utf8 collate=utf8_general_ci;")
+	c.Assert(err.Error(), Equals, "[types:1291]Column 'a' has duplicated value 'b' in ENUM")
+	failSQL = "create table t_enum (a set('e','E')) charset=utf8 collate=utf8_unicode_ci;"
+	s.tk.MustGetErrCode(failSQL, errno.ErrDuplicatedValueInType)
+	failSQL = "create table t_enum (a set('ss','ß')) charset=utf8 collate=utf8_unicode_ci;"
+	s.tk.MustGetErrCode(failSQL, errno.ErrDuplicatedValueInType)
+	_, err = s.tk.Exec("create table t_enum (a enum('ss','ß')) charset=utf8 collate=utf8_unicode_ci;")
+	c.Assert(err.Error(), Equals, "[types:1291]Column 'a' has duplicated value 'ß' in ENUM")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testSerialDBSuite) TestRepairTable(c *C) {
@@ -2897,9 +3014,15 @@ func (s *testDBSuite2) TestCreateTableWithSetCol(c *C) {
 		"  `a` int(11) DEFAULT NULL,\n" +
 		"  `b` set('e') DEFAULT ''\n" +
 		") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin"))
+<<<<<<< HEAD
 	tk.MustExec("drop table t_set")
 	tk.MustExec("create table t_set (a set('a', 'b', 'c', 'd') default 'a,c,c');")
 	tk.MustQuery("show create table t_set").Check(testkit.Rows("t_set CREATE TABLE `t_set` (\n" +
+=======
+	s.tk.MustExec("drop table t_set")
+	s.tk.MustExec("create table t_set (a set('a', 'b', 'c', 'd') default 'a,c,c');")
+	s.tk.MustQuery("show create table t_set").Check(testkit.Rows("t_set CREATE TABLE `t_set` (\n" +
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		"  `a` set('a','b','c','d') DEFAULT 'a,c'\n" +
 		") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin"))
 
@@ -3094,6 +3217,7 @@ func (s *testDBSuite3) TestFKOnGeneratedColumns(c *C) {
 	tk.MustExec("drop table t1, t2;")
 
 	// allowed FK options on the base columns of a stored generated columns
+<<<<<<< HEAD
 	tk.MustExec("create table t1 (a int primary key, b char(5));")
 	tk.MustExec("create table t2 (a int, b int generated always as (a % 10) stored, foreign key (a) references t1(a) on update restrict);")
 	tk.MustExec("create table t3 (a int, b int generated always as (a % 10) stored, foreign key (a) references t1(a) on update no action);")
@@ -3109,6 +3233,23 @@ func (s *testDBSuite3) TestFKOnGeneratedColumns(c *C) {
 	tk.MustExec("create table t5 (a int, b int generated always as (a % 10) stored);")
 	tk.MustExec("alter table t5 add foreign key (a) references t1(a) on delete no action;")
 	tk.MustExec("drop table t1,t2,t3,t4,t5;")
+=======
+	s.tk.MustExec("create table t1 (a int primary key, b char(5));")
+	s.tk.MustExec("create table t2 (a int, b int generated always as (a % 10) stored, foreign key (a) references t1(a) on update restrict);")
+	s.tk.MustExec("create table t3 (a int, b int generated always as (a % 10) stored, foreign key (a) references t1(a) on update no action);")
+	s.tk.MustExec("create table t4 (a int, b int generated always as (a % 10) stored, foreign key (a) references t1(a) on delete restrict);")
+	s.tk.MustExec("create table t5 (a int, b int generated always as (a % 10) stored, foreign key (a) references t1(a) on delete no action);")
+	s.tk.MustExec("drop table t2,t3,t4,t5")
+	s.tk.MustExec("create table t2 (a int, b int generated always as (a % 10) stored);")
+	s.tk.MustExec("alter table t2 add foreign key (a) references t1(a) on update restrict;")
+	s.tk.MustExec("create table t3 (a int, b int generated always as (a % 10) stored);")
+	s.tk.MustExec("alter table t3 add foreign key (a) references t1(a) on update no action;")
+	s.tk.MustExec("create table t4 (a int, b int generated always as (a % 10) stored);")
+	s.tk.MustExec("alter table t4 add foreign key (a) references t1(a) on delete restrict;")
+	s.tk.MustExec("create table t5 (a int, b int generated always as (a % 10) stored);")
+	s.tk.MustExec("alter table t5 add foreign key (a) references t1(a) on delete no action;")
+	s.tk.MustExec("drop table t1,t2,t3,t4,t5;")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testSerialDBSuite) TestTruncateTable(c *C) {
@@ -3516,8 +3657,13 @@ func (s *testDBSuite3) TestGeneratedColumnDDL(c *C) {
 		") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin"))
 
 	// Test incorrect parameter count.
+<<<<<<< HEAD
 	tk.MustGetErrCode("create table test_gv_incorrect_pc(a double, b int as (lower(a, 2)))", errno.ErrWrongParamcountToNativeFct)
 	tk.MustGetErrCode("create table test_gv_incorrect_pc(a double, b int as (lower(a, 2)) stored)", errno.ErrWrongParamcountToNativeFct)
+=======
+	s.tk.MustGetErrCode("create table test_gv_incorrect_pc(a double, b int as (lower(a, 2)))", errno.ErrWrongParamcountToNativeFct)
+	s.tk.MustGetErrCode("create table test_gv_incorrect_pc(a double, b int as (lower(a, 2)) stored)", errno.ErrWrongParamcountToNativeFct)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	genExprTests := []struct {
 		stmt string
@@ -3892,7 +4038,11 @@ func (s *testDBSuite5) TestModifyColumnRollBack(c *C) {
 	err := <-done
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, "[ddl:8214]Cancelled DDL job")
+<<<<<<< HEAD
 	s.mustExec(tk, c, "insert into t1(c2) values (null);")
+=======
+	s.mustExec(c, "insert into t1(c2) values (null);")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	t := s.testGetTable(c, "t1")
 	for _, col := range t.Cols() {
@@ -4156,7 +4306,11 @@ func testModifyColumnNullToNotNull(c *C, s *testDBSuite, enableChangeColumnType 
 	// Check insert null before job first update.
 	times := 0
 	hook := &ddl.TestDDLCallback{Do: s.dom}
+<<<<<<< HEAD
 	tk.MustExec("delete from t1")
+=======
+	s.tk.MustExec("delete from t1")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	var checkErr error
 	hook.OnJobRunBeforeExported = func(job *model.Job) {
 		if tbl.Meta().ID != job.TableID {
@@ -4242,7 +4396,11 @@ func (s *testDBSuite2) TestTransactionOnAddDropColumn(c *C) {
 		// do transaction.
 		for _, transaction := range transactions {
 			for _, sql := range transaction {
+<<<<<<< HEAD
 				if _, checkErr = tk.Exec(sql); checkErr != nil {
+=======
+				if _, checkErr = s.tk.Exec(sql); checkErr != nil {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 					checkErr = errors.Errorf("err: %s, sql: %s, job schema state: %s", checkErr.Error(), sql, job.SchemaState)
 					return
 				}
@@ -4256,15 +4414,24 @@ func (s *testDBSuite2) TestTransactionOnAddDropColumn(c *C) {
 	err := <-done
 	c.Assert(err, IsNil)
 	c.Assert(checkErr, IsNil)
+<<<<<<< HEAD
 	tk.MustQuery("select a,b from t1 order by a").Check(testkit.Rows("1 1", "1 1", "1 1", "2 2", "2 2", "2 2"))
 	s.mustExec(tk, c, "delete from t1")
+=======
+	s.tk.MustQuery("select a,b from t1 order by a").Check(testkit.Rows("1 1", "1 1", "1 1", "2 2", "2 2", "2 2"))
+	s.mustExec(c, "delete from t1")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// test transaction on drop column.
 	go backgroundExec(s.store, "alter table t1 drop column c", done)
 	err = <-done
 	c.Assert(err, IsNil)
 	c.Assert(checkErr, IsNil)
+<<<<<<< HEAD
 	tk.MustQuery("select a,b from t1 order by a").Check(testkit.Rows("1 1", "1 1", "1 1", "2 2", "2 2", "2 2"))
+=======
+	s.tk.MustQuery("select a,b from t1 order by a").Check(testkit.Rows("1 1", "1 1", "1 1", "2 2", "2 2", "2 2"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testDBSuite3) TestTransactionWithWriteOnlyColumn(c *C) {
@@ -4298,7 +4465,11 @@ func (s *testDBSuite3) TestTransactionWithWriteOnlyColumn(c *C) {
 		// do transaction.
 		for _, transaction := range transactions {
 			for _, sql := range transaction {
+<<<<<<< HEAD
 				if _, checkErr = tk.Exec(sql); checkErr != nil {
+=======
+				if _, checkErr = s.tk.Exec(sql); checkErr != nil {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 					checkErr = errors.Errorf("err: %s, sql: %s, job schema state: %s", checkErr.Error(), sql, job.SchemaState)
 					return
 				}
@@ -4312,15 +4483,24 @@ func (s *testDBSuite3) TestTransactionWithWriteOnlyColumn(c *C) {
 	err := <-done
 	c.Assert(err, IsNil)
 	c.Assert(checkErr, IsNil)
+<<<<<<< HEAD
 	tk.MustQuery("select a from t1").Check(testkit.Rows("2"))
 	s.mustExec(tk, c, "delete from t1")
+=======
+	s.tk.MustQuery("select a from t1").Check(testkit.Rows("2"))
+	s.mustExec(c, "delete from t1")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// test transaction on drop column.
 	go backgroundExec(s.store, "alter table t1 drop column c", done)
 	err = <-done
 	c.Assert(err, IsNil)
 	c.Assert(checkErr, IsNil)
+<<<<<<< HEAD
 	tk.MustQuery("select a from t1").Check(testkit.Rows("2"))
+=======
+	s.tk.MustQuery("select a from t1").Check(testkit.Rows("2"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testDBSuite4) TestAddColumn2(c *C) {
@@ -4489,9 +4669,15 @@ func testAddIndexForGeneratedColumn(tk *testkit.TestKit, s *testSerialDBSuite, c
 	for i := 0; i < 50; i++ {
 		s.mustExec(tk, c, "insert into t values (?)", i)
 	}
+<<<<<<< HEAD
 	tk.MustExec("insert into t values()")
 	tk.MustExec("ALTER TABLE t ADD COLUMN y1 year as (y + 2)")
 	_, err := tk.Exec("ALTER TABLE t ADD INDEX idx_y(y1)")
+=======
+	s.tk.MustExec("insert into t values()")
+	s.tk.MustExec("ALTER TABLE t ADD COLUMN y1 year as (y + 2)")
+	_, err := s.tk.Exec("ALTER TABLE t ADD INDEX idx_y(y1)")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 
 	t := s.testGetTable(c, "t")
@@ -4751,6 +4937,7 @@ func (s *testSerialDBSuite) TestModifyColumnCharset(c *C) {
 
 }
 
+<<<<<<< HEAD
 func (s *testDBSuite1) TestModifyColumnTime(c *C) {
 	limit := variable.GetDDLErrorCountLimit()
 	variable.SetDDLErrorCountLimit(3)
@@ -5054,6 +5241,15 @@ func (s *testSerialDBSuite) TestSetTableFlashReplica(c *C) {
 	s.mustExec(tk, c, "drop table if exists t_flash;")
 	tk.MustExec("create table t_flash(a int, b int)")
 	defer s.mustExec(tk, c, "drop table t_flash;")
+=======
+func (s *testSerialDBSuite) TestSetTableFlashReplica(c *C) {
+	c.Assert(failpoint.Enable("github.com/pingcap/tidb/infoschema/mockTiFlashStoreCount", `return(true)`), IsNil)
+	s.tk = testkit.NewTestKit(c, s.store)
+	s.tk.MustExec("use test_db")
+	s.mustExec(c, "drop table if exists t_flash;")
+	s.tk.MustExec("create table t_flash(a int, b int)")
+	defer s.mustExec(c, "drop table t_flash;")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	t := s.testGetTable(c, "t_flash")
 	c.Assert(t.Meta().TiFlashReplica, IsNil)
@@ -5141,9 +5337,15 @@ func (s *testSerialDBSuite) TestSetTableFlashReplica(c *C) {
 	failpoint.Disable("github.com/pingcap/tidb/infoschema/mockTiFlashStoreCount")
 
 	// Test for set replica count more than the tiflash store count.
+<<<<<<< HEAD
 	s.mustExec(tk, c, "drop table if exists t_flash;")
 	tk.MustExec("create table t_flash(a int, b int)")
 	_, err = tk.Exec("alter table t_flash set tiflash replica 2 location labels 'a','b';")
+=======
+	s.mustExec(c, "drop table if exists t_flash;")
+	s.tk.MustExec("create table t_flash(a int, b int)")
+	_, err = s.tk.Exec("alter table t_flash set tiflash replica 2 location labels 'a','b';")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, "the tiflash replica count: 2 should be less than the total tiflash server count: 0")
 }
@@ -5321,7 +5523,12 @@ func (s *testSerialDBSuite) TestSkipSchemaChecker(c *C) {
 	c.Assert(failpoint.Enable("github.com/pingcap/tidb/infoschema/mockTiFlashStoreCount", `return(true)`), IsNil)
 	defer failpoint.Disable("github.com/pingcap/tidb/infoschema/mockTiFlashStoreCount")
 
+<<<<<<< HEAD
 	tk := testkit.NewTestKit(c, s.store)
+=======
+	s.tk = testkit.NewTestKit(c, s.store)
+	tk := s.tk
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("use test")
 	tk.MustExec("drop table if exists t1")
 	defer tk.MustExec("drop table if exists t1")
@@ -5829,6 +6036,7 @@ func (s *testDBSuite2) TestDDLWithInvalidTableInfo(c *C) {
 	c.Assert(err.Error(), Equals, "[parser:1064]You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 94 near \"then (b / a) end));\" ")
 }
 
+<<<<<<< HEAD
 func (s *testDBSuite4) TestColumnCheck(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use " + s.schemaName)
@@ -5872,13 +6080,19 @@ func (s *testDBSuite7) TestAddConstraintCheck(c *C) {
 	tk.MustQuery("show warnings").Check(testutil.RowsWithSep("|", "Warning|8231|ADD CONSTRAINT CHECK is not supported"))
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testDBSuite7) TestCreateTableIngoreCheckConstraint(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use " + s.schemaName)
 	tk.MustExec("drop table if exists table_constraint_check")
 	tk.MustExec("CREATE TABLE admin_user (enable bool, CHECK (enable IN (0, 1)));")
 	c.Assert(tk.Se.GetSessionVars().StmtCtx.WarningCount(), Equals, uint16(1))
+<<<<<<< HEAD
 	tk.MustQuery("show warnings").Check(testutil.RowsWithSep("|", "Warning|8231|CONSTRAINT CHECK is not supported"))
+=======
+	tk.MustQuery("show warnings").Check(testutil.RowsWithSep("|", "Warning|1064|You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 63 near \");\"The CHECK clause is parsed but ignored by all storage engines. "))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustQuery("show create table admin_user").Check(testutil.RowsWithSep("|", ""+
 		"admin_user CREATE TABLE `admin_user` (\n"+
 		"  `enable` tinyint(1) DEFAULT NULL\n"+
@@ -5958,6 +6172,7 @@ func (s *testSerialDBSuite) TestDDLJobErrorCount(c *C) {
 	}
 }
 
+<<<<<<< HEAD
 func (s *testDBSuite1) TestAlterTableWithValidation(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -5975,12 +6190,35 @@ func (s *testDBSuite1) TestAlterTableWithValidation(c *C) {
 	tk.MustExec("alter table t1 without validation")
 	c.Assert(tk.Se.GetSessionVars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(testutil.RowsWithSep("|", "Warning|8200|ALTER TABLE WITHOUT VALIDATION is currently unsupported"))
+=======
+// TestAddIndexFailOnCaseWhenCanExit is used to close #19325.
+func (s *testSerialDBSuite) TestAddIndexFailOnCaseWhenCanExit(c *C) {
+	c.Assert(failpoint.Enable("github.com/pingcap/tidb/ddl/MockCaseWhenParseFailure", `return(true)`), IsNil)
+	defer func() {
+		c.Assert(failpoint.Disable("github.com/pingcap/tidb/ddl/MockCaseWhenParseFailure"), IsNil)
+	}()
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t")
+	tk.MustExec("create table t(a int, b int)")
+	tk.MustExec("insert into t values(1, 1)")
+	_, err := tk.Exec("alter table t add index idx(b)")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[ddl:8214]Cancelled DDL job")
+	tk.MustExec("drop table if exists t")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testSerialDBSuite) TestCommitTxnWithIndexChange(c *C) {
 	// Prepare work.
 	tk := testkit.NewTestKit(c, s.store)
+<<<<<<< HEAD
 	tk.MustExec("set tidb_enable_amend_pessimistic_txn = 1;")
+=======
+	tk.MustExec("set global tidb_enable_amend_pessimistic_txn = 1;")
+	tk.MustExec("set tidb_enable_amend_pessimistic_txn = 1;")
+	defer tk.MustExec("set global tidb_enable_amend_pessimistic_txn = 0;")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("drop database if exists test_db")
 	tk.MustExec("create database test_db")
 	tk.MustExec("use test_db")
@@ -6032,7 +6270,11 @@ func (s *testSerialDBSuite) TestCommitTxnWithIndexChange(c *C) {
 			"insert into t2 values(11, 11, 11)",
 			"delete from t2 where c2 = 11",
 			"update t2 set c2 = 110 where c1 = 11"},
+<<<<<<< HEAD
 			// "update t2 set c1 = 10 where c3 = 100"},
+=======
+			//"update t2 set c1 = 10 where c3 = 100"},
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			[]string{"alter table t1 add index k2(c2)",
 				"alter table t1 drop index k2",
 				"alter table t1 add index kk2(c2, c1)",
@@ -6168,6 +6410,7 @@ func (s *testSerialDBSuite) TestCommitTxnWithIndexChange(c *C) {
 	tk.MustExec("admin check table t1")
 }
 
+<<<<<<< HEAD
 // TestAddIndexFailOnCaseWhenCanExit is used to close #19325.
 func (s *testSerialDBSuite) TestAddIndexFailOnCaseWhenCanExit(c *C) {
 	c.Assert(failpoint.Enable("github.com/pingcap/tidb/ddl/MockCaseWhenParseFailure", `return(true)`), IsNil)
@@ -6183,6 +6426,28 @@ func (s *testSerialDBSuite) TestAddIndexFailOnCaseWhenCanExit(c *C) {
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, "[ddl:-1]DDL job rollback, error msg: job.ErrCount:512, mock unknown type: ast.whenClause.")
 	tk.MustExec("drop table if exists t")
+=======
+func (s *testDBSuite5) TestChangeColumnShouldKeepFlagWhenTypeIsTimestamp(c *C) {
+	s.tk = testkit.NewTestKit(c, s.store)
+	s.tk.MustExec("use " + s.schemaName)
+	s.mustExec(c, "drop table if exists tt")
+	s.mustExec(c, "create table tt(id int auto_increment primary key, c timestamp)")
+	ctx := s.tk.Se.(sessionctx.Context)
+	is := domain.GetDomain(ctx).InfoSchema()
+	tbl, err := is.TableByName(model.NewCIStr(s.schemaName), model.NewCIStr("tt"))
+	c.Assert(err, IsNil)
+	colC := tbl.Meta().Columns[1]
+	originFlag := colC.Flag
+	c.Assert(originFlag > 0, IsTrue)
+	c.Assert(colC.Name.L, Equals, "c")
+	s.mustExec(c, "alter table tt change column c cc timestamp")
+	is = domain.GetDomain(ctx).InfoSchema()
+	tbl, err = is.TableByName(model.NewCIStr(s.schemaName), model.NewCIStr("tt"))
+	c.Assert(err, IsNil)
+	colCC := tbl.Meta().Columns[1]
+	c.Assert(colCC.Name.L, Equals, "cc")
+	c.Assert(originFlag, Equals, colCC.Flag)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func init() {
@@ -6191,6 +6456,7 @@ func init() {
 	domain.SchemaOutOfDateRetryTimes = int32(50)
 }
 
+<<<<<<< HEAD
 func (s *testSerialDBSuite) TestCreateTableWithIntegerLengthWaring(c *C) {
 	// Inject the strict-integer-display-width variable in parser directly.
 	parsertypes.TiDBStrictIntegerDisplayWidth = true
@@ -6474,10 +6740,17 @@ func (s *testSerialDBSuite) TestModifyColumnTypeWhenInterception(c *C) {
 }
 
 func (s *testDBSuite4) TestGeneratedColumnWindowFunction(c *C) {
+=======
+func (s *testDBSuite4) TestGeneratedColumnWindowFunction(c *C) {
+	config.UpdateGlobal(func(conf *config.Config) {
+		conf.Experimental.AllowsExpressionIndex = true
+	})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test_db")
 	tk.MustExec("DROP TABLE IF EXISTS t")
 	tk.MustGetErrCode("CREATE TABLE t (a INT , b INT as (ROW_NUMBER() OVER (ORDER BY a)))", errno.ErrWindowInvalidWindowFuncUse)
+<<<<<<< HEAD
 	tk.MustGetErrCode("CREATE TABLE t (a INT , index idx ((ROW_NUMBER() OVER (ORDER BY a))))", errno.ErrWindowInvalidWindowFuncUse)
 }
 
@@ -6562,4 +6835,27 @@ func (s *testDBSuite4) TestIssue22207(c *C) {
 	tk.MustQuery("select * from t2").Check(testkit.Rows("1", "2", "3"))
 	c.Assert(len(tk.MustQuery("select * from t1").Rows()), Equals, 0)
 	tk.MustExec("set @@session.tidb_enable_exchange_partition = 0;")
+=======
+	tk.MustExec("CREATE TABLE t (a INT)")
+	tk.MustGetErrCode("ALTER TABLE t ADD index idx ((ROW_NUMBER() OVER (ORDER BY a)))", errno.ErrWindowInvalidWindowFuncUse)
+}
+
+// Test issue #20529.
+func (s *testSerialDBSuite) TestColumnTypeChangeIgnoreDisplayLength(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+
+	// Change int to int(3).
+	// Although display length is increased, the default flen is decreased, reorg is needed.
+	tk.MustExec("drop table if exists t")
+	tk.MustExec("create table t(a int)")
+	tk.MustExec("alter table t modify column a int(3)")
+
+	// Change int to bigint(1)
+	// Although display length is decreased, default flen is the same, reorg is not needed.
+	tk.MustExec("drop table if exists t")
+	tk.MustExec("create table t(a int)")
+	tk.MustExec("alter table t modify column a bigint(1)")
+	tk.MustExec("drop table if exists t")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

@@ -143,8 +143,12 @@ func prepareTestCtx(c *C, createTable string, partitionExpr string) *testCtx {
 	sctx := mock.NewContext()
 	tblInfo, err := ddl.BuildTableInfoFromAST(stmt.(*ast.CreateTableStmt))
 	c.Assert(err, IsNil)
+<<<<<<< HEAD
 	columns, names, err := expression.ColumnInfos2ColumnsAndNames(sctx, model.NewCIStr("t"), tblInfo.Name, tblInfo.Cols(), tblInfo)
 	c.Assert(err, IsNil)
+=======
+	columns, names := expression.ColumnInfos2ColumnsAndNames(sctx, model.NewCIStr("t"), tblInfo.Name, tblInfo.Columns, tblInfo)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	schema := expression.NewSchema(columns...)
 
 	col, fn, _, err := makePartitionByFnCol(sctx, columns, names, partitionExpr)
@@ -320,7 +324,11 @@ func (s *testPartitionPruningSuite) TestPartitionRangePrunner2CharWithCollation(
 	collate.SetNewCollationEnabledForTest(true)
 	defer collate.SetNewCollationEnabledForTest(false)
 	tc := prepareTestCtx(c,
+<<<<<<< HEAD
 		"create table t (a char(32) collate utf8mb4_unicode_ci)",
+=======
+		"create table t (a char(32) collate utf8mb4_general_ci)",
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		"a",
 	)
 	lessThanDataInt := []string{"'c'", "'F'", "'h'", "'L'", "'t'"}

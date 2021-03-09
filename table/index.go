@@ -66,15 +66,25 @@ type Index interface {
 	// Create supports insert into statement.
 	Create(ctx sessionctx.Context, us kv.UnionStore, indexedValues []types.Datum, h kv.Handle, opts ...CreateIdxOptFunc) (kv.Handle, error)
 	// Delete supports delete from statement.
+<<<<<<< HEAD
 	Delete(sc *stmtctx.StatementContext, us kv.UnionStore, indexedValues []types.Datum, h kv.Handle) error
+=======
+	Delete(sc *stmtctx.StatementContext, m kv.MemBuffer, indexedValues []types.Datum, h int64) error
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Drop supports drop table, drop index statements.
 	Drop(us kv.UnionStore) error
 	// Exist supports check index exists or not.
 	Exist(sc *stmtctx.StatementContext, us kv.UnionStore, indexedValues []types.Datum, h kv.Handle) (bool, kv.Handle, error)
 	// GenIndexKey generates an index key.
+<<<<<<< HEAD
 	GenIndexKey(sc *stmtctx.StatementContext, indexedValues []types.Datum, h kv.Handle, buf []byte) (key []byte, distinct bool, err error)
 	// GenIndexValue generates an index value.
 	GenIndexValue(sc *stmtctx.StatementContext, indexedValues []types.Datum, distinct bool, untouched bool, h kv.Handle) (val []byte, err error)
+=======
+	GenIndexKey(sc *stmtctx.StatementContext, indexedValues []types.Datum, h int64, buf []byte) (key []byte, distinct bool, err error)
+	// GenIndexValue generates an index value.
+	GenIndexValue(sc *stmtctx.StatementContext, indexedValues []types.Datum, distinct bool, untouched bool, h int64) (val []byte, err error)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Seek supports where clause.
 	Seek(sc *stmtctx.StatementContext, r kv.Retriever, indexedValues []types.Datum) (iter IndexIterator, hit bool, err error)
 	// SeekFirst supports aggregate min and ascend order by.

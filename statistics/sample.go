@@ -319,9 +319,15 @@ func (c *SampleCollector) ExtractTopN(numTop uint32, sc *stmtctx.StatementContex
 		if err != nil {
 			return err
 		}
+<<<<<<< HEAD
 		cms.SubValue(h1, h2, realCnt)
 		c.TopN.AppendTopN(data, realCnt)
 	}
 	c.TopN.Sort()
+=======
+		cms.subValue(h1, h2, realCnt)
+		cms.topN[h1] = append(cms.topN[h1], &TopNMeta{h2, data, realCnt})
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return nil
 }

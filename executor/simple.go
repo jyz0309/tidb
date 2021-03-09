@@ -275,7 +275,11 @@ func (e *SimpleExec) setDefaultRoleAll(s *ast.SetDefaultRoleStmt) error {
 	}
 	defer e.releaseSysSession(restrictedCtx)
 	sqlExecutor := restrictedCtx.(sqlexec.SQLExecutor)
+<<<<<<< HEAD
 	if _, err := sqlExecutor.ExecuteInternal(context.TODO(), "begin"); err != nil {
+=======
+	if _, err := sqlExecutor.Execute(context.Background(), "begin"); err != nil {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return err
 	}
 	sql := new(strings.Builder)
@@ -912,11 +916,14 @@ func (e *SimpleExec) executeAlterUser(s *ast.AlterUserStmt) error {
 		pwd, ok := spec.EncodedPassword()
 		if !ok {
 			return errors.Trace(ErrPasswordFormat)
+<<<<<<< HEAD
 		}
 		exec := e.ctx.(sqlexec.RestrictedSQLExecutor)
 		stmt, err := exec.ParseWithParams(context.TODO(), `UPDATE %n.%n SET authentication_string=%? WHERE Host=%? and User=%?;`, mysql.SystemDB, mysql.UserTable, pwd, spec.User.Hostname, spec.User.Username)
 		if err != nil {
 			return err
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		_, _, err = exec.ExecRestrictedStmt(context.TODO(), stmt)
 		if err != nil {

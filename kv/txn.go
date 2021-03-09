@@ -114,7 +114,10 @@ func IsMockCommitErrorEnable() bool {
 
 // TxnInfo is used to keep track the info of a committed transaction (mainly for diagnosis and testing)
 type TxnInfo struct {
+<<<<<<< HEAD
 	TxnScope string `json:"txn_scope"`
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	StartTS  uint64 `json:"start_ts"`
 	CommitTS uint64 `json:"commit_ts"`
 	ErrMsg   string `json:"error,omitempty"`

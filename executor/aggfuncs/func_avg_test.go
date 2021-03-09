@@ -42,6 +42,7 @@ func (s *testSuite) TestAvg(c *C) {
 	}
 }
 
+<<<<<<< HEAD
 func (s *testSuite) TestMemAvg(c *C) {
 	tests := []aggMemTest{
 		buildAggMemTester(ast.AggFuncAvg, mysql.TypeNewDecimal, 5,
@@ -58,6 +59,8 @@ func (s *testSuite) TestMemAvg(c *C) {
 	}
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func BenchmarkAvg(b *testing.B) {
 	s := testSuite{}
 	s.SetUpSuite(nil)

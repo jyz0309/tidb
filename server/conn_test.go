@@ -23,7 +23,10 @@ import (
 
 	. "github.com/pingcap/check"
 	"github.com/pingcap/failpoint"
+<<<<<<< HEAD
 	"github.com/pingcap/parser/model"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/parser/mysql"
 	"github.com/pingcap/tidb/domain"
 	"github.com/pingcap/tidb/executor"
@@ -445,6 +448,7 @@ func (ts *ConnTestSuite) TestDispatchClientProtocol41(c *C) {
 			err: nil,
 			out: []byte{0x7, 0x0, 0x0, 0xe, 0x0, 0x0, 0x0, 0x2, 0x0, 0x0, 0x0},
 		},
+<<<<<<< HEAD
 		{
 			com: mysql.ComRefresh, // flush privileges
 			in:  []byte{0x01},
@@ -463,13 +467,19 @@ func (ts *ConnTestSuite) TestDispatchClientProtocol41(c *C) {
 			err: nil,
 			out: []byte{0x7, 0x0, 0x0, 0x12, 0x0, 0x0, 0x0, 0x2, 0x0, 0x0, 0x0},
 		},
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	ts.testDispatch(c, inputs, mysql.ClientProtocol41)
 }
 
 func (ts *ConnTestSuite) testDispatch(c *C, inputs []dispatchInput, capability uint32) {
+<<<<<<< HEAD
 	store, err := mockstore.NewMockStore()
+=======
+	store, err := mockstore.NewMockTikvStore()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	defer store.Close()
 	dom, err := session.BootstrapSession(store)
@@ -489,8 +499,13 @@ func (ts *ConnTestSuite) testDispatch(c *C, inputs []dispatchInput, capability u
 
 	var outBuffer bytes.Buffer
 	tidbdrv := NewTiDBDriver(ts.store)
+<<<<<<< HEAD
 	cfg := newTestConfig()
 	cfg.Port, cfg.Status.StatusPort = 0, 0
+=======
+	cfg := config.NewConfig()
+	cfg.Port = 0
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	cfg.Status.ReportStatus = false
 	server, err := NewServer(cfg, tidbdrv)
 
@@ -629,11 +644,31 @@ func (ts *ConnTestSuite) TestConnExecutionTimeout(c *C) {
 	c.Assert(failpoint.Disable("github.com/pingcap/tidb/server/FakeClientConn"), IsNil)
 }
 
+<<<<<<< HEAD
+=======
+type mockTiDBCtx struct {
+	TiDBContext
+	err error
+}
+
+func (c *mockTiDBCtx) GetSessionVars() *variable.SessionVars {
+	return &variable.SessionVars{}
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (ts *ConnTestSuite) TestShutDown(c *C) {
 	cc := &clientConn{}
 	se, err := session.CreateSession4Test(ts.store)
 	c.Assert(err, IsNil)
+<<<<<<< HEAD
 	cc.ctx = &TiDBContext{Session: se}
+=======
+	// mock delay response
+	cc.ctx = &mockTiDBCtx{
+		TiDBContext: TiDBContext{session: se},
+		err:         nil,
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// set killed flag
 	cc.status = connStatusShutdown
 	// assert ErrQueryInterrupted

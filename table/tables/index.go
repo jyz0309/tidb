@@ -64,7 +64,11 @@ func (c *indexIter) Next() (val []types.Datum, h kv.Handle, err error) {
 		val = vv[0 : len(vv)-1]
 	} else {
 		// If the index is unique and the value isn't nil, the handle is in value.
+<<<<<<< HEAD
 		h, err = tablecodec.DecodeHandleInUniqueIndexValue(c.it.Value(), c.idx.tblInfo.IsCommonHandle)
+=======
+		h, err = tablecodec.DecodeHandle(c.it.Value())
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			return nil, nil, err
 		}
@@ -115,9 +119,16 @@ func NewIndex(physicalID int64, tblInfo *model.TableInfo, indexInfo *model.Index
 		prefix = tablecodec.EncodeTableIndexPrefix(physicalID, indexInfo.ID)
 	}
 	index := &index{
+<<<<<<< HEAD
 		idxInfo:  indexInfo,
 		tblInfo:  tblInfo,
 		prefix:   prefix,
+=======
+		idxInfo: indexInfo,
+		tblInfo: tblInfo,
+		// The prefix can't encode from tblInfo.ID, because table partition may change the id to partition id.
+		prefix:   tablecodec.EncodeTableIndexPrefix(physicalID, indexInfo.ID),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		phyTblID: physicalID,
 	}
 	index.containNonBinaryString = index.checkContainNonBinaryString()
@@ -131,6 +142,7 @@ func (c *index) Meta() *model.IndexInfo {
 
 // GenIndexKey generates storage key for index values. Returned distinct indicates whether the
 // indexed values should be distinct in storage (i.e. whether handle is encoded in the key).
+<<<<<<< HEAD
 func (c *index) GenIndexKey(sc *stmtctx.StatementContext, indexedValues []types.Datum, h kv.Handle, buf []byte) (key []byte, distinct bool, err error) {
 	idxTblID := c.phyTblID
 	if c.idxInfo.Global {
@@ -141,6 +153,14 @@ func (c *index) GenIndexKey(sc *stmtctx.StatementContext, indexedValues []types.
 
 func (c *index) GenIndexValue(sc *stmtctx.StatementContext, indexedValues []types.Datum, distinct bool, untouched bool, h kv.Handle) (val []byte, err error) {
 	return tablecodec.GenIndexValueNew(sc, c.tblInfo, c.idxInfo, c.containNonBinaryString, distinct, untouched, indexedValues, h, c.phyTblID)
+=======
+func (c *index) GenIndexKey(sc *stmtctx.StatementContext, indexedValues []types.Datum, h int64, buf []byte) (key []byte, distinct bool, err error) {
+	return tablecodec.GenIndexKey(sc, c.tblInfo, c.idxInfo, c.phyTblID, indexedValues, h, buf)
+}
+
+func (c *index) GenIndexValue(sc *stmtctx.StatementContext, indexedValues []types.Datum, distinct bool, untouched bool, h int64) (val []byte, err error) {
+	return tablecodec.GenIndexValue(sc, c.tblInfo, c.idxInfo, c.containNonBinaryString, distinct, untouched, indexedValues, h)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // Create creates a new entry in the kvIndex data.
@@ -213,10 +233,18 @@ func (c *index) Create(sctx sessionctx.Context, us kv.UnionStore, indexedValues 
 
 	// save the key buffer to reuse.
 	writeBufs.IndexKeyBuf = key
+<<<<<<< HEAD
 	idxVal, err := tablecodec.GenIndexValueNew(sctx.GetSessionVars().StmtCtx, c.tblInfo, c.idxInfo,
 		c.containNonBinaryString, distinct, opt.Untouched, indexedValues, h, c.phyTblID)
 	if err != nil {
 		return nil, err
+=======
+	var idxVal []byte
+	idxVal, err = tablecodec.GenIndexValue(sctx.GetSessionVars().StmtCtx, c.tblInfo, c.idxInfo,
+		c.containNonBinaryString, distinct, opt.Untouched, indexedValues, h)
+	if err != nil {
+		return 0, err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	if !distinct || skipCheck || opt.Untouched {
@@ -252,7 +280,11 @@ func (c *index) Create(sctx sessionctx.Context, us kv.UnionStore, indexedValues 
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	handle, err := tablecodec.DecodeHandleInUniqueIndexValue(value, c.tblInfo.IsCommonHandle)
+=======
+	handle, err := tablecodec.DecodeHandle(value)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return nil, err
 	}
@@ -260,15 +292,25 @@ func (c *index) Create(sctx sessionctx.Context, us kv.UnionStore, indexedValues 
 }
 
 // Delete removes the entry for handle h and indexedValues from KV index.
+<<<<<<< HEAD
 func (c *index) Delete(sc *stmtctx.StatementContext, us kv.UnionStore, indexedValues []types.Datum, h kv.Handle) error {
+=======
+func (c *index) Delete(sc *stmtctx.StatementContext, m kv.MemBuffer, indexedValues []types.Datum, h int64) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	key, distinct, err := c.GenIndexKey(sc, indexedValues, h, nil)
 	if err != nil {
 		return err
 	}
 	if distinct {
+<<<<<<< HEAD
 		err = us.GetMemBuffer().DeleteWithFlags(key, kv.SetNeedLocked)
 	} else {
 		err = us.GetMemBuffer().Delete(key)
+=======
+		err = m.DeleteWithNeedLock(key)
+	} else {
+		err = m.Delete(key)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	return err
 }
@@ -344,8 +386,12 @@ func (c *index) Exist(sc *stmtctx.StatementContext, us kv.UnionStore, indexedVal
 
 	// For distinct index, the value of key is handle.
 	if distinct {
+<<<<<<< HEAD
 		var handle kv.Handle
 		handle, err := tablecodec.DecodeHandleInUniqueIndexValue(value, c.tblInfo.IsCommonHandle)
+=======
+		handle, err := tablecodec.DecodeHandle(value)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			return false, nil, err
 		}

@@ -228,7 +228,11 @@ CREATE TABLE t (id int(10) unsigned NOT NULL AUTO_INCREMENT,
     x int(10) unsigned DEFAULT '0',
     PRIMARY KEY (`id`)
 );
+<<<<<<< HEAD
 explain format = 'brief' select row_number() over( partition by i ) - x as rnk from t;
+=======
+explain select row_number() over( partition by i ) - x as rnk from t;
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 # for issue 21692
 create table precise_types (

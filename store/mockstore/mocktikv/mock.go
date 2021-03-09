@@ -15,7 +15,11 @@ package mocktikv
 
 import (
 	"github.com/pingcap/errors"
+<<<<<<< HEAD
 	pd "github.com/tikv/pd/client"
+=======
+	"github.com/tikv/pd/client"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 // NewTiKVAndPDClient creates a TiKV client and PD client from options.

@@ -21,16 +21,38 @@ import (
 	"strconv"
 	"sync"
 
+<<<<<<< HEAD
 	errors2 "github.com/pingcap/errors"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/parser/terror"
 	"github.com/pingcap/tidb/config"
 	"github.com/pingcap/tidb/types"
 	"github.com/pingcap/tidb/util/checksum"
 	"github.com/pingcap/tidb/util/disk"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/util/encrypt"
 	"github.com/pingcap/tidb/util/memory"
 )
 
+=======
+	"github.com/pingcap/tidb/util/memory"
+)
+
+const (
+	writeBufSize = 128 * 1024
+	readBufSize  = 4 * 1024
+)
+
+var bufWriterPool = sync.Pool{
+	New: func() interface{} { return bufio.NewWriterSize(nil, writeBufSize) },
+}
+
+var bufReaderPool = sync.Pool{
+	New: func() interface{} { return bufio.NewReaderSize(nil, readBufSize) },
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // ListInDisk represents a slice of chunks storing in temporary disk.
 type ListInDisk struct {
 	fieldTypes []*types.FieldType
@@ -64,6 +86,13 @@ func NewListInDisk(fieldTypes []*types.FieldType) *ListInDisk {
 
 func (l *ListInDisk) initDiskFile() (err error) {
 	err = disk.CheckAndInitTempDir()
+<<<<<<< HEAD
+=======
+	if err != nil {
+		return
+	}
+	l.disk, err = ioutil.TempFile(config.GetGlobalConfig().TempStoragePath, defaultChunkListInDiskPath+strconv.Itoa(l.diskTracker.Label()))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return
 	}
@@ -198,6 +227,10 @@ func (l *ListInDisk) Close() error {
 	if l.disk != nil {
 		l.diskTracker.Consume(-l.diskTracker.BytesConsumed())
 		terror.Call(l.disk.Close)
+<<<<<<< HEAD
+=======
+		bufWriterPool.Put(l.bufWriter)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		terror.Log(os.Remove(l.disk.Name()))
 	}
 	return nil

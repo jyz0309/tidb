@@ -127,8 +127,11 @@ func (a *baseFuncDesc) typeInfer4Count(ctx sessionctx.Context) {
 	a.RetTp = types.NewFieldType(mysql.TypeLonglong)
 	a.RetTp.Flen = 21
 	a.RetTp.Decimal = 0
+<<<<<<< HEAD
 	// count never returns null
 	a.RetTp.Flag |= mysql.NotNullFlag
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	types.SetBinChsClnFlag(a.RetTp)
 }
 
@@ -181,14 +184,29 @@ func (a *baseFuncDesc) typeInfer4Sum(ctx sessionctx.Context) {
 	switch a.Args[0].GetType().Tp {
 	case mysql.TypeTiny, mysql.TypeShort, mysql.TypeInt24, mysql.TypeLong, mysql.TypeLonglong, mysql.TypeYear:
 		a.RetTp = types.NewFieldType(mysql.TypeNewDecimal)
+<<<<<<< HEAD
 		a.RetTp.Flen, a.RetTp.Decimal = mathutil.Min(a.Args[0].GetType().Flen+21, mysql.MaxDecimalWidth), 0
 		if a.Args[0].GetType().Flen < 0 || a.RetTp.Flen > mysql.MaxDecimalWidth {
+=======
+		a.RetTp.Flen, a.RetTp.Decimal = a.Args[0].GetType().Flen+21, 0
+		if a.RetTp.Flen > mysql.MaxDecimalWidth {
+			a.RetTp.Flen = mysql.MaxDecimalWidth
+		}
+		if a.Args[0].GetType().Flen < 0 {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			a.RetTp.Flen = mysql.MaxDecimalWidth
 		}
 	case mysql.TypeNewDecimal:
 		a.RetTp = types.NewFieldType(mysql.TypeNewDecimal)
 		a.RetTp.Flen, a.RetTp.Decimal = a.Args[0].GetType().Flen+22, a.Args[0].GetType().Decimal
+<<<<<<< HEAD
 		if a.Args[0].GetType().Flen < 0 || a.RetTp.Flen > mysql.MaxDecimalWidth {
+=======
+		if a.RetTp.Flen > mysql.MaxDecimalWidth {
+			a.RetTp.Flen = mysql.MaxDecimalWidth
+		}
+		if a.Args[0].GetType().Flen < 0 {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			a.RetTp.Flen = mysql.MaxDecimalWidth
 		}
 		if a.RetTp.Decimal < 0 || a.RetTp.Decimal > mysql.MaxDecimalScale {
@@ -215,7 +233,14 @@ func (a *baseFuncDesc) typeInfer4Avg(ctx sessionctx.Context) {
 		} else {
 			a.RetTp.Decimal = mathutil.Min(a.Args[0].GetType().Decimal+types.DivFracIncr, mysql.MaxDecimalScale)
 		}
+<<<<<<< HEAD
 		a.RetTp.Flen = mathutil.Min(mysql.MaxDecimalWidth, a.Args[0].GetType().Flen+types.DivFracIncr)
+=======
+		a.RetTp.Flen = a.Args[0].GetType().Flen + types.DivFracIncr
+		if a.RetTp.Flen > mysql.MaxDecimalWidth {
+			a.RetTp.Flen = mysql.MaxDecimalWidth
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if a.Args[0].GetType().Flen < 0 {
 			a.RetTp.Flen = mysql.MaxDecimalWidth
 		}
@@ -309,7 +334,11 @@ func (a *baseFuncDesc) typeInfer4LeadLag(ctx sessionctx.Context) {
 }
 
 func (a *baseFuncDesc) typeInfer4PopOrSamp(ctx sessionctx.Context) {
+<<<<<<< HEAD
 	// var_pop/std/var_samp/stddev_samp's return value type is double
+=======
+	//var_pop/std/var_samp/stddev_samp's return value type is double
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	a.RetTp = types.NewFieldType(mysql.TypeDouble)
 	a.RetTp.Flen, a.RetTp.Decimal = mysql.MaxRealWidth, types.UnspecifiedLength
 }

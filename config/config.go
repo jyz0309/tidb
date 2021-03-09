@@ -14,6 +14,11 @@
 package config
 
 import (
+<<<<<<< HEAD
+=======
+	"crypto/tls"
+	"crypto/x509"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -47,10 +52,13 @@ const (
 	DefMaxIndexLength = 3072
 	// DefMaxOfMaxIndexLength is the maximum index length(in bytes) for TiDB v3.0.7 and previous version.
 	DefMaxOfMaxIndexLength = 3072 * 4
+<<<<<<< HEAD
 	// DefIndexLimit is the limitation of index on a single table. This value is consistent with MySQL.
 	DefIndexLimit = 64
 	// DefMaxOfIndexLimit is the maximum limitation of index on a single table for TiDB.
 	DefMaxOfIndexLimit = 64 * 8
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// DefPort is the default port of TiDB
 	DefPort = 4000
 	// DefStatusPort is the default status port of TiDB
@@ -59,12 +67,17 @@ const (
 	DefHost = "0.0.0.0"
 	// DefStatusHost is the default status host of TiDB
 	DefStatusHost = "0.0.0.0"
+<<<<<<< HEAD
 	// Def TableColumnCountLimit is limit of the number of columns in a table
 	DefTableColumnCountLimit = 1017
 	// Def TableColumnCountLimit is maximum limitation of the number of columns in a table
 	DefMaxOfTableColumnCountLimit = 4096
 	// DefTxnScope is the default value for TxnScope
 	DefTxnScope = "global"
+=======
+	// DefStoreLivenessTimeout is the default value for store liveness timeout.
+	DefStoreLivenessTimeout = "5s"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 // Valid config maps
@@ -101,6 +114,7 @@ type Config struct {
 	MemQuotaQuery    int64  `toml:"mem-quota-query" json:"mem-quota-query"`
 	// TempStorageQuota describe the temporary storage Quota during query exector when OOMUseTmpStorage is enabled
 	// If the quota exceed the capacity of the TempStoragePath, the tidb-server would exit with fatal error
+<<<<<<< HEAD
 	TempStorageQuota int64                   `toml:"tmp-storage-quota" json:"tmp-storage-quota"` // Bytes
 	EnableStreaming  bool                    `toml:"enable-streaming" json:"enable-streaming"`
 	EnableBatchDML   bool                    `toml:"enable-batch-dml" json:"enable-batch-dml"`
@@ -127,6 +141,31 @@ type Config struct {
 	IndexLimit                 int                `toml:"index-limit" json:"index-limit"`
 	TableColumnCountLimit      uint32             `toml:"table-column-count-limit" json:"table-column-count-limit"`
 	GracefulWaitBeforeShutdown int                `toml:"graceful-wait-before-shutdown" json:"graceful-wait-before-shutdown"`
+=======
+	TempStorageQuota int64           `toml:"tmp-storage-quota" json:"tmp-storage-quota"` // Bytes
+	EnableStreaming  bool            `toml:"enable-streaming" json:"enable-streaming"`
+	EnableBatchDML   bool            `toml:"enable-batch-dml" json:"enable-batch-dml"`
+	TxnLocalLatches  TxnLocalLatches `toml:"-" json:"-"`
+	// Set sys variable lower-case-table-names, ref: https://dev.mysql.com/doc/refman/5.7/en/identifier-case-sensitivity.html.
+	// TODO: We actually only support mode 2, which keeps the original case, but the comparison is case-insensitive.
+	LowerCaseTableNames        int               `toml:"lower-case-table-names" json:"lower-case-table-names"`
+	ServerVersion              string            `toml:"server-version" json:"server-version"`
+	Log                        Log               `toml:"log" json:"log"`
+	Security                   Security          `toml:"security" json:"security"`
+	Status                     Status            `toml:"status" json:"status"`
+	Performance                Performance       `toml:"performance" json:"performance"`
+	PreparedPlanCache          PreparedPlanCache `toml:"prepared-plan-cache" json:"prepared-plan-cache"`
+	OpenTracing                OpenTracing       `toml:"opentracing" json:"opentracing"`
+	ProxyProtocol              ProxyProtocol     `toml:"proxy-protocol" json:"proxy-protocol"`
+	TiKVClient                 TiKVClient        `toml:"tikv-client" json:"tikv-client"`
+	Binlog                     Binlog            `toml:"binlog" json:"binlog"`
+	CompatibleKillQuery        bool              `toml:"compatible-kill-query" json:"compatible-kill-query"`
+	Plugin                     Plugin            `toml:"plugin" json:"plugin"`
+	PessimisticTxn             PessimisticTxn    `toml:"pessimistic-txn" json:"pessimistic-txn"`
+	CheckMb4ValueInUTF8        bool              `toml:"check-mb4-value-in-utf8" json:"check-mb4-value-in-utf8"`
+	MaxIndexLength             int               `toml:"max-index-length" json:"max-index-length"`
+	GracefulWaitBeforeShutdown int               `toml:"graceful-wait-before-shutdown" json:"graceful-wait-before-shutdown"`
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// AlterPrimaryKey is used to control alter primary key feature.
 	AlterPrimaryKey bool `toml:"alter-primary-key" json:"alter-primary-key"`
 	// TreatOldVersionUTF8AsUTF8MB4 is use to treat old version table/column UTF8 charset as UTF8MB4. This is for compatibility.
@@ -155,6 +194,7 @@ type Config struct {
 	SkipRegisterToDashboard bool `toml:"skip-register-to-dashboard" json:"skip-register-to-dashboard"`
 	// EnableTelemetry enables the usage data report to PingCAP.
 	EnableTelemetry bool `toml:"enable-telemetry" json:"enable-telemetry"`
+<<<<<<< HEAD
 	// Labels indicates the labels set for the tidb server. The labels describe some specific properties for the tidb
 	// server like `zone`/`rack`/`host`. Currently, labels won't affect the tidb server except for some special
 	// label keys. Now we have following special keys:
@@ -178,6 +218,8 @@ type Config struct {
 	// EnableTCP4Only enables net.Listen("tcp4",...)
 	// Note that: it can make lvs with toa work and thus tidb can get real client ip.
 	EnableTCP4Only bool `toml:"enable-tcp4-only" json:"enable-tcp4-only"`
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // UpdateTempStoragePath is to update the `TempStoragePath` if port/statusPort was changed
@@ -190,6 +232,7 @@ func (c *Config) UpdateTempStoragePath() {
 	}
 }
 
+<<<<<<< HEAD
 func (c *Config) getTiKVConfig() *tikvcfg.Config {
 	return &tikvcfg.Config{
 		CommitterConcurrency:  c.Performance.CommitterConcurrency,
@@ -206,6 +249,8 @@ func (c *Config) getTiKVConfig() *tikvcfg.Config {
 	}
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func encodeDefTempStorageDir(tempDir string, host, statusHost string, port, statusPort uint) string {
 	dirName := base64.URLEncoding.EncodeToString([]byte(fmt.Sprintf("%v:%v/%v:%v", host, port, statusHost, statusPort)))
 	var osUID string
@@ -394,8 +439,12 @@ type Status struct {
 
 // Performance is the performance section of the config.
 type Performance struct {
+<<<<<<< HEAD
 	MaxProcs uint `toml:"max-procs" json:"max-procs"`
 	// Deprecated: use ServerMemoryQuota instead
+=======
+	MaxProcs              uint    `toml:"max-procs" json:"max-procs"`
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	MaxMemory             uint64  `toml:"max-memory" json:"max-memory"`
 	ServerMemoryQuota     uint64  `toml:"server-memory-quota" json:"server-memory-quota"`
 	MemoryUsageAlarmRatio float64 `toml:"memory-usage-alarm-ratio" json:"memory-usage-alarm-ratio"`
@@ -414,8 +463,11 @@ type Performance struct {
 	DistinctAggPushDown   bool    `toml:"distinct-agg-push-down" json:"agg-push-down-join"`
 	CommitterConcurrency  int     `toml:"committer-concurrency" json:"committer-concurrency"`
 	MaxTxnTTL             uint64  `toml:"max-txn-ttl" json:"max-txn-ttl"`
+<<<<<<< HEAD
 	MemProfileInterval    string  `toml:"mem-profile-interval" json:"mem-profile-interval"`
 	IndexUsageSyncLease   string  `toml:"index-usage-sync-lease" json:"index-usage-sync-lease"`
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	GOGC                  int     `toml:"gogc" json:"gogc"`
 }
 
@@ -426,6 +478,15 @@ type PlanCache struct {
 	Shards   uint `toml:"shards" json:"shards"`
 }
 
+<<<<<<< HEAD
+=======
+// TxnLocalLatches is the TxnLocalLatches section of the config.
+type TxnLocalLatches struct {
+	Enabled  bool `toml:"-" json:"-"`
+	Capacity uint `toml:"-" json:"-"`
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // PreparedPlanCache is the PreparedPlanCache section of the config.
 type PreparedPlanCache struct {
 	Enabled          bool    `toml:"enabled" json:"enabled"`
@@ -470,6 +531,60 @@ type ProxyProtocol struct {
 	HeaderTimeout uint `toml:"header-timeout" json:"header-timeout"`
 }
 
+<<<<<<< HEAD
+=======
+// TiKVClient is the config for tikv client.
+type TiKVClient struct {
+	// GrpcConnectionCount is the max gRPC connections that will be established
+	// with each tikv-server.
+	GrpcConnectionCount uint `toml:"grpc-connection-count" json:"grpc-connection-count"`
+	// After a duration of this time in seconds if the client doesn't see any activity it pings
+	// the server to see if the transport is still alive.
+	GrpcKeepAliveTime uint `toml:"grpc-keepalive-time" json:"grpc-keepalive-time"`
+	// After having pinged for keepalive check, the client waits for a duration of Timeout in seconds
+	// and if no activity is seen even after that the connection is closed.
+	GrpcKeepAliveTimeout uint `toml:"grpc-keepalive-timeout" json:"grpc-keepalive-timeout"`
+	// CommitTimeout is the max time which command 'commit' will wait.
+	CommitTimeout string `toml:"commit-timeout" json:"commit-timeout"`
+
+	// MaxBatchSize is the max batch size when calling batch commands API.
+	MaxBatchSize uint `toml:"max-batch-size" json:"max-batch-size"`
+	// If TiKV load is greater than this, TiDB will wait for a while to avoid little batch.
+	OverloadThreshold uint `toml:"overload-threshold" json:"overload-threshold"`
+	// MaxBatchWaitTime in nanosecond is the max wait time for batch.
+	MaxBatchWaitTime time.Duration `toml:"max-batch-wait-time" json:"max-batch-wait-time"`
+	// BatchWaitSize is the max wait size for batch.
+	BatchWaitSize uint `toml:"batch-wait-size" json:"batch-wait-size"`
+	// EnableChunkRPC indicate the data encode in chunk format for coprocessor requests.
+	EnableChunkRPC bool `toml:"enable-chunk-rpc" json:"enable-chunk-rpc"`
+	// If a Region has not been accessed for more than the given duration (in seconds), it
+	// will be reloaded from the PD.
+	RegionCacheTTL uint `toml:"region-cache-ttl" json:"region-cache-ttl"`
+	// If a store has been up to the limit, it will return error for successive request to
+	// prevent the store occupying too much token in dispatching level.
+	StoreLimit int64 `toml:"store-limit" json:"store-limit"`
+	// StoreLivenessTimeout is the timeout for store liveness check request.
+	StoreLivenessTimeout string `toml:"store-liveness-timeout" json:"store-liveness-timeout"`
+
+	CoprCache CoprocessorCache `toml:"copr-cache" json:"copr-cache"`
+}
+
+// CoprocessorCache is the config for coprocessor cache.
+type CoprocessorCache struct {
+	// Whether to enable the copr cache. The copr cache saves the result from TiKV Coprocessor in the memory and
+	// reuses the result when corresponding data in TiKV is unchanged, on a region basis.
+	Enable bool `toml:"enable" json:"enable"`
+	// The capacity in MB of the cache.
+	CapacityMB float64 `toml:"capacity-mb" json:"capacity-mb"`
+	// Only cache requests that containing small number of ranges. May to be changed in future.
+	AdmissionMaxRanges uint64 `toml:"admission-max-ranges" json:"admission-max-ranges"`
+	// Only cache requests whose result set is small.
+	AdmissionMaxResultMB float64 `toml:"admission-max-result-mb" json:"admission-max-result-mb"`
+	// Only cache requests takes notable time to process.
+	AdmissionMinProcessMs uint64 `toml:"admission-min-process-ms" json:"admission-min-process-ms"`
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // Binlog is the config for binlog.
 type Binlog struct {
 	Enable bool `toml:"enable" json:"enable"`
@@ -548,7 +663,11 @@ var defaultConf = Config{
 	OOMUseTmpStorage:             true,
 	TempStorageQuota:             -1,
 	TempStoragePath:              tempStorageDirName,
+<<<<<<< HEAD
 	OOMAction:                    OOMActionCancel,
+=======
+	OOMAction:                    OOMActionLog,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	MemQuotaQuery:                1 << 30,
 	EnableStreaming:              false,
 	EnableBatchDML:               false,
@@ -564,10 +683,20 @@ var defaultConf = Config{
 	RepairMode:                   false,
 	RepairTableList:              []string{},
 	MaxServerConnections:         0,
+<<<<<<< HEAD
 	TxnLocalLatches:              defTiKVCfg.TxnLocalLatches,
 	LowerCaseTableNames:          2,
 	GracefulWaitBeforeShutdown:   0,
 	ServerVersion:                "",
+=======
+	TxnLocalLatches: TxnLocalLatches{
+		Enabled:  false,
+		Capacity: 0,
+	},
+	LowerCaseTableNames:        2,
+	GracefulWaitBeforeShutdown: 0,
+	ServerVersion:              "",
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	Log: Log{
 		Level:               "info",
 		Format:              "text",
@@ -607,12 +736,18 @@ var defaultConf = Config{
 		TxnEntrySizeLimit:     DefTxnEntrySizeLimit,
 		TxnTotalSizeLimit:     DefTxnTotalSizeLimit,
 		DistinctAggPushDown:   false,
+<<<<<<< HEAD
 		CommitterConcurrency:  defTiKVCfg.CommitterConcurrency,
 		MaxTxnTTL:             defTiKVCfg.MaxTxnTTL, // 1hour
 		MemProfileInterval:    "1m",
 		// TODO: set indexUsageSyncLease to 60s.
 		IndexUsageSyncLease: "0s",
 		GOGC:                100,
+=======
+		CommitterConcurrency:  16,
+		MaxTxnTTL:             10 * 60 * 1000, // 10min
+		GOGC:                  100,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	},
 	ProxyProtocol: ProxyProtocol{
 		Networks:      "",
@@ -631,8 +766,36 @@ var defaultConf = Config{
 		},
 		Reporter: OpenTracingReporter{},
 	},
+<<<<<<< HEAD
 	PDClient:   defTiKVCfg.PDClient,
 	TiKVClient: defTiKVCfg.TiKVClient,
+=======
+	TiKVClient: TiKVClient{
+		GrpcConnectionCount:  4,
+		GrpcKeepAliveTime:    10,
+		GrpcKeepAliveTimeout: 3,
+		CommitTimeout:        "41s",
+
+		MaxBatchSize:      128,
+		OverloadThreshold: 200,
+		MaxBatchWaitTime:  0,
+		BatchWaitSize:     8,
+
+		EnableChunkRPC: true,
+
+		RegionCacheTTL:       600,
+		StoreLimit:           0,
+		StoreLivenessTimeout: DefStoreLivenessTimeout,
+
+		CoprCache: CoprocessorCache{
+			Enable:                false,
+			CapacityMB:            1000,
+			AdmissionMaxRanges:    500,
+			AdmissionMaxResultMB:  10,
+			AdmissionMinProcessMs: 5,
+		},
+	},
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	Binlog: Binlog{
 		WriteTimeout: "15s",
 		Strategy:     "range",
@@ -660,9 +823,14 @@ var defaultConf = Config{
 	Security: Security{
 		SpilledFileEncryptionMethod: SpilledFileEncryptionMethodPlaintext,
 	},
+<<<<<<< HEAD
 	DeprecateIntegerDisplayWidth: false,
 	EnableEnumLengthLimit:        true,
 	StoresRefreshInterval:        defTiKVCfg.StoresRefreshInterval,
+=======
+	EnableCollectExecutionInfo: true,
+	EnableTelemetry:            true,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 var (
@@ -685,19 +853,28 @@ func GetGlobalConfig() *Config {
 // StoreGlobalConfig stores a new config to the globalConf. It mostly uses in the test to avoid some data races.
 func StoreGlobalConfig(config *Config) {
 	globalConf.Store(config)
+<<<<<<< HEAD
 	cfg := *config.getTiKVConfig()
 	tikvcfg.StoreGlobalConfig(&cfg)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 var deprecatedConfig = map[string]struct{}{
 	"pessimistic-txn.ttl":            {},
+<<<<<<< HEAD
 	"pessimistic-txn.enable":         {},
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"log.file.log-rotate":            {},
 	"log.log-slow-query":             {},
 	"txn-local-latches":              {},
 	"txn-local-latches.enabled":      {},
 	"txn-local-latches.capacity":     {},
+<<<<<<< HEAD
 	"performance.max-memory":         {},
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"max-txn-time-use":               {},
 	"experimental.allow-auto-random": {},
 	"enable-redact-log":              {}, // use variable tidb_redact_log instead
@@ -716,10 +893,13 @@ func isAllDeprecatedConfigItems(items []string) bool {
 // is set by the user.
 var IsMemoryQuotaQuerySetByUser bool
 
+<<<<<<< HEAD
 // IsOOMActionSetByUser indicates whether the config item mem-action is set by
 // the user.
 var IsOOMActionSetByUser bool
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // InitializeConfig initialize the global config handler.
 // The function enforceCmdArgs is used to merge the config file with command arguments:
 // For example, if you start TiDB by the command "./tidb-server --port=3000", the port number should be
@@ -778,9 +958,12 @@ func (c *Config) Load(confFile string) error {
 	if metaData.IsDefined("mem-quota-query") {
 		IsMemoryQuotaQuerySetByUser = true
 	}
+<<<<<<< HEAD
 	if metaData.IsDefined("oom-action") {
 		IsOOMActionSetByUser = true
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if len(c.ServerVersion) > 0 {
 		mysql.ServerVersion = c.ServerVersion
 	}

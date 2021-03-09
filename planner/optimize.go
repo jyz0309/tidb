@@ -87,6 +87,7 @@ func Optimize(ctx context.Context, sctx sessionctx.Context, node ast.Node, is in
 			sessVars.IsolationReadEngines[kv.TiFlash] = struct{}{}
 		}()
 	}
+<<<<<<< HEAD
 
 	if _, isolationReadContainTiKV := sessVars.IsolationReadEngines[kv.TiKV]; isolationReadContainTiKV {
 		var fp plannercore.Plan
@@ -96,6 +97,10 @@ func Optimize(ctx context.Context, sctx sessionctx.Context, node ast.Node, is in
 		} else {
 			fp = plannercore.TryFastPlan(sctx, node)
 		}
+=======
+	if _, isolationReadContainTiKV := sctx.GetSessionVars().GetIsolationReadEngines()[kv.TiKV]; isolationReadContainTiKV {
+		fp := plannercore.TryFastPlan(sctx, node)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if fp != nil {
 			if !useMaxTS(sctx, fp) {
 				sctx.PrepareTSFuture(ctx)
@@ -113,6 +118,7 @@ func Optimize(ctx context.Context, sctx sessionctx.Context, node ast.Node, is in
 		sctx.GetSessionVars().StmtCtx.AppendWarning(warn)
 	}
 	warns = warns[:0]
+<<<<<<< HEAD
 	for name, val := range stmtHints.SetVars {
 		err := variable.SetStmtVar(sessVars, name, val)
 		if err != nil {
@@ -120,6 +126,8 @@ func Optimize(ctx context.Context, sctx sessionctx.Context, node ast.Node, is in
 		}
 	}
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	bestPlan, names, _, err := optimize(ctx, sctx, node, is)
 	if err != nil {
 		return nil, nil, err
@@ -142,10 +150,13 @@ func Optimize(ctx context.Context, sctx sessionctx.Context, node ast.Node, is in
 		sctx.GetSessionVars().StmtCtx.AppendWarning(errors.New("sql_select_limit is set, so plan binding is not activated"))
 		return bestPlan, names, nil
 	}
+<<<<<<< HEAD
 	err = setFoundInBinding(sctx, true)
 	if err != nil {
 		return nil, nil, err
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	bestPlanHint := plannercore.GenHintsFromPhysicalPlan(bestPlan)
 	if len(bindRecord.Bindings) > 0 {
 		orgBinding := bindRecord.Bindings[0] // the first is the original binding
@@ -277,7 +288,11 @@ func optimize(ctx context.Context, sctx sessionctx.Context, node ast.Node, is in
 	return finalPlan, names, cost, err
 }
 
+<<<<<<< HEAD
 func extractSelectAndNormalizeDigest(stmtNode ast.StmtNode, specifiledDB string) (ast.StmtNode, string, string, error) {
+=======
+func extractSelectAndNormalizeDigest(stmtNode ast.StmtNode, specifiledDB string) (ast.StmtNode, string, string) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	switch x := stmtNode.(type) {
 	case *ast.ExplainStmt:
 		// This function is only used to find bind record.
@@ -286,6 +301,7 @@ func extractSelectAndNormalizeDigest(stmtNode ast.StmtNode, specifiledDB string)
 		// The difference between them is whether len(x.Text()) is empty. They cannot be distinguished by stmt.restore.
 		// For these cases, we need return "" as normalize SQL and hash.
 		if len(x.Text()) == 0 {
+<<<<<<< HEAD
 			return x.Stmt, "", "", nil
 		}
 		switch x.Stmt.(type) {
@@ -300,6 +316,12 @@ func extractSelectAndNormalizeDigest(stmtNode ast.StmtNode, specifiledDB string)
 			hash := parser.DigestNormalized(normalizeSQL)
 			return x.Stmt, normalizeSQL, hash, nil
 		case *ast.SetOprStmt:
+=======
+			return x.Stmt, "", ""
+		}
+		switch x.Stmt.(type) {
+		case *ast.SelectStmt, *ast.DeleteStmt, *ast.UpdateStmt, *ast.InsertStmt:
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			plannercore.EraseLastSemicolon(x)
 			var normalizeExplainSQL string
 			if specifiledDB != "" {
@@ -307,6 +329,7 @@ func extractSelectAndNormalizeDigest(stmtNode ast.StmtNode, specifiledDB string)
 			} else {
 				normalizeExplainSQL = parser.Normalize(x.Text())
 			}
+<<<<<<< HEAD
 			idx := strings.Index(normalizeExplainSQL, "select")
 			parenthesesIdx := strings.Index(normalizeExplainSQL, "(")
 			if parenthesesIdx != -1 && parenthesesIdx < idx {
@@ -317,6 +340,28 @@ func extractSelectAndNormalizeDigest(stmtNode ast.StmtNode, specifiledDB string)
 			return x.Stmt, normalizeSQL, hash, nil
 		}
 	case *ast.SelectStmt, *ast.SetOprStmt, *ast.DeleteStmt, *ast.UpdateStmt, *ast.InsertStmt:
+=======
+			idx := int(0)
+			switch n := x.Stmt.(type) {
+			case *ast.SelectStmt:
+				idx = strings.Index(normalizeExplainSQL, "select")
+			case *ast.DeleteStmt:
+				idx = strings.Index(normalizeExplainSQL, "delete")
+			case *ast.UpdateStmt:
+				idx = strings.Index(normalizeExplainSQL, "update")
+			case *ast.InsertStmt:
+				if n.IsReplace {
+					idx = strings.Index(normalizeExplainSQL, "replace")
+				} else {
+					idx = strings.Index(normalizeExplainSQL, "insert")
+				}
+			}
+			normalizeSQL := normalizeExplainSQL[idx:]
+			hash := parser.DigestNormalized(normalizeSQL)
+			return x.Stmt, normalizeSQL, hash
+		}
+	case *ast.SelectStmt, *ast.DeleteStmt, *ast.UpdateStmt, *ast.InsertStmt:
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		plannercore.EraseLastSemicolon(x)
 		// This function is only used to find bind record.
 		// For some SQLs, such as `explain select * from t`, they will be entered here many times,
@@ -324,7 +369,11 @@ func extractSelectAndNormalizeDigest(stmtNode ast.StmtNode, specifiledDB string)
 		// The difference between them is whether len(x.Text()) is empty. They cannot be distinguished by stmt.restore.
 		// For these cases, we need return "" as normalize SQL and hash.
 		if len(x.Text()) == 0 {
+<<<<<<< HEAD
 			return x, "", "", nil
+=======
+			return x, "", ""
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		var normalizedSQL, hash string
 		if specifiledDB != "" {
@@ -332,7 +381,11 @@ func extractSelectAndNormalizeDigest(stmtNode ast.StmtNode, specifiledDB string)
 		} else {
 			normalizedSQL, hash = parser.NormalizeDigest(x.Text())
 		}
+<<<<<<< HEAD
 		return x, normalizedSQL, hash, nil
+=======
+		return x, normalizedSQL, hash
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	return nil, "", "", nil
 }
@@ -342,9 +395,15 @@ func getBindRecord(ctx sessionctx.Context, stmt ast.StmtNode) (*bindinfo.BindRec
 	if ctx.Value(bindinfo.SessionBindInfoKeyType) == nil {
 		return nil, "", nil
 	}
+<<<<<<< HEAD
 	stmtNode, normalizedSQL, hash, err := extractSelectAndNormalizeDigest(stmt, ctx.GetSessionVars().CurrentDB)
 	if err != nil || stmtNode == nil {
 		return nil, "", err
+=======
+	selectStmt, normalizedSQL, hash := extractSelectAndNormalizeDigest(stmt, ctx.GetSessionVars().CurrentDB)
+	if selectStmt == nil {
+		return nil, ""
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	sessionHandle := ctx.Value(bindinfo.SessionBindInfoKeyType).(*bindinfo.SessionHandle)
 	bindRecord := sessionHandle.GetBindRecord(normalizedSQL, "")
@@ -356,10 +415,17 @@ func getBindRecord(ctx sessionctx.Context, stmt ast.StmtNode) (*bindinfo.BindRec
 	}
 	globalHandle := domain.GetDomain(ctx).BindHandle()
 	if globalHandle == nil {
+<<<<<<< HEAD
 		return nil, "", nil
 	}
 	bindRecord = globalHandle.GetBindRecord(hash, normalizedSQL, "")
 	return bindRecord, metrics.ScopeGlobal, nil
+=======
+		return nil, ""
+	}
+	bindRecord = globalHandle.GetBindRecord(hash, normalizedSQL, "")
+	return bindRecord, metrics.ScopeGlobal
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func handleInvalidBindRecord(ctx context.Context, sctx sessionctx.Context, level string, bindRecord bindinfo.BindRecord) {

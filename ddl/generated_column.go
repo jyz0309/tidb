@@ -236,7 +236,10 @@ func checkModifyGeneratedColumn(tbl table.Table, oldCol, newCol *table.Column, n
 type illegalFunctionChecker struct {
 	hasIllegalFunc bool
 	hasAggFunc     bool
+<<<<<<< HEAD
 	hasRowVal      bool // hasRowVal checks whether the functional index refers to a row value
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	hasWindowFunc  bool
 	otherErr       error
 }
@@ -263,9 +266,12 @@ func (c *illegalFunctionChecker) Enter(inNode ast.Node) (outNode ast.Node, skipC
 		// Aggregate function is not allowed
 		c.hasAggFunc = true
 		return inNode, true
+<<<<<<< HEAD
 	case *ast.RowExpr:
 		c.hasRowVal = true
 		return inNode, true
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case *ast.WindowFuncExpr:
 		c.hasWindowFunc = true
 		return inNode, true
@@ -299,6 +305,7 @@ func checkIllegalFn4Generated(name string, genType int, expr ast.ExprNode) error
 	if c.hasAggFunc {
 		return ErrInvalidGroupFuncUse
 	}
+<<<<<<< HEAD
 	if c.hasRowVal {
 		switch genType {
 		case typeColumn:
@@ -309,6 +316,10 @@ func checkIllegalFn4Generated(name string, genType int, expr ast.ExprNode) error
 	}
 	if c.hasWindowFunc {
 		return errWindowInvalidWindowFuncUse.GenWithStackByArgs(name)
+=======
+	if c.hasWindowFunc {
+		return errWindowInvalidWindowFuncUse
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	if c.otherErr != nil {
 		return c.otherErr

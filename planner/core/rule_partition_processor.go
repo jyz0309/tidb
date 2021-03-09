@@ -30,7 +30,10 @@ import (
 	"github.com/pingcap/tidb/util/chunk"
 	"github.com/pingcap/tidb/util/math"
 	"github.com/pingcap/tidb/util/plancodec"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/util/ranger"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/util/set"
 )
 
@@ -216,8 +219,30 @@ func (s *partitionProcessor) processHashPartition(ds *DataSource, pi *model.Part
 	if err != nil {
 		return nil, err
 	}
+<<<<<<< HEAD
 	if used != nil {
 		return s.makeUnionAllChildren(ds, pi, convertToRangeOr(used, pi))
+=======
+	if ok {
+		idx := math.Abs(val % int64(pi.Num))
+		if len(ds.partitionNames) > 0 && !s.findByName(ds.partitionNames, pi.Definitions[idx].Name.L) {
+			// For condition like `from t partition (p1) where a = 5`, but they are conflict, return TableDual directly.
+			tableDual := LogicalTableDual{RowCount: 0}.Init(ds.SCtx(), ds.blockOffset)
+			tableDual.schema = ds.Schema()
+			return tableDual, nil
+		}
+		newDataSource := *ds
+		newDataSource.baseLogicalPlan = newBaseLogicalPlan(ds.SCtx(), plancodec.TypeTableScan, &newDataSource, ds.blockOffset)
+		newDataSource.isPartition = true
+		newDataSource.physicalTableID = pi.Definitions[idx].ID
+		// There are many expression nodes in the plan tree use the original datasource
+		// id as FromID. So we set the id of the newDataSource with the original one to
+		// avoid traversing the whole plan tree to update the references.
+		newDataSource.id = ds.id
+		newDataSource.statisticTable = getStatsTable(ds.SCtx(), ds.table.Meta(), pi.Definitions[idx].ID)
+		pl := &newDataSource
+		return pl, nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	tableDual := LogicalTableDual{RowCount: 0}.Init(ds.SCtx(), ds.blockOffset)
 	tableDual.schema = ds.Schema()
@@ -672,16 +697,25 @@ func intersectionRange(start, end, newStart, newEnd int) (int, int) {
 	return s, e
 }
 
+<<<<<<< HEAD
 func (s *partitionProcessor) pruneRangePartition(ctx sessionctx.Context, pi *model.PartitionInfo, tbl table.PartitionedTable, conds []expression.Expression,
 	columns []*expression.Column, names types.NameSlice) (partitionRangeOR, error) {
 	partExpr, err := tbl.(partitionTable).PartitionExpr()
+=======
+func (s *partitionProcessor) pruneRangePartition(ds *DataSource, pi *model.PartitionInfo) (LogicalPlan, error) {
+	partExpr, err := ds.table.(partitionTable).PartitionExpr()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return nil, err
 	}
 
 	// Partition by range columns.
 	if len(pi.Columns) > 0 {
+<<<<<<< HEAD
 		return s.pruneRangeColumnsPartition(ctx, conds, pi, partExpr, columns, names)
+=======
+		return s.pruneRangeColumnsPartition(ds, pi, partExpr)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	// Partition by range.
@@ -695,6 +729,7 @@ func (s *partitionProcessor) pruneRangePartition(ctx sessionctx.Context, pi *mod
 	}
 
 	// Extract the partition column, if the column is not null, it's possible to prune.
+<<<<<<< HEAD
 	pruner := rangePruner{
 		lessThan: lessThanDataInt{
 			data:     partExpr.ForRangePruning.LessThan,
@@ -703,6 +738,18 @@ func (s *partitionProcessor) pruneRangePartition(ctx sessionctx.Context, pi *mod
 		col:        col,
 		partFn:     fn,
 		monotonous: mono,
+=======
+	if col != nil {
+		pruner := rangePruner{
+			lessThan: lessThanDataInt{
+				data:     partExpr.ForRangePruning.LessThan,
+				maxvalue: partExpr.ForRangePruning.MaxValue,
+			},
+			col:    col,
+			partFn: fn,
+		}
+		result = partitionRangeForCNFExpr(ds.ctx, ds.allConds, &pruner, result)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	result = partitionRangeForCNFExpr(ctx, conds, &pruner, result)
 	return result, nil
@@ -716,6 +763,7 @@ func (s *partitionProcessor) processRangePartition(ds *DataSource, pi *model.Par
 	return s.makeUnionAllChildren(ds, pi, used)
 }
 
+<<<<<<< HEAD
 func (s *partitionProcessor) processListPartition(ds *DataSource, pi *model.PartitionInfo) (LogicalPlan, error) {
 	used, err := s.pruneListPartition(ds.SCtx(), ds.table, ds.partitionNames, ds.allConds)
 	if err != nil {
@@ -729,6 +777,8 @@ func (s *partitionProcessor) processListPartition(ds *DataSource, pi *model.Part
 	return tableDual, nil
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // makePartitionByFnCol extracts the column and function information in 'partition by ... fn(col)'.
 func makePartitionByFnCol(sctx sessionctx.Context, columns []*expression.Column, names types.NameSlice, partitionExpr string) (*expression.Column, *expression.ScalarFunction, monotoneMode, error) {
 	monotonous := monotoneModeInvalid
@@ -749,18 +799,33 @@ func makePartitionByFnCol(sctx sessionctx.Context, columns []*expression.Column,
 				args := ut.GetArgs()
 				if len(args) == 1 {
 					if c, ok1 := args[0].(*expression.Column); ok1 {
+<<<<<<< HEAD
 						return c, raw, monotoneModeNonStrict, nil
+=======
+						return c, raw, nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 					}
 				}
 			}
 		}
 
+<<<<<<< HEAD
 		fn = raw
 		args := fn.GetArgs()
 		if len(args) > 0 {
 			arg0 := args[0]
 			if c, ok1 := arg0.(*expression.Column); ok1 {
 				col = c
+=======
+		if _, ok := monotoneIncFuncs[raw.FuncName.L]; ok {
+			fn = raw
+			args := fn.GetArgs()
+			if len(args) > 0 {
+				arg0 := args[0]
+				if c, ok1 := arg0.(*expression.Column); ok1 {
+					col = c
+				}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 		}
 		monotonous = getMonotoneMode(raw.FuncName.L)
@@ -830,7 +895,10 @@ func (p *rangePruner) partitionRangeForExpr(sctx sessionctx.Context, expr expres
 			return 0, 0, true
 		}
 	}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	dataForPrune, ok := p.extractDataForPrune(sctx, expr)
 	if !ok {
 		return 0, 0, false
@@ -886,6 +954,7 @@ func partitionRangeForInExpr(sctx sessionctx.Context, args []expression.Expressi
 	return result.simplify()
 }
 
+<<<<<<< HEAD
 type monotoneMode int
 
 const (
@@ -909,6 +978,12 @@ func getMonotoneMode(fnName string) monotoneMode {
 		return monotoneModeInvalid
 	}
 	return mode
+=======
+// monotoneIncFuncs are those functions that for any x y, if x > y => f(x) > f(y)
+var monotoneIncFuncs = map[string]struct{}{
+	ast.ToDays:        {},
+	ast.UnixTimestamp: {},
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // f(x) op const, op is > = <
@@ -966,7 +1041,11 @@ func (p *rangePruner) extractDataForPrune(sctx sessionctx.Context, expr expressi
 		// If the partition expression is fn(col), change constExpr to fn(constExpr).
 		constExpr = replaceColumnWithConst(p.partFn, con)
 
+<<<<<<< HEAD
 		// When the partFn is not strict monotonous, we need to relax the condition < to <=, > to >=.
+=======
+		// Sometimes we need to relax the condition, < to <=, > to >=.
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		// For example, the following case doesn't hold:
 		// col < '2020-02-11 17:34:11' => to_days(col) < to_days(2020-02-11 17:34:11)
 		// The correct transform should be:
@@ -1228,9 +1307,13 @@ func (s *partitionProcessor) makeUnionAllChildren(ds *DataSource, pi *model.Part
 			// id as FromID. So we set the id of the newDataSource with the original one to
 			// avoid traversing the whole plan tree to update the references.
 			newDataSource.id = ds.id
+<<<<<<< HEAD
 			if !ds.ctx.GetSessionVars().UseDynamicPartitionPrune() {
 				newDataSource.statisticTable = getStatsTable(ds.SCtx(), ds.table.Meta(), pi.Definitions[i].ID)
 			}
+=======
+			newDataSource.statisticTable = getStatsTable(ds.SCtx(), ds.table.Meta(), pi.Definitions[i].ID)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			err := s.resolveOptimizeHint(&newDataSource, pi.Definitions[i].Name)
 			partitionNameSet.Insert(pi.Definitions[i].Name.L)
 			if err != nil {
@@ -1257,14 +1340,22 @@ func (s *partitionProcessor) makeUnionAllChildren(ds *DataSource, pi *model.Part
 	return unionAll, nil
 }
 
+<<<<<<< HEAD
 func (s *partitionProcessor) pruneRangeColumnsPartition(ctx sessionctx.Context, conds []expression.Expression, pi *model.PartitionInfo, pe *tables.PartitionExpr, columns []*expression.Column, names types.NameSlice) (partitionRangeOR, error) {
+=======
+func (s *partitionProcessor) pruneRangeColumnsPartition(ds *DataSource, pi *model.PartitionInfo, pe *tables.PartitionExpr) (LogicalPlan, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	result := fullRange(len(pi.Definitions))
 
 	if len(pi.Columns) != 1 {
 		return result, nil
 	}
 
+<<<<<<< HEAD
 	pruner, err := makeRangeColumnPruner(columns, names, pi, pe.ForRangeColumnsPruning)
+=======
+	pruner, err := makeRangeColumnPruner(ds, pi, pe.ForRangeColumnsPruning)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err == nil {
 		result = partitionRangeForCNFExpr(ctx, conds, pruner, result)
 	}
@@ -1280,9 +1371,15 @@ type rangeColumnsPruner struct {
 	maxvalue bool
 }
 
+<<<<<<< HEAD
 func makeRangeColumnPruner(columns []*expression.Column, names types.NameSlice, pi *model.PartitionInfo, from *tables.ForRangeColumnsPruning) (*rangeColumnsPruner, error) {
 	schema := expression.NewSchema(columns...)
 	idx := expression.FindFieldNameIdxByColName(names, pi.Columns[0].L)
+=======
+func makeRangeColumnPruner(ds *DataSource, pi *model.PartitionInfo, from *tables.ForRangeColumnsPruning) (*rangeColumnsPruner, error) {
+	schema := expression.NewSchema(ds.TblCols...)
+	idx := expression.FindFieldNameIdxByColName(ds.names, pi.Columns[0].L)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	partCol := schema.Columns[idx]
 	data := make([]expression.Expression, len(from.LessThan))
 	for i := 0; i < len(from.LessThan); i++ {

@@ -187,7 +187,11 @@ func (s *testColumnChangeSuite) TestModifyAutoRandColumnWithMetaKeyChanged(c *C)
 	tc.onJobRunBefore = func(job *model.Job) {
 		if atomic.LoadInt32(&errCount) > 0 && job.Type == model.ActionModifyColumn {
 			atomic.AddInt32(&errCount, -1)
+<<<<<<< HEAD
 			genAutoRandErr = kv.RunInNewTxn(context.Background(), s.store, false, func(ctx context.Context, txn kv.Transaction) error {
+=======
+			genAutoRandErr = kv.RunInNewTxn(s.store, false, func(txn kv.Transaction) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				t := meta.NewMeta(txn)
 				_, err1 := t.GenAutoRandomID(s.dbInfo.ID, tableID, 1)
 				return err1
@@ -210,7 +214,11 @@ func (s *testColumnChangeSuite) TestModifyAutoRandColumnWithMetaKeyChanged(c *C)
 	c.Assert(genAutoRandErr, IsNil)
 	testCheckJobDone(c, d, job, true)
 	var newTbInfo *model.TableInfo
+<<<<<<< HEAD
 	err = kv.RunInNewTxn(context.Background(), d.store, false, func(ctx context.Context, txn kv.Transaction) error {
+=======
+	err = kv.RunInNewTxn(d.store, false, func(txn kv.Transaction) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		t := meta.NewMeta(txn)
 		var err error
 		newTbInfo, err = t.GetTable(s.dbInfo.ID, tableID)

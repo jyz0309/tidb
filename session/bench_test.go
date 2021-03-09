@@ -1515,6 +1515,7 @@ func BenchmarkRangeColumnPartitionPruning(b *testing.B) {
 	}
 	b.StopTimer()
 }
+<<<<<<< HEAD
 
 func BenchmarkHashPartitionPruningPointSelect(b *testing.B) {
 	ctx := context.Background()
@@ -1579,3 +1580,5 @@ func BenchmarkHashPartitionPruningMultiSelect(b *testing.B) {
 	}
 	b.StopTimer()
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

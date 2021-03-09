@@ -34,7 +34,10 @@ import (
 	"github.com/pingcap/kvproto/pkg/metapb"
 	"github.com/pingcap/parser/model"
 	"github.com/pingcap/parser/terror"
+<<<<<<< HEAD:store/gcworker/gc_worker.go
 	"github.com/pingcap/tidb/ddl/placement"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker.go
 	"github.com/pingcap/tidb/ddl/util"
 	"github.com/pingcap/tidb/domain/infosync"
 	"github.com/pingcap/tidb/kv"
@@ -46,8 +49,13 @@ import (
 	"github.com/pingcap/tidb/store/tikv/logutil"
 	"github.com/pingcap/tidb/store/tikv/oracle"
 	"github.com/pingcap/tidb/store/tikv/tikvrpc"
+<<<<<<< HEAD:store/gcworker/gc_worker.go
 	tikvutil "github.com/pingcap/tidb/store/tikv/util"
 	"github.com/pingcap/tidb/util/admin"
+=======
+	tidbutil "github.com/pingcap/tidb/util"
+	"github.com/pingcap/tidb/util/logutil"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker.go
 	pd "github.com/tikv/pd/client"
 	"go.uber.org/zap"
 )
@@ -323,7 +331,11 @@ func (w *GCWorker) checkPrepare(ctx context.Context) (bool, uint64, error) {
 	if err != nil || !ok {
 		return false, 0, errors.Trace(err)
 	}
+<<<<<<< HEAD:store/gcworker/gc_worker.go
 	newSafePoint, newSafePointValue, err := w.calcNewSafePoint(ctx, now)
+=======
+	newSafePoint, newSafePointValue, err := w.calculateNewSafePoint(ctx, now)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker.go
 	if err != nil || newSafePoint == nil {
 		return false, 0, errors.Trace(err)
 	}
@@ -338,10 +350,19 @@ func (w *GCWorker) checkPrepare(ctx context.Context) (bool, uint64, error) {
 	return true, newSafePointValue, nil
 }
 
+<<<<<<< HEAD:store/gcworker/gc_worker.go
 func (w *GCWorker) calcGlobalMinStartTS(ctx context.Context) (uint64, error) {
 	kvs, err := w.store.GetSafePointKV().GetWithPrefix(infosync.ServerMinStartTSPath)
 	if err != nil {
 		return 0, err
+=======
+// calculateNewSafePoint uses the current global transaction min start timestamp to calculate the new safe point.
+func (w *GCWorker) calSafePointByMinStartTS(ctx context.Context, safePoint time.Time) time.Time {
+	kvs, err := w.store.GetSafePointKV().GetWithPrefix(infosync.ServerMinStartTSPath)
+	if err != nil {
+		logutil.Logger(ctx).Warn("get all minStartTS failed", zap.Error(err))
+		return safePoint
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker.go
 	}
 
 	var globalMinStartTS uint64 = math.MaxUint64
@@ -355,6 +376,7 @@ func (w *GCWorker) calcGlobalMinStartTS(ctx context.Context) (uint64, error) {
 			globalMinStartTS = minStartTS
 		}
 	}
+<<<<<<< HEAD:store/gcworker/gc_worker.go
 	return globalMinStartTS, nil
 }
 
@@ -372,6 +394,16 @@ func (w *GCWorker) calcSafePointByMinStartTS(ctx context.Context, safePoint uint
 			zap.Uint64("globalMinStartTS", globalMinStartTS),
 			zap.Uint64("safePoint", safePoint))
 		safePoint = globalMinStartTS
+=======
+
+	safePointTS := variable.GoTimeToTS(safePoint)
+	if globalMinStartTS < safePointTS {
+		safePoint = time.Unix(0, oracle.ExtractPhysical(globalMinStartTS)*1e6)
+		logutil.Logger(ctx).Info("[gc worker] gc safepoint blocked by a running session",
+			zap.String("uuid", w.uuid),
+			zap.Uint64("globalMinStartTS", globalMinStartTS),
+			zap.Time("safePoint", safePoint))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker.go
 	}
 	return safePoint
 }
@@ -485,7 +517,11 @@ func (w *GCWorker) validateGCLifeTime(lifeTime time.Duration) (time.Duration, er
 	return gcMinLifeTime, err
 }
 
+<<<<<<< HEAD:store/gcworker/gc_worker.go
 func (w *GCWorker) calcNewSafePoint(ctx context.Context, now time.Time) (*time.Time, uint64, error) {
+=======
+func (w *GCWorker) calculateNewSafePoint(ctx context.Context, now time.Time) (*time.Time, uint64, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker.go
 	lifeTime, err := w.loadDurationWithDefault(gcLifeTimeKey, gcDefaultLifeTime)
 	if err != nil {
 		return nil, 0, errors.Trace(err)
@@ -499,6 +535,7 @@ func (w *GCWorker) calcNewSafePoint(ctx context.Context, now time.Time) (*time.T
 	lastSafePoint, err := w.loadTime(gcSafePointKey)
 	if err != nil {
 		return nil, 0, errors.Trace(err)
+<<<<<<< HEAD:store/gcworker/gc_worker.go
 	}
 
 	safePointValue := w.calcSafePointByMinStartTS(ctx, oracle.GoTimeToTS(now.Add(-*lifeTime)))
@@ -511,6 +548,18 @@ func (w *GCWorker) calcNewSafePoint(ctx context.Context, now time.Time) (*time.T
 	// To prevent the GC worker from keeping working due to the loss of logical part when the
 	// safe point isn't changed, we should compare them in time.Time format.
 	safePoint := oracle.GetTimeFromTS(safePointValue)
+=======
+	}
+	safePoint := w.calSafePointByMinStartTS(ctx, now.Add(-*lifeTime))
+
+	safePointValue := oracle.ComposeTS(oracle.GetPhysical(safePoint), 0)
+	safePointValue, err = w.setGCWorkerServiceSafePoint(ctx, safePointValue)
+	safePoint = oracle.GetTimeFromTS(safePointValue)
+
+	if err != nil {
+		return nil, 0, errors.Trace(err)
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker.go
 	// We should never decrease safePoint.
 	if lastSafePoint != nil && !safePoint.After(*lastSafePoint) {
 		logutil.BgLogger().Info("[gc worker] last safe point is later than current one."+
@@ -1760,12 +1809,19 @@ func (w *GCWorker) loadValueFromSysTable(key string) (string, error) {
 	se := createSession(w.store)
 	defer se.Close()
 	rs, err := se.ExecuteInternal(ctx, `SELECT HIGH_PRIORITY (variable_value) FROM mysql.tidb WHERE variable_name=%? FOR UPDATE`, key)
+<<<<<<< HEAD:store/gcworker/gc_worker.go
 	if rs != nil {
 		defer terror.Call(rs.Close)
 	}
 	if err != nil {
 		return "", errors.Trace(err)
 	}
+=======
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+	defer terror.Call(rs.Close)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker.go
 	req := rs.NewChunk()
 	err = rs.Next(ctx, req)
 	if err != nil {

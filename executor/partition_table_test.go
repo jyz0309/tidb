@@ -15,6 +15,7 @@ package executor_test
 
 import (
 	. "github.com/pingcap/check"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/sessionctx/variable"
 	"github.com/pingcap/tidb/util/testkit"
 )
@@ -103,6 +104,12 @@ func (s *partitionTableSuite) TestPartitionUnionScanIndexJoin(c *C) {
 }
 
 func (s *partitionTableSuite) TestPartitionReaderUnderApply(c *C) {
+=======
+	"github.com/pingcap/tidb/util/testkit"
+)
+
+func (s *testSuite9) TestPartitionReaderUnderApply(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk := testkit.NewTestKitWithInit(c, s.store)
 	tk.MustExec("use test")
 
@@ -148,6 +155,7 @@ func (s *partitionTableSuite) TestPartitionReaderUnderApply(c *C) {
 		"3 vibrant shamir 6.300000",
 		"4 hungry wilson 4.900000",
 		"5 naughty swartz 9.524000"))
+<<<<<<< HEAD
 
 	// For issue 19450 release-4.0
 	tk.MustExec(`set @@tidb_partition_prune_mode='` + string(variable.StaticOnly) + `'`)
@@ -197,4 +205,6 @@ partition p2 values less than (10))`)
 	tk.MustExec("alter table p add unique idx(id)")
 	tk.MustExec("insert into p values (1,3), (3,4), (5,6), (7,9)")
 	tk.MustQuery("select * from p use index (idx)").Check(testkit.Rows("1 3", "3 4", "5 6", "7 9"))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

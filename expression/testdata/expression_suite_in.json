@@ -33,9 +33,15 @@
       "explain format = 'brief' select * from t1 left join t2 on t1.a = 1 or (t1.a = 2 and t1.a = 3)",
       "explain format = 'brief' select * from t1 left join t2 on true where t1.a = 1 or (t1.a = 2 and t1.a = 3)",
       // Constant propagation over left outer semi join, filter with aux column should not be derived.
+<<<<<<< HEAD
       "explain format = 'brief' select * from t1 where t1.b > 1 or t1.b in (select b from t2)",
       // Don't propagate for the control function.
       "explain format = 'brief' select * from t1 left join t2 on t1.a = t2.a where ifnull(t2.b, t1.a) = 1"
+=======
+      "explain select * from t1 where t1.b > 1 or t1.b in (select b from t2)",
+      // Don't propagate for the control function.
+      "explain select * from t1 left join t2 on t1.a = t2.a where ifnull(t2.b, t1.a) = 1"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
     ]
   }
 ]

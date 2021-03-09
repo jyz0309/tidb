@@ -222,9 +222,14 @@ func (c *anyValueFunctionClass) getFunction(ctx sessionctx.Context, args []Expre
 	if err != nil {
 		return nil, err
 	}
+<<<<<<< HEAD
 	ft := args[0].GetType().Clone()
 	ft.Flag |= bf.tp.Flag
 	*bf.tp = *ft
+=======
+	args[0].GetType().Flag |= bf.tp.Flag
+	*bf.tp = *args[0].GetType()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	var sig builtinFunc
 	switch argTp {
 	case types.ETDecimal:

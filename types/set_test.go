@@ -53,21 +53,33 @@ func (s *testSetSuite) TestSet(c *C) {
 	}
 
 	for _, t := range tbl {
+<<<<<<< HEAD
 		e, err := ParseSet(elems, t.Name, mysql.DefaultCollationName)
+=======
+		e, err := ParseSetName(elems, t.Name, mysql.DefaultCollationName)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		c.Assert(err, IsNil)
 		c.Assert(e.ToNumber(), Equals, float64(t.ExpectedValue))
 		c.Assert(e.String(), Equals, t.ExpectedName)
 	}
 
 	for _, t := range tbl {
+<<<<<<< HEAD
 		e, err := ParseSet(elems, t.Name, "utf8_unicode_ci")
+=======
+		e, err := ParseSetName(elems, t.Name, "utf8_unicode_ci")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		c.Assert(err, IsNil)
 		c.Assert(e.ToNumber(), Equals, float64(t.ExpectedValue))
 		c.Assert(e.String(), Equals, t.ExpectedName)
 	}
 
 	for _, t := range citbl {
+<<<<<<< HEAD
 		e, err := ParseSet(elems, t.Name, "utf8_general_ci")
+=======
+		e, err := ParseSetName(elems, t.Name, "utf8_general_ci")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		c.Assert(err, IsNil)
 		c.Assert(e.ToNumber(), Equals, float64(t.ExpectedValue))
 		c.Assert(e.String(), Equals, t.ExpectedName)
@@ -95,7 +107,11 @@ func (s *testSetSuite) TestSet(c *C) {
 		"e.f",
 	}
 	for _, t := range tblErr {
+<<<<<<< HEAD
 		_, err := ParseSet(elems, t, mysql.DefaultCollationName)
+=======
+		_, err := ParseSetName(elems, t, mysql.DefaultCollationName)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		c.Assert(err, NotNil)
 	}
 

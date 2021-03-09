@@ -31,7 +31,11 @@ func splitPartitionTableRegion(ctx sessionctx.Context, store kv.SplittableStore,
 	regionIDs := make([]uint64, 0, len(pi.Definitions))
 	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), ctx.GetSessionVars().GetSplitRegionTimeout())
 	defer cancel()
+<<<<<<< HEAD
 	if shardingBits(tbInfo) > 0 && tbInfo.PreSplitRegions > 0 {
+=======
+	if tbInfo.ShardRowIDBits > 0 && tbInfo.PreSplitRegions > 0 {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		for _, def := range pi.Definitions {
 			regionIDs = append(regionIDs, preSplitPhysicalTableByShardRowID(ctxWithTimeout, store, tbInfo, def.ID, scatter)...)
 		}
@@ -49,7 +53,11 @@ func splitTableRegion(ctx sessionctx.Context, store kv.SplittableStore, tbInfo *
 	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), ctx.GetSessionVars().GetSplitRegionTimeout())
 	defer cancel()
 	var regionIDs []uint64
+<<<<<<< HEAD
 	if shardingBits(tbInfo) > 0 && tbInfo.PreSplitRegions > 0 {
+=======
+	if tbInfo.ShardRowIDBits > 0 && tbInfo.PreSplitRegions > 0 {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		regionIDs = preSplitPhysicalTableByShardRowID(ctxWithTimeout, store, tbInfo, tbInfo.ID, scatter)
 	} else {
 		regionIDs = append(regionIDs, splitRecordRegion(ctxWithTimeout, store, tbInfo.ID, scatter))
@@ -89,10 +97,17 @@ func preSplitPhysicalTableByShardRowID(ctx context.Context, store kv.SplittableS
 	max := int64(1 << shardingBits)
 	splitTableKeys := make([][]byte, 0, 1<<(tbInfo.PreSplitRegions))
 	splitTableKeys = append(splitTableKeys, tablecodec.GenTablePrefix(physicalID))
+<<<<<<< HEAD
 	for p := step; p < max; p += step {
 		recordID := p << (64 - shardingBits - 1)
 		recordPrefix := tablecodec.GenTableRecordPrefix(physicalID)
 		key := tablecodec.EncodeRecordKey(recordPrefix, kv.IntHandle(recordID))
+=======
+	for p := int64(step); p < max; p += step {
+		recordID := p << (64 - tbInfo.ShardRowIDBits - 1)
+		recordPrefix := tablecodec.GenTableRecordPrefix(physicalID)
+		key := tablecodec.EncodeRecordKey(recordPrefix, recordID)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		splitTableKeys = append(splitTableKeys, key)
 	}
 	var err error

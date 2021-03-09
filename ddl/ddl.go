@@ -79,6 +79,20 @@ const (
 	OnExistReplace
 )
 
+// OnExist specifies what to do when a new object has a name collision.
+type OnExist uint8
+
+const (
+	// OnExistError throws an error on name collision.
+	OnExistError OnExist = iota
+	// OnExistIgnore skips creating the new object.
+	OnExistIgnore
+	// OnExistReplace replaces the old object by the new object. This is only
+	// supported by VIEWs at the moment. For other object types, this is
+	// equivalent to OnExistError.
+	OnExistReplace
+)
+
 var (
 	// TableIndexCountLimit is limit of the number of indexes in a table.
 	TableIndexCountLimit = uint32(64)
@@ -112,7 +126,10 @@ type DDL interface {
 	RepairTable(ctx sessionctx.Context, table *ast.TableName, createStmt *ast.CreateTableStmt) error
 	CreateSequence(ctx sessionctx.Context, stmt *ast.CreateSequenceStmt) error
 	DropSequence(ctx sessionctx.Context, tableIdent ast.Ident, ifExists bool) (err error)
+<<<<<<< HEAD
 	AlterSequence(ctx sessionctx.Context, stmt *ast.AlterSequenceStmt) error
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// CreateSchemaWithInfo creates a database (schema) given its database info.
 	//
@@ -200,7 +217,10 @@ type ddlCtx struct {
 	lease        time.Duration        // lease is schema lease.
 	binlogCli    *pumpcli.PumpsClient // binlogCli is used for Binlog.
 	infoHandle   *infoschema.Handle
+<<<<<<< HEAD
 	statsHandle  *handle.Handle
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tableLockCkr util.DeadTableLockChecker
 
 	// hook may be modified.
@@ -274,7 +294,11 @@ func newDDL(ctx context.Context, options ...Option) *ddl {
 		syncer = NewMockSchemaSyncer()
 	} else {
 		manager = owner.NewOwnerManager(ctx, etcdCli, ddlPrompt, id, DDLOwnerKey)
+<<<<<<< HEAD
 		syncer = util.NewSchemaSyncer(ctx, etcdCli, id, manager)
+=======
+		syncer = util.NewSchemaSyncer(etcdCli, id, manager)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		deadLockCkr = util.NewDeadTableLockChecker(etcdCli)
 	}
 
@@ -561,9 +585,12 @@ func (d *ddl) doDDLJob(ctx sessionctx.Context, job *model.Job) error {
 		case <-ticker.C:
 			i++
 			ticker = updateTickerInterval(ticker, 10*d.lease, job, i)
+<<<<<<< HEAD
 		case <-d.ctx.Done():
 			logutil.BgLogger().Info("[ddl] doDDLJob will quit because context done")
 			return context.Canceled
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 
 		historyJob, err = d.getHistoryDDLJob(jobID)
@@ -643,7 +670,11 @@ func (d *ddl) startCleanDeadTableLock() {
 			if d.infoHandle == nil || !d.infoHandle.IsValid() {
 				continue
 			}
+<<<<<<< HEAD
 			deadLockTables, err := d.tableLockCkr.GetDeadLockedTables(d.ctx, d.infoHandle.Get().AllSchemas())
+=======
+			deadLockTables, err := d.tableLockCkr.GetDeadLockedTables(d.quitCh, d.infoHandle.Get().AllSchemas())
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			if err != nil {
 				logutil.BgLogger().Info("[ddl] get dead table lock failed.", zap.Error(err))
 				continue
@@ -654,7 +685,11 @@ func (d *ddl) startCleanDeadTableLock() {
 					logutil.BgLogger().Info("[ddl] clean dead table lock failed.", zap.Error(err))
 				}
 			}
+<<<<<<< HEAD
 		case <-d.ctx.Done():
+=======
+		case <-d.quitCh:
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			return
 		}
 	}

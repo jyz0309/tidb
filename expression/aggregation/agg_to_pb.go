@@ -26,9 +26,15 @@ import (
 
 // AggFuncToPBExpr converts aggregate function to pb.
 func AggFuncToPBExpr(sc *stmtctx.StatementContext, client kv.Client, aggFunc *AggFuncDesc) *tipb.Expr {
+<<<<<<< HEAD
 	// if aggFunc.HasDistinct {
 	// do nothing and ignore aggFunc.HasDistinct
 	// }
+=======
+	if aggFunc.HasDistinct {
+		// do nothing and ignore aggFunc.HasDistinct
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if len(aggFunc.OrderByItems) > 0 {
 		return nil
 	}

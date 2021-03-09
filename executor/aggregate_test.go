@@ -15,12 +15,15 @@ package executor_test
 
 import (
 	"fmt"
+<<<<<<< HEAD
 	"math"
 	"math/rand"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	. "github.com/pingcap/check"
 	"github.com/pingcap/errors"
@@ -470,7 +473,11 @@ func (s *testSuiteAgg) TestAggregation(c *C) {
 	tk.MustQuery("select  std(b) from t1 group by a order by a;").Check(testkit.Rows("<nil>", "0", "0"))
 	tk.MustQuery("select  stddev(b) from t1 group by a order by a;").Check(testkit.Rows("<nil>", "0", "0"))
 
+<<<<<<< HEAD
 	// For var_samp()/stddev_samp()
+=======
+	//For var_samp()/stddev_samp()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("drop table if exists t1;")
 	tk.MustExec("CREATE TABLE t1 (id int(11),value1 float(10,2));")
 	tk.MustExec("INSERT INTO t1 VALUES (1,0.00),(1,1.00), (1,2.00), (2,10.00), (2,11.00), (2,12.00), (2,13.00);")
@@ -1150,6 +1157,7 @@ func (s *testSuiteAgg) TestIssue17216(c *C) {
 	tk.MustQuery("SELECT count(distinct col1) FROM t1").Check(testkit.Rows("48"))
 }
 
+<<<<<<< HEAD
 func (s *testSuiteAgg) TestHashAggRuntimeStat(c *C) {
 	partialInfo := &executor.AggWorkerInfo{
 		Concurrency: 5,
@@ -1296,4 +1304,30 @@ func (s *testSuiteAgg) TestIssue20658(c *C) {
 			}
 		}
 	}
+=======
+func (s *testSuiteAgg) TestIssue19426(c *C) {
+	tk := testkit.NewTestKitWithInit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t")
+	tk.MustExec("create table t(a int primary key, b int)")
+	tk.MustExec("insert into t values (1, 11), (4, 44), (2, 22), (3, 33)")
+	tk.MustQuery("select sum(case when a <= 0 or a > 1000 then 0.0 else b end) from t").
+		Check(testkit.Rows("110.0"))
+	tk.MustQuery("select avg(case when a <= 0 or a > 1000 then 0.0 else b end) from t").
+		Check(testkit.Rows("27.50000"))
+	tk.MustQuery("select distinct (case when a <= 0 or a > 1000 then 0.0 else b end) v from t order by v").
+		Check(testkit.Rows("11.0", "22.0", "33.0", "44.0"))
+	tk.MustQuery("select group_concat(case when a <= 0 or a > 1000 then 0.0 else b end order by -a) from t").
+		Check(testkit.Rows("44.0,33.0,22.0,11.0"))
+	tk.MustQuery("select group_concat(a, b, case when a <= 0 or a > 1000 then 0.0 else b end order by -a) from t").
+		Check(testkit.Rows("44444.0,33333.0,22222.0,11111.0"))
+	tk.MustQuery("select group_concat(distinct case when a <= 0 or a > 1000 then 0.0 else b end order by -a) from t").
+		Check(testkit.Rows("44.0,33.0,22.0,11.0"))
+	tk.MustQuery("select max(case when a <= 0 or a > 1000 then 0.0 else b end) from t").
+		Check(testkit.Rows("44.0"))
+	tk.MustQuery("select min(case when a <= 0 or a > 1000 then 0.0 else b end) from t").
+		Check(testkit.Rows("11.0"))
+	tk.MustQuery("select a, b, sum(case when a < 1000 then b else 0.0 end) over (order by a) from t").
+		Check(testkit.Rows("1 11 11.0", "2 22 33.0", "3 33 66.0", "4 44 110.0"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

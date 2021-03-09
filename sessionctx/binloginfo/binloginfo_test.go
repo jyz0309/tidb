@@ -591,6 +591,7 @@ func (s *testBinlogSuite) TestAddSpecialComment(c *C) {
 		{
 			"create table t1 (id int) /*T![auto_id_cache] auto_id_cache=5 */ ;",
 			"create table t1 (id int) /*T![auto_id_cache] auto_id_cache=5 */ ;",
+<<<<<<< HEAD
 		},
 		{
 			"create table t1 (id int, a varchar(255), primary key (a, b) clustered);",
@@ -603,6 +604,8 @@ func (s *testBinlogSuite) TestAddSpecialComment(c *C) {
 		{
 			"create table t1 (id int, a varchar(255), primary key (a, b) /*T![clustered_index] nonclustered */);",
 			"create table t1 (id int, a varchar(255), primary key (a, b) /*T![clustered_index] nonclustered */);",
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		},
 	}
 	for _, ca := range testCase {

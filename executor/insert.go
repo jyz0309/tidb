@@ -153,7 +153,11 @@ func prefetchConflictedOldRows(ctx context.Context, txn kv.Transaction, rows []t
 	for _, r := range rows {
 		for _, uk := range r.uniqueKeys {
 			if val, found := values[string(uk.newKey)]; found {
+<<<<<<< HEAD
 				handle, err := tablecodec.DecodeHandleInUniqueIndexValue(val, uk.commonHandle)
+=======
+				handle, err := tablecodec.DecodeHandle(val)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				if err != nil {
 					return err
 				}
@@ -218,14 +222,22 @@ func (e *InsertExec) batchUpdateDupRows(ctx context.Context, newRows [][]types.D
 			defer snapshot.DelOption(kv.CollectRuntimeStats)
 		}
 	}
+<<<<<<< HEAD
 	prefetchStart := time.Now()
+=======
+	PrefetchStart := time.Now()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Use BatchGet to fill cache.
 	// It's an optimization and could be removed without affecting correctness.
 	if err = prefetchDataCache(ctx, txn, toBeCheckedRows); err != nil {
 		return err
 	}
 	if e.stats != nil {
+<<<<<<< HEAD
 		e.stats.Prefetch += time.Since(prefetchStart)
+=======
+		e.stats.Prefetch += time.Since(PrefetchStart)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	for i, r := range toBeCheckedRows {
 		if r.handleKey != nil {
@@ -251,7 +263,11 @@ func (e *InsertExec) batchUpdateDupRows(ctx context.Context, newRows [][]types.D
 				}
 				return err
 			}
+<<<<<<< HEAD
 			handle, err := tablecodec.DecodeHandleInUniqueIndexValue(val, uk.commonHandle)
+=======
+			handle, err := tablecodec.DecodeHandle(val)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			if err != nil {
 				return err
 			}
@@ -263,7 +279,11 @@ func (e *InsertExec) batchUpdateDupRows(ctx context.Context, newRows [][]types.D
 					// handle points to nothing.
 					logutil.BgLogger().Error("get old row failed when insert on dup",
 						zap.String("uniqueKey", hex.EncodeToString(uk.newKey)),
+<<<<<<< HEAD
 						zap.Stringer("handle", handle),
+=======
+						zap.Int64("handle", handle),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 						zap.String("toBeInsertedRow", types.DatumsToStrNoErr(r.row)))
 				}
 				return err

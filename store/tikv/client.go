@@ -40,6 +40,10 @@ import (
 	"github.com/pingcap/tidb/store/tikv/metrics"
 	"github.com/pingcap/tidb/store/tikv/tikvrpc"
 	"github.com/pingcap/tidb/util/execdetails"
+<<<<<<< HEAD
+=======
+	"github.com/pingcap/tidb/util/logutil"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
@@ -139,11 +143,14 @@ func (a *connArray) Init(addr string, security config.Security, idleNotify *uint
 	keepAliveTimeout := cfg.TiKVClient.GrpcKeepAliveTimeout
 	for i := range a.v {
 		ctx, cancel := context.WithTimeout(context.Background(), a.dialTimeout)
+<<<<<<< HEAD
 		var callOptions []grpc.CallOption
 		callOptions = append(callOptions, grpc.MaxCallRecvMsgSize(MaxRecvMsgSize))
 		if cfg.TiKVClient.GrpcCompressionType == gzip.Name {
 			callOptions = append(callOptions, grpc.UseCompressor(gzip.Name))
 		}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		conn, err := grpc.DialContext(
 			ctx,
 			addr,
@@ -239,6 +246,7 @@ type RPCClient struct {
 	dialTimeout time.Duration
 }
 
+<<<<<<< HEAD
 // NewRPCClient creates a client that manages connections and rpc calls with tikv-servers.
 func NewRPCClient(security config.Security, opts ...func(c *RPCClient)) *RPCClient {
 	cli := &RPCClient{
@@ -249,6 +257,17 @@ func NewRPCClient(security config.Security, opts ...func(c *RPCClient)) *RPCClie
 	for _, opt := range opts {
 		opt(cli)
 	}
+=======
+func newRPCClient(security config.Security, opts ...func(c *rpcClient)) *rpcClient {
+	cli := &rpcClient{
+		conns:       make(map[string]*connArray),
+		security:    security,
+		dialTimeout: dialTimeout,
+	}
+	for _, opt := range opts {
+		opt(cli)
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return cli
 }
 
@@ -257,7 +276,11 @@ func NewTestRPCClient(security config.Security) Client {
 	return NewRPCClient(security)
 }
 
+<<<<<<< HEAD
 func (c *RPCClient) getConnArray(addr string, enableBatch bool, opt ...func(cfg *config.TiKVClient)) (*connArray, error) {
+=======
+func (c *rpcClient) getConnArray(addr string, enableBatch bool, opt ...func(cfg *config.TiKVClient)) (*connArray, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.RLock()
 	if c.isClosed {
 		c.RUnlock()
@@ -275,7 +298,11 @@ func (c *RPCClient) getConnArray(addr string, enableBatch bool, opt ...func(cfg 
 	return array, nil
 }
 
+<<<<<<< HEAD
 func (c *RPCClient) createConnArray(addr string, enableBatch bool, opts ...func(cfg *config.TiKVClient)) (*connArray, error) {
+=======
+func (c *rpcClient) createConnArray(addr string, enableBatch bool, opts ...func(cfg *config.TiKVClient)) (*connArray, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Lock()
 	defer c.Unlock()
 	array, ok := c.conns[addr]
@@ -387,6 +414,7 @@ func (c *RPCClient) SendRequest(ctx context.Context, addr string, req *tikvrpc.R
 
 	client := tikvpb.NewTikvClient(clientConn)
 
+<<<<<<< HEAD
 	switch req.Type {
 	case tikvrpc.CmdBatchCop:
 		return c.getBatchCopStreamResponse(ctx, client, req, timeout, connArray)
@@ -394,6 +422,10 @@ func (c *RPCClient) SendRequest(ctx context.Context, addr string, req *tikvrpc.R
 		return c.getCopStreamResponse(ctx, client, req, timeout, connArray)
 	case tikvrpc.CmdMPPConn:
 		return c.getMPPStreamResponse(ctx, client, req, timeout, connArray)
+=======
+	if req.Type == tikvrpc.CmdBatchCop {
+		return c.getBatchCopStreamResponse(ctx, client, req, timeout, connArray)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	// Or else it's a unary call.
 	ctx1, cancel := context.WithTimeout(ctx, timeout)
@@ -401,7 +433,19 @@ func (c *RPCClient) SendRequest(ctx context.Context, addr string, req *tikvrpc.R
 	return tikvrpc.CallRPC(ctx1, client, req)
 }
 
+<<<<<<< HEAD
 func (c *RPCClient) getCopStreamResponse(ctx context.Context, client tikvpb.TikvClient, req *tikvrpc.Request, timeout time.Duration, connArray *connArray) (*tikvrpc.Response, error) {
+=======
+	if req.Type == tikvrpc.CmdCopStream {
+		return c.getCopStreamResponse(ctx, client, req, timeout, connArray)
+	}
+	ctx1, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	return tikvrpc.CallRPC(ctx1, client, req)
+}
+
+func (c *rpcClient) getCopStreamResponse(ctx context.Context, client tikvpb.TikvClient, req *tikvrpc.Request, timeout time.Duration, connArray *connArray) (*tikvrpc.Response, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Coprocessor streaming request.
 	// Use context to support timeout for grpc streaming client.
 	ctx1, cancel := context.WithCancel(ctx)
@@ -436,7 +480,11 @@ func (c *RPCClient) getCopStreamResponse(ctx context.Context, client tikvpb.Tikv
 
 }
 
+<<<<<<< HEAD
 func (c *RPCClient) getBatchCopStreamResponse(ctx context.Context, client tikvpb.TikvClient, req *tikvrpc.Request, timeout time.Duration, connArray *connArray) (*tikvrpc.Response, error) {
+=======
+func (c *rpcClient) getBatchCopStreamResponse(ctx context.Context, client tikvpb.TikvClient, req *tikvrpc.Request, timeout time.Duration, connArray *connArray) (*tikvrpc.Response, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Coprocessor streaming request.
 	// Use context to support timeout for grpc streaming client.
 	ctx1, cancel := context.WithCancel(ctx)
@@ -468,6 +516,7 @@ func (c *RPCClient) getBatchCopStreamResponse(ctx context.Context, client tikvpb
 	}
 	copStream.BatchResponse = first
 	return resp, nil
+<<<<<<< HEAD
 }
 
 func (c *RPCClient) getMPPStreamResponse(ctx context.Context, client tikvpb.TikvClient, req *tikvrpc.Request, timeout time.Duration, connArray *connArray) (*tikvrpc.Response, error) {
@@ -501,6 +550,9 @@ func (c *RPCClient) getMPPStreamResponse(ctx context.Context, client tikvpb.Tikv
 	}
 	copStream.MPPDataPacket = first
 	return resp, nil
+=======
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // Close closes all connections.

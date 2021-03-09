@@ -503,8 +503,13 @@
     "Name": "TestCollationColumnEstimate",
     "Cases": [
       [
+<<<<<<< HEAD
         "test t  a 0 0 2 2 \u0000A\u0000A\u0000A \u0000A\u0000A\u0000A 0",
         "test t  a 0 1 4 2 \u0000B\u0000B\u0000B \u0000B\u0000B\u0000B 0"
+=======
+        "test t  a 0 0 2 2 \u0000A\u0000A\u0000A \u0000A\u0000A\u0000A",
+        "test t  a 0 1 4 2 \u0000B\u0000B\u0000B \u0000B\u0000B\u0000B"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
       ],
       [
         "TableReader_7 2.00 root  data:Selection_6",
@@ -517,6 +522,7 @@
         "  └─TableFullScan_5 4.00 cop[tikv] table:t keep order:false"
       ]
     ]
+<<<<<<< HEAD
   },
   {
     "Name": "TestDNFCondSelectivity",
@@ -538,5 +544,7 @@
         "Selectivity": 0.3125
       }
     ]
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
   }
 ]

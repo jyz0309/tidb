@@ -263,7 +263,11 @@ timezone.*
     ```shell
     curl http://{TiDBIP}:10080/tables/{db}/{table}/scatter
     ```
+<<<<<<< HEAD
     *Hint: On a partitioned table, use the `table(partition)` pattern as the table name, `test(p1)` for example.*
+=======
+    *Hint: On a partitioned table, use the `table(partition)` pattern as the table name, `test(p1)` for example:*
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
     **Note**: The `scatter-range` scheduler may conflict with the global scheduler, do not use it for long periods on the larger table.
 
@@ -272,7 +276,11 @@ timezone.*
     ```shell
     curl http://{TiDBIP}:10080/tables/{db}/{table}/stop-scatter
     ```
+<<<<<<< HEAD
     *Hint: On a partitioned table, use the `table(partition)` pattern as the table name, `test(p1)` for example.*
+=======
+    *Hint: On a partitioned table, use the `table(partition)` pattern as the table name, `test(p1)` for example:*
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 1. Get TiDB server settings
 

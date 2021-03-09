@@ -158,6 +158,7 @@ func (e *ShowExec) appendTableForStatsBuckets(dbName, tblName, partitionName str
 		return nil
 	}
 	colNameToType := make(map[string]byte, len(statsTbl.Columns))
+<<<<<<< HEAD
 	for _, col := range stableColsStats(statsTbl.Columns) {
 		err := e.bucketsToRows(dbName, tblName, partitionName, col.Info.Name.O, 0, col.Histogram, nil)
 		if err != nil {
@@ -215,17 +216,29 @@ func (e *ShowExec) appendTableForStatsTopN(dbName, tblName, partitionName string
 	colNameToType := make(map[string]byte, len(statsTbl.Columns))
 	for _, col := range stableColsStats(statsTbl.Columns) {
 		err := e.topNToRows(dbName, tblName, partitionName, col.Info.Name.O, 1, 0, col.TopN, []byte{col.Histogram.Tp.Tp})
+=======
+	for _, col := range statsTbl.Columns {
+		err := e.bucketsToRows(dbName, tblName, partitionName, col.Info.Name.O, 0, col.Histogram, nil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			return errors.Trace(err)
 		}
 		colNameToType[col.Info.Name.O] = col.Histogram.Tp.Tp
 	}
+<<<<<<< HEAD
 	for _, idx := range stableIdxsStats(statsTbl.Indices) {
+=======
+	for _, idx := range statsTbl.Indices {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		idxColumnTypes := make([]byte, 0, len(idx.Info.Columns))
 		for i := 0; i < len(idx.Info.Columns); i++ {
 			idxColumnTypes = append(idxColumnTypes, colNameToType[idx.Info.Columns[i].Name.O])
 		}
+<<<<<<< HEAD
 		err := e.topNToRows(dbName, tblName, partitionName, idx.Info.Name.O, len(idx.Info.Columns), 1, idx.TopN, idxColumnTypes)
+=======
+		err := e.bucketsToRows(dbName, tblName, partitionName, idx.Info.Name.O, len(idx.Info.Columns), idx.Histogram, idxColumnTypes)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			return errors.Trace(err)
 		}

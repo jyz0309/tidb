@@ -106,6 +106,8 @@ func Recover(metricsLabel, funcInfo string, recoverFn func(), quit bool) {
 	if r == nil {
 		return
 	}
+<<<<<<< HEAD
+=======
 
 	if recoverFn != nil {
 		recoverFn()
@@ -121,6 +123,40 @@ func Recover(metricsLabel, funcInfo string, recoverFn func(), quit bool) {
 		time.Sleep(time.Second * 15)
 		os.Exit(1)
 	}
+}
+
+// CompatibleParseGCTime parses a string with `GCTimeFormat` and returns a time.Time. If `value` can't be parsed as that
+// format, truncate to last space and try again. This function is only useful when loading times that saved by
+// gc_worker. We have changed the format that gc_worker saves time (removed the last field), but when loading times it
+// should be compatible with the old format.
+func CompatibleParseGCTime(value string) (time.Time, error) {
+	t, err := time.Parse(GCTimeFormat, value)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
+
+	if recoverFn != nil {
+		recoverFn()
+	}
+	logutil.BgLogger().Error("panic in the recoverable goroutine",
+		zap.String("label", metricsLabel),
+		zap.String("funcInfo", funcInfo),
+		zap.Reflect("r", r),
+		zap.String("stack", string(GetStack())))
+	metrics.PanicCounter.WithLabelValues(metricsLabel).Inc()
+	if quit {
+		// Wait for metrics to be pushed.
+		time.Sleep(time.Second * 15)
+		os.Exit(1)
+	}
+}
+
+// HasCancelled checks whether context has be cancelled.
+func HasCancelled(ctx context.Context) (cancel bool) {
+	select {
+	case <-ctx.Done():
+		cancel = true
+	default:
+	}
+	return
 }
 
 // HasCancelled checks whether context has be cancelled.

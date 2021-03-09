@@ -32,7 +32,12 @@ func (c *conditionChecker) check(condition expression.Expression) bool {
 	case *expression.ScalarFunction:
 		return c.checkScalarFunction(x)
 	case *expression.Column:
+<<<<<<< HEAD
 		if x.RetType.EvalType() == types.ETString {
+=======
+		s, _ := condition.(*expression.Column)
+		if s.RetType.EvalType() == types.ETString {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			return false
 		}
 		return c.checkColumn(x)
@@ -68,7 +73,11 @@ func (c *conditionChecker) checkScalarFunction(scalar *expression.ScalarFunction
 		}
 	case ast.IsNull:
 		return c.checkColumn(scalar.GetArgs()[0])
+<<<<<<< HEAD
 	case ast.IsTruthWithoutNull, ast.IsFalsity, ast.IsTruthWithNull:
+=======
+	case ast.IsTruthWithoutNull, ast.IsTruthWithNull, ast.IsFalsity:
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if s, ok := scalar.GetArgs()[0].(*expression.Column); ok {
 			if s.RetType.EvalType() == types.ETString {
 				return false

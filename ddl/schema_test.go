@@ -225,6 +225,67 @@ func (s *testSchemaSuite) TestSchemaWaitJob(c *C) {
 	doDDLJobErr(c, schemaID, 0, model.ActionCreateSchema, []interface{}{dbInfo}, ctx, d2)
 }
 
+<<<<<<< HEAD
+=======
+func testRunInterruptedJob(c *C, d *ddl, job *model.Job) {
+	ctx := mock.NewContext()
+	ctx.Store = d.store
+
+	done := make(chan error, 1)
+	go func() {
+		done <- d.doDDLJob(ctx, job)
+	}()
+
+	ticker := time.NewTicker(d.lease * 1)
+	defer ticker.Stop()
+LOOP:
+	for {
+		select {
+		case <-ticker.C:
+			d.Stop()
+			d.restartWorkers(context.Background())
+			time.Sleep(time.Millisecond * 20)
+		case err := <-done:
+			c.Assert(err, IsNil)
+			break LOOP
+		}
+	}
+}
+
+func (s *testSchemaSuite) TestSchemaResume(c *C) {
+	store := testCreateStore(c, "test_schema_resume")
+	defer store.Close()
+
+	d1 := testNewDDLAndStart(
+		context.Background(),
+		c,
+		WithStore(store),
+		WithLease(testLease),
+	)
+	defer d1.Stop()
+
+	testCheckOwner(c, d1, true)
+
+	dbInfo := testSchemaInfo(c, d1, "test")
+	job := &model.Job{
+		SchemaID:   dbInfo.ID,
+		Type:       model.ActionCreateSchema,
+		BinlogInfo: &model.HistoryInfo{},
+		Args:       []interface{}{dbInfo},
+	}
+	testRunInterruptedJob(c, d1, job)
+	testCheckSchemaState(c, d1, dbInfo, model.StatePublic)
+
+	job = &model.Job{
+		SchemaID:   dbInfo.ID,
+		Type:       model.ActionDropSchema,
+		BinlogInfo: &model.HistoryInfo{},
+	}
+	testRunInterruptedJob(c, d1, job)
+	testCheckSchemaState(c, d1, dbInfo, model.StateNone)
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func testGetSchemaInfoWithError(d *ddl, schemaID int64) (*model.DBInfo, error) {
 	var dbInfo *model.DBInfo
 	err := kv.RunInNewTxn(context.Background(), d.store, false, func(ctx context.Context, txn kv.Transaction) error {

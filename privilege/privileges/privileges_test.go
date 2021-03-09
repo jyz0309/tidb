@@ -870,7 +870,11 @@ func (s *testPrivilegeSuite) TestConfigPrivilege(c *C) {
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "tcd1", Hostname: "localhost", AuthHostname: "tcd1", AuthUsername: "%"}, nil, nil), IsTrue)
 	mustExec(c, se, `SET CONFIG TIKV testkey="testval"`)
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "tcd2", Hostname: "localhost", AuthHostname: "tcd2", AuthUsername: "%"}, nil, nil), IsTrue)
+<<<<<<< HEAD
 	_, err := se.ExecuteInternal(context.Background(), `SET CONFIG TIKV testkey="testval"`)
+=======
+	_, err := se.Execute(context.Background(), `SET CONFIG TIKV testkey="testval"`)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, ErrorMatches, ".*you need \\(at least one of\\) the CONFIG privilege\\(s\\) for this operation")
 	mustExec(c, se, `DROP USER tcd1, tcd2`)
 }
@@ -909,7 +913,11 @@ func (s *testPrivilegeSuite) TestAnalyzeTable(c *C) {
 	c.Assert(terror.ErrorEqual(err, core.ErrTableaccessDenied), IsTrue)
 	c.Assert(err.Error(), Equals, "[planner:1142]INSERT command denied to user 'anobody'@'%' for table 't1'")
 
+<<<<<<< HEAD
 	_, err = se.ExecuteInternal(context.Background(), "select * from t1")
+=======
+	_, err = se.Execute(context.Background(), "select * from t1")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err.Error(), Equals, "[planner:1142]SELECT command denied to user 'anobody'@'%' for table 't1'")
 
 	// try again after SELECT privilege granted
@@ -946,11 +954,19 @@ func (s *testPrivilegeSuite) TestSystemSchema(c *C) {
 	mustExec(c, se, `select * from performance_schema.events_statements_summary_by_digest`)
 	_, err = se.ExecuteInternal(context.Background(), "drop table performance_schema.events_statements_summary_by_digest")
 	c.Assert(strings.Contains(err.Error(), "denied to user"), IsTrue)
+<<<<<<< HEAD
 	_, err = se.ExecuteInternal(context.Background(), "update performance_schema.events_statements_summary_by_digest set schema_name = 'tst'")
+=======
+	_, err = se.Execute(context.Background(), "update performance_schema.events_statements_summary_by_digest set schema_name = 'tst'")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(strings.Contains(err.Error(), "privilege check fail"), IsTrue)
 	_, err = se.ExecuteInternal(context.Background(), "delete from performance_schema.events_statements_summary_by_digest")
 	c.Assert(strings.Contains(err.Error(), "privilege check fail"), IsTrue)
+<<<<<<< HEAD
 	_, err = se.ExecuteInternal(context.Background(), "create table performance_schema.t(a int)")
+=======
+	_, err = se.Execute(context.Background(), "create table performance_schema.t(a int)")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, NotNil)
 	c.Assert(strings.Contains(err.Error(), "CREATE command denied"), IsTrue, Commentf(err.Error()))
 
@@ -962,7 +978,11 @@ func (s *testPrivilegeSuite) TestSystemSchema(c *C) {
 	c.Assert(strings.Contains(err.Error(), "privilege check fail"), IsTrue)
 	_, err = se.ExecuteInternal(context.Background(), "delete from metrics_schema.tidb_query_duration")
 	c.Assert(strings.Contains(err.Error(), "privilege check fail"), IsTrue)
+<<<<<<< HEAD
 	_, err = se.ExecuteInternal(context.Background(), "create table metric_schema.t(a int)")
+=======
+	_, err = se.Execute(context.Background(), "create table metric_schema.t(a int)")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, NotNil)
 	c.Assert(strings.Contains(err.Error(), "CREATE command denied"), IsTrue, Commentf(err.Error()))
 }
@@ -1055,11 +1075,47 @@ func (s *testPrivilegeSuite) TestLoadDataPrivilege(c *C) {
 	c.Assert(err, IsNil)
 }
 
+<<<<<<< HEAD
+=======
+func (s *testPrivilegeSuite) TestLoadDataPrivilege(c *C) {
+	// Create file.
+	path := "/tmp/load_data_priv.csv"
+	fp, err := os.Create(path)
+	c.Assert(err, IsNil)
+	c.Assert(fp, NotNil)
+	defer func() {
+		err = fp.Close()
+		c.Assert(err, IsNil)
+		err = os.Remove(path)
+		c.Assert(err, IsNil)
+	}()
+	fp.WriteString("1\n")
+
+	se := newSession(c, s.store, s.dbName)
+	c.Assert(se.Auth(&auth.UserIdentity{Username: "root", Hostname: "localhost"}, nil, nil), IsTrue)
+	mustExec(c, se, `CREATE USER 'test_load'@'localhost';`)
+	mustExec(c, se, `CREATE TABLE t_load(a int)`)
+	mustExec(c, se, `GRANT SELECT on *.* to 'test_load'@'localhost'`)
+	c.Assert(se.Auth(&auth.UserIdentity{Username: "test_load", Hostname: "localhost"}, nil, nil), IsTrue)
+	_, err = se.Execute(context.Background(), "LOAD DATA LOCAL INFILE '/tmp/load_data_priv.csv' INTO TABLE t_load")
+	c.Assert(strings.Contains(err.Error(), "INSERT command denied to user 'test_load'@'localhost' for table 't_load'"), IsTrue)
+	c.Assert(se.Auth(&auth.UserIdentity{Username: "root", Hostname: "localhost"}, nil, nil), IsTrue)
+	mustExec(c, se, `GRANT INSERT on *.* to 'test_load'@'localhost'`)
+	c.Assert(se.Auth(&auth.UserIdentity{Username: "test_load", Hostname: "localhost"}, nil, nil), IsTrue)
+	_, err = se.Execute(context.Background(), "LOAD DATA LOCAL INFILE '/tmp/load_data_priv.csv' INTO TABLE t_load")
+	c.Assert(err, IsNil)
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testPrivilegeSuite) TestSelectIntoNoPremissions(c *C) {
 	se := newSession(c, s.store, s.dbName)
 	mustExec(c, se, `CREATE USER 'nofile'@'localhost';`)
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "nofile", Hostname: "localhost"}, nil, nil), IsTrue)
+<<<<<<< HEAD
 	_, err := se.ExecuteInternal(context.Background(), `select 1 into outfile '/tmp/doesntmatter-no-permissions'`)
+=======
+	_, err := se.Execute(context.Background(), `select 1 into outfile '/tmp/doesntmatter-no-permissions'`)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	message := "Access denied; you need (at least one of) the FILE privilege(s) for this operation"
 	c.Assert(strings.Contains(err.Error(), message), IsTrue)
 }

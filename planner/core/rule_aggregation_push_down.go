@@ -301,10 +301,18 @@ func (a *aggregationPushDownSolver) splitPartialAgg(agg *LogicalAggregation) (pu
 		AggFuncs:     agg.AggFuncs,
 		GroupByItems: agg.GroupByItems,
 		Schema:       agg.schema,
+<<<<<<< HEAD
 	}, false, false)
 	agg.SetSchema(final.Schema)
 	agg.AggFuncs = final.AggFuncs
 	agg.GroupByItems = final.GroupByItems
+=======
+	}, false)
+	agg.SetSchema(final.Schema)
+	agg.AggFuncs = final.AggFuncs
+	agg.GroupByItems = final.GroupByItems
+	agg.collectGroupByColumns()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	pushedAgg = LogicalAggregation{
 		AggFuncs:     partial.AggFuncs,
@@ -312,6 +320,10 @@ func (a *aggregationPushDownSolver) splitPartialAgg(agg *LogicalAggregation) (pu
 		aggHints:     agg.aggHints,
 	}.Init(agg.ctx, agg.blockOffset)
 	pushedAgg.SetSchema(partial.Schema)
+<<<<<<< HEAD
+=======
+	pushedAgg.collectGroupByColumns()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return
 }
 
@@ -439,12 +451,16 @@ func (a *aggregationPushDownSolver) aggPushDown(p LogicalPlan) (_ LogicalPlan, e
 				}
 				projChild := proj.children[0]
 				agg.SetChildren(projChild)
+<<<<<<< HEAD
 				// When the origin plan tree is `Aggregation->Projection->Union All->X`, we need to merge 'Aggregation' and 'Projection' first.
 				// And then push the new 'Aggregation' below the 'Union All' .
 				// The final plan tree should be 'Aggregation->Union All->Aggregation->X'.
 				child = projChild
 			}
 			if union, ok1 := child.(*LogicalUnionAll); ok1 && p.SCtx().GetSessionVars().AllowAggPushDown {
+=======
+			} else if union, ok1 := child.(*LogicalUnionAll); ok1 && p.SCtx().GetSessionVars().AllowAggPushDown {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				err := a.tryAggPushDownForUnion(union, agg)
 				if err != nil {
 					return nil, err

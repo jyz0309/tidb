@@ -837,7 +837,10 @@ const (
 	ErrDependentByGeneratedColumn                                   = 3108
 	ErrGeneratedColumnRefAutoInc                                    = 3109
 	ErrWarnConflictingHint                                          = 3126
+<<<<<<< HEAD
 	ErrUnresolvedHintName                                           = 3128
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	ErrInvalidJSONText                                              = 3140
 	ErrInvalidJSONPath                                              = 3143
 	ErrInvalidTypeForJSON                                           = 3146
@@ -988,6 +991,7 @@ const (
 	ErrBRIERestoreFailed                   = 8125
 	ErrBRIEImportFailed                    = 8126
 	ErrBRIEExportFailed                    = 8127
+<<<<<<< HEAD
 	ErrInvalidTableSample                  = 8128
 	ErrJSONObjectKeyTooLong                = 8129
 	ErrMultiStatementDisabled              = 8130
@@ -1045,4 +1049,56 @@ const (
 	ErrTiKVMaxTimestampNotSynced = 9011
 	ErrTiFlashServerTimeout      = 9012
 	ErrTiFlashServerBusy         = 9013
+=======
+	ErrJSONObjectKeyTooLong                = 8129 // skip ErrInvalidTableSample (8128) in master only
+	ErrMultiStatementDisabled              = 8130
+
+	// Error codes used by TiDB ddl package
+	ErrUnsupportedDDLOperation        = 8200
+	ErrNotOwner                       = 8201
+	ErrCantDecodeIndex                = 8202
+	ErrInvalidDDLWorker               = 8203
+	ErrInvalidDDLJob                  = 8204
+	ErrInvalidDDLJobFlag              = 8205
+	ErrWaitReorgTimeout               = 8206
+	ErrInvalidStoreVersion            = 8207
+	ErrUnknownTypeLength              = 8208
+	ErrUnknownFractionLength          = 8209
+	ErrInvalidDDLState                = 8210
+	ErrReorgPanic                     = 8211
+	ErrInvalidSplitRegionRanges       = 8212
+	ErrInvalidDDLJobVersion           = 8213
+	ErrCancelledDDLJob                = 8214
+	ErrRepairTable                    = 8215
+	ErrInvalidAutoRandom              = 8216
+	ErrInvalidHashKeyFlag             = 8217
+	ErrInvalidListIndex               = 8218
+	ErrInvalidListMetaData            = 8219
+	ErrWriteOnSnapshot                = 8220
+	ErrInvalidKey                     = 8221
+	ErrInvalidIndexKey                = 8222
+	ErrDataInConsistent               = 8223
+	ErrDDLJobNotFound                 = 8224
+	ErrCancelFinishedDDLJob           = 8225
+	ErrCannotCancelDDLJob             = 8226
+	ErrSequenceUnsupportedTableOption = 8227
+	ErrColumnTypeUnsupportedNextValue = 8228
+	ErrLockExpire                     = 8229
+	ErrAddColumnWithSequenceAsDefault = 8230
+
+	// TiKV/PD/TiFlash errors.
+	ErrPDServerTimeout        = 9001
+	ErrTiKVServerTimeout      = 9002
+	ErrTiKVServerBusy         = 9003
+	ErrResolveLockTimeout     = 9004
+	ErrRegionUnavailable      = 9005
+	ErrGCTooEarly             = 9006
+	ErrWriteConflict          = 9007
+	ErrTiKVStoreLimit         = 9008
+	ErrPrometheusAddrIsNotSet = 9009
+	ErrTiKVStaleCommand       = 9010
+
+	ErrTiFlashServerTimeout = 9012
+	ErrTiFlashServerBusy    = 9013
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )

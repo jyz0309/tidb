@@ -469,7 +469,7 @@ func (w *worker) handleDDLJobQueue(d *ddlCtx) error {
 			// and retry later if the job is not cancelled.
 			schemaVer, runJobErr = w.runDDLJob(d, t, job)
 			if job.IsCancelled() {
-				txn.Reset()
+				txn.Discard()
 				err = w.finishDDLJob(t, job)
 				return errors.Trace(err)
 			}
@@ -480,7 +480,11 @@ func (w *worker) handleDDLJobQueue(d *ddlCtx) error {
 				// then shouldn't discard the KV modification.
 				// And the job state is rollback done, it means the job was already finished, also shouldn't discard too.
 				// Otherwise, we should discard the KV modification when running job.
+<<<<<<< HEAD
 				txn.Reset()
+=======
+				txn.Discard()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				// If error happens after updateSchemaVersion(), then the schemaVer is updated.
 				// Result in the retry duration is up to 2 * lease.
 				schemaVer = 0
@@ -512,9 +516,13 @@ func (w *worker) handleDDLJobQueue(d *ddlCtx) error {
 		// Here means the job enters another state (delete only, write only, public, etc...) or is cancelled.
 		// If the job is done or still running or rolling back, we will wait 2 * lease time to guarantee other servers to update
 		// the newest schema.
+<<<<<<< HEAD
 		ctx, cancel := context.WithTimeout(w.ctx, waitTime)
 		w.waitSchemaChanged(ctx, d, waitTime, schemaVer, job)
 		cancel()
+=======
+		w.waitSchemaChanged(nil, d, waitTime, schemaVer, job)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 		if RunInGoTest {
 			// d.mu.hook is initialed from domain / test callback, which will force the owner host update schema diff synchronously.
@@ -539,9 +547,12 @@ func skipWriteBinlog(job *model.Job) bool {
 	// it's used to update table's TiFlash replica available status.
 	case model.ActionUpdateTiFlashReplicaStatus:
 		return true
+<<<<<<< HEAD
 	// It is done without modifying table info, bin log is not needed
 	case model.ActionAlterTableAlterPartition:
 		return true
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	return false
@@ -552,7 +563,11 @@ func writeBinlog(binlogCli *pumpcli.PumpsClient, txn kv.Transaction, job *model.
 		// When this column is in the "delete only" and "delete reorg" states, the binlog of "drop column" has not been written yet,
 		// but the column has been removed from the binlog of the write operation.
 		// So we add this binlog to enable downstream components to handle DML correctly in this schema state.
+<<<<<<< HEAD
 		((job.Type == model.ActionDropColumn || job.Type == model.ActionDropColumns) && job.SchemaState == model.StateDeleteOnly) {
+=======
+		(job.Type == model.ActionDropColumn && job.SchemaState == model.StateDeleteOnly) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if skipWriteBinlog(job) {
 			return
 		}

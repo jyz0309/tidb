@@ -247,7 +247,11 @@ func (s *testUnitTestSuit) TestIndexJoinAnalyzeLookUpFilters(c *C) {
 		others, err := s.rewriteSimpleExpr(tt.otherConds, joinNode.schema, joinColNames)
 		c.Assert(err, IsNil)
 		joinNode.OtherConditions = others
+<<<<<<< HEAD
 		helper := &indexJoinBuildHelper{join: joinNode, lastColManager: nil, innerPlan: dataSourceNode}
+=======
+		helper := &indexJoinBuildHelper{join: joinNode, lastColManager: nil}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		_, err = helper.analyzeLookUpFilters(path, dataSourceNode, tt.innerKeys, tt.innerKeys)
 		c.Assert(err, IsNil)
 		c.Assert(fmt.Sprintf("%v", helper.chosenAccess), Equals, tt.accesses)

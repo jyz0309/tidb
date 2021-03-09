@@ -706,6 +706,7 @@ func (c *Chunk) ToString(ft []*types.FieldType) string {
 	}
 	return string(buf)
 }
+<<<<<<< HEAD
 
 // AppendRows appends multiple rows to the chunk.
 func (c *Chunk) AppendRows(rows []Row) {
@@ -725,3 +726,5 @@ func (c *Chunk) AppendPartialRows(colOff int, rows []Row) {
 		}
 	}
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

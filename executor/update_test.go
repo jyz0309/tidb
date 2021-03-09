@@ -235,6 +235,7 @@ func (s *testUpdateSuite) TestUpdateMultiDatabaseTable(c *C) {
 	tk.MustExec("update t, test2.t set test.t.a=1")
 }
 
+<<<<<<< HEAD
 func (s *testUpdateSuite) TestUpdateSwapColumnValues(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -496,6 +497,8 @@ func (s *testSuite11) TestOutOfRangeWithUnsigned(c *C) {
 	c.Assert(err.Error(), Equals, "[types:1690]BIGINT UNSIGNED value is out of range in '(0 - test.t.ts)'")
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testPointGetSuite) TestIssue21447(c *C) {
 	tk1, tk2 := testkit.NewTestKit(c, s.store), testkit.NewTestKit(c, s.store)
 	tk1.MustExec("use test")

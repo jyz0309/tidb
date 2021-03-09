@@ -249,10 +249,20 @@ func (s *testSequenceSuite) TestSequenceAsDefaultValue(c *C) {
 	tk.MustExec("create sequence seq")
 
 	// test the use sequence's nextval as default.
+<<<<<<< HEAD
 	tk.MustExec("drop table if exists t")
 	tk.MustExec("create table t(a int not null default next value for seq key)")
 	tk.MustExec("drop table if exists t")
 	tk.MustExec("create table t(a int not null default nextval(seq), b int, primary key(a))")
+=======
+	s.tk.MustExec("drop table if exists t")
+	s.tk.MustExec("create table t(a int not null default next value for seq key)")
+	s.tk.MustExec("drop table if exists t")
+	s.tk.MustExec("create table t(a int not null default nextval(seq), b int, primary key(a))")
+
+	s.tk.MustExec("create table t1 (a int default next value for seq)")
+	s.tk.MustGetErrMsg("create table t2 (a char(1) default next value for seq)", "[ddl:8228]Unsupported sequence default value for column type 'a'")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	tk.MustExec("create table t1 (a int default next value for seq)")
 	tk.MustGetErrMsg("create table t2 (a char(1) default next value for seq)", "[ddl:8228]Unsupported sequence default value for column type 'a'")
@@ -266,6 +276,7 @@ func (s *testSequenceSuite) TestSequenceAsDefaultValue(c *C) {
 	tk.MustExec("create table t5 (a char(1))")
 	tk.MustGetErrMsg("alter table t5 alter column a set default (next value for seq)", "[ddl:8228]Unsupported sequence default value for column type 'a'")
 
+<<<<<<< HEAD
 	tk.MustGetErrMsg("alter table t5 alter column a set default (nextval(seq))", "[ddl:8228]Unsupported sequence default value for column type 'a'")
 
 	// Specially, the new added column with sequence as it's default value is forbade.
@@ -279,6 +290,19 @@ func (s *testSequenceSuite) TestSequenceAsDefaultValue(c *C) {
 	tk.MustExec("alter table t5 alter column c set default (next value for seq)")
 	// Alter with change.
 	tk.MustExec("alter table t5 change column c c int default next value for seq")
+=======
+	// Specially, the new added column with sequence as it's default value is forbade.
+	// But alter table column with sequence as it's default value is allowed.
+	s.tk.MustGetErrMsg("alter table t5 add column c int default next value for seq", "[ddl:8230]Unsupported using sequence as default value in add column 'c'")
+
+	s.tk.MustExec("alter table t5 add column c int default -1")
+	// Alter with modify.
+	s.tk.MustExec("alter table t5 modify column c int default next value for seq")
+	// Alter with alter.
+	s.tk.MustExec("alter table t5 alter column c set default (next value for seq)")
+	// Alter with change.
+	s.tk.MustExec("alter table t5 change column c c int default next value for seq")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testSequenceSuite) TestSequenceFunction(c *C) {
@@ -609,6 +633,7 @@ func (s *testSequenceSuite) TestSequenceFunction(c *C) {
 	c.Assert(round, Equals, int64(0))
 
 	// Test the sequence seek formula will overflow Int64.
+<<<<<<< HEAD
 	tk.MustExec("drop sequence if exists seq")
 	tk.MustExec("create sequence seq increment 2 start -9223372036854775807 maxvalue 9223372036854775806 minvalue -9223372036854775807 cache 2 cycle")
 	tk.MustQuery("select nextval(seq)").Check(testkit.Rows("-9223372036854775807"))
@@ -669,6 +694,68 @@ func (s *testSequenceSuite) TestSequenceFunction(c *C) {
 	// test the current value already satisfied setval in other session.
 	tk.MustExec("create sequence seq")
 	tk.MustQuery("select setval(seq, 100)").Check(testkit.Rows("100"))
+=======
+	s.tk.MustExec("drop sequence if exists seq")
+	s.tk.MustExec("create sequence seq increment 2 start -9223372036854775807 maxvalue 9223372036854775806 minvalue -9223372036854775807 cache 2 cycle")
+	s.tk.MustQuery("select nextval(seq)").Check(testkit.Rows("-9223372036854775807"))
+	s.tk.MustQuery("select setval(seq, 9223372036854775800)").Check(testkit.Rows("9223372036854775800"))
+	s.tk.MustQuery("select nextval(seq)").Check(testkit.Rows("9223372036854775801"))
+
+	s.tk.MustExec("drop sequence if exists seq")
+	s.tk.MustExec("create sequence seq increment -2 start 9223372036854775806 maxvalue 9223372036854775806 minvalue -9223372036854775807 cache 2 cycle")
+	s.tk.MustQuery("select nextval(seq)").Check(testkit.Rows("9223372036854775806"))
+	s.tk.MustQuery("select setval(seq, -9223372036854775800)").Check(testkit.Rows("-9223372036854775800"))
+	s.tk.MustQuery("select nextval(seq)").Check(testkit.Rows("-9223372036854775802"))
+
+	// Test sequence function with wrong object name.
+	s.tk.MustExec("drop sequence if exists seq")
+	s.tk.MustExec("drop table if exists seq")
+	s.tk.MustExec("drop view if exists seq")
+	s.tk.MustExec("drop sequence if exists seq1")
+	s.tk.MustExec("drop table if exists seq1")
+	s.tk.MustExec("drop view if exists seq1")
+	s.tk.MustExec("create table seq(a int)")
+	_, err = s.tk.Exec("select nextval(seq)")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[schema:1347]'test.seq' is not SEQUENCE")
+	_, err = s.tk.Exec("select lastval(seq)")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[schema:1347]'test.seq' is not SEQUENCE")
+	_, err = s.tk.Exec("select setval(seq, 10)")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[schema:1347]'test.seq' is not SEQUENCE")
+
+	s.tk.MustExec("create view seq1 as select * from seq")
+	_, err = s.tk.Exec("select nextval(seq1)")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[schema:1347]'test.seq1' is not SEQUENCE")
+	_, err = s.tk.Exec("select lastval(seq1)")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[schema:1347]'test.seq1' is not SEQUENCE")
+	_, err = s.tk.Exec("select setval(seq1, 10)")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[schema:1347]'test.seq1' is not SEQUENCE")
+	s.tk.MustExec("drop sequence if exists seq")
+	s.tk.MustExec("drop table if exists seq")
+	s.tk.MustExec("drop view if exists seq")
+	s.tk.MustExec("drop sequence if exists seq1")
+	s.tk.MustExec("drop table if exists seq1")
+	s.tk.MustExec("drop view if exists seq1")
+
+	// test a bug found in ticase.
+	s.tk.MustExec("create sequence seq")
+	s.tk.MustQuery("select setval(seq, 10)").Check(testkit.Rows("10"))
+	s.tk.MustQuery("select setval(seq, 5)").Check(testkit.Rows("<nil>"))
+	s.tk.MustExec("drop sequence seq")
+	s.tk.MustExec("create sequence seq increment=-1")
+	s.tk.MustQuery("select setval(seq, -10)").Check(testkit.Rows("-10"))
+	s.tk.MustQuery("select setval(seq, -5)").Check(testkit.Rows("<nil>"))
+	s.tk.MustExec("drop sequence seq")
+
+	// test the current value already satisfied setval in other session.
+	s.tk.MustExec("create sequence seq")
+	s.tk.MustQuery("select setval(seq, 100)").Check(testkit.Rows("100"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	se, err := session.CreateSession4Test(s.store)
 	c.Assert(err, IsNil)
 	tk1 := testkit.NewTestKit(c, s.store)
@@ -679,15 +766,23 @@ func (s *testSequenceSuite) TestSequenceFunction(c *C) {
 	tk1.MustQuery("select setval(seq, 100)").Check(testkit.Rows("<nil>"))
 	tk1.MustQuery("select setval(seq, 101)").Check(testkit.Rows("<nil>"))
 	tk1.MustQuery("select setval(seq, 102)").Check(testkit.Rows("102"))
+<<<<<<< HEAD
 	tk.MustExec("drop sequence seq")
 
 	tk.MustExec("create sequence seq increment=-1")
 	tk.MustQuery("select setval(seq, -100)").Check(testkit.Rows("-100"))
+=======
+	s.tk.MustExec("drop sequence seq")
+
+	s.tk.MustExec("create sequence seq increment=-1")
+	s.tk.MustQuery("select setval(seq, -100)").Check(testkit.Rows("-100"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk1.MustQuery("select setval(seq, -50)").Check(testkit.Rows("<nil>"))
 	tk1.MustQuery("select nextval(seq)").Check(testkit.Rows("-101"))
 	tk1.MustQuery("select setval(seq, -100)").Check(testkit.Rows("<nil>"))
 	tk1.MustQuery("select setval(seq, -101)").Check(testkit.Rows("<nil>"))
 	tk1.MustQuery("select setval(seq, -102)").Check(testkit.Rows("-102"))
+<<<<<<< HEAD
 	tk.MustExec("drop sequence seq")
 
 	// test the sequence name preprocess.
@@ -705,6 +800,25 @@ func (s *testSequenceSuite) TestSequenceFunction(c *C) {
 	tk.MustQuery("select nextval(seq)").Check(testkit.Rows("3"))
 	tk.MustExec("drop sequence seq")
 	tk.MustExec("drop table t")
+=======
+	s.tk.MustExec("drop sequence seq")
+
+	// test the sequence name preprocess.
+	s.tk.MustExec("drop table if exists t")
+	s.tk.MustExec("create sequence seq")
+	s.tk.MustExec("create table t(a int)")
+	s.tk.MustExec("insert into t values(1),(2)")
+	s.tk.MustQuery("select nextval(seq), t.a from t").Check(testkit.Rows("1 1", "2 2"))
+	_, err = s.tk.Exec("select nextval(t), t.a from t")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[schema:1347]'test.t' is not SEQUENCE")
+	_, err = s.tk.Exec("select nextval(seq), nextval(t), t.a from t")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[schema:1347]'test.t' is not SEQUENCE")
+	s.tk.MustQuery("select nextval(seq)").Check(testkit.Rows("3"))
+	s.tk.MustExec("drop sequence seq")
+	s.tk.MustExec("drop table t")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testSequenceSuite) TestInsertSequence(c *C) {
@@ -755,6 +869,7 @@ func (s *testSequenceSuite) TestInsertSequence(c *C) {
 	tk.MustQuery("select * from t").Check(testkit.Rows("14", "-1", "101"))
 
 	// test insert with generated column.
+<<<<<<< HEAD
 	tk.MustExec("drop sequence if exists seq")
 	tk.MustExec("create sequence seq")
 	tk.MustExec("drop table if exists t")
@@ -767,6 +882,20 @@ func (s *testSequenceSuite) TestInsertSequence(c *C) {
 	tk.MustExec("delete from t")
 	tk.MustExec("insert into t (id) values(-1),(default)")
 	tk.MustQuery("select * from t").Check(testkit.Rows("-1 0", "4 5"))
+=======
+	s.tk.MustExec("drop sequence if exists seq")
+	s.tk.MustExec("create sequence seq")
+	s.tk.MustExec("drop table if exists t")
+	s.tk.MustExec("create table t (id int default next value for seq, col1 int generated always as (id + 1))")
+
+	s.tk.MustExec("insert into t values()")
+	s.tk.MustQuery("select * from t").Check(testkit.Rows("1 2"))
+	s.tk.MustExec("insert into t values(),()")
+	s.tk.MustQuery("select * from t").Check(testkit.Rows("1 2", "2 3", "3 4"))
+	s.tk.MustExec("delete from t")
+	s.tk.MustExec("insert into t (id) values(-1),(default)")
+	s.tk.MustQuery("select * from t").Check(testkit.Rows("-1 0", "4 5"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// test sequence run out (overflows MaxInt64).
 	setSQL := "select setval(seq," + strconv.FormatInt(model.DefaultPositiveSequenceMaxValue+1, 10) + ")"
@@ -863,6 +992,7 @@ func (s *testSequenceSuite) BenchmarkInsertCacheDefaultExpr(c *C) {
 }
 
 func (s *testSequenceSuite) TestSequenceFunctionPrivilege(c *C) {
+<<<<<<< HEAD
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
 
@@ -873,6 +1003,19 @@ func (s *testSequenceSuite) TestSequenceFunctionPrivilege(c *C) {
 	tk.MustExec("create table t(a int default next value for seq)")
 	tk.MustExec("drop user if exists myuser@localhost")
 	tk.MustExec("create user myuser@localhost")
+=======
+	s.tk = testkit.NewTestKit(c, s.store)
+	s.tk.MustExec("use test")
+
+	// Test sequence function privilege.
+	s.tk.MustExec("drop sequence if exists seq")
+	s.tk.MustExec("create sequence seq")
+	s.tk.MustExec("drop table if exists t")
+	s.tk.MustExec("create table t(a int default next value for seq)")
+	s.tk.MustExec("drop user if exists myuser@localhost")
+	s.tk.MustExec("create user myuser@localhost")
+	s.tk.MustExec("flush privileges")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	tk1 := testkit.NewTestKit(c, s.store)
 	se, err := session.CreateSession4Test(s.store)
@@ -881,7 +1024,12 @@ func (s *testSequenceSuite) TestSequenceFunctionPrivilege(c *C) {
 	tk1.Se = se
 
 	// grant the myuser the create access to the sequence.
+<<<<<<< HEAD
 	tk.MustExec("grant insert on test.t to 'myuser'@'localhost'")
+=======
+	s.tk.MustExec("grant insert on test.t to 'myuser'@'localhost'")
+	s.tk.MustExec("flush privileges")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// INSERT privilege required to use nextval.
 	tk1.MustExec("use test")
@@ -904,7 +1052,12 @@ func (s *testSequenceSuite) TestSequenceFunctionPrivilege(c *C) {
 	c.Assert(err.Error(), Equals, "[expression:1142]INSERT command denied to user 'myuser'@'localhost' for table 'seq'")
 
 	// grant the myuser the SELECT & UPDATE access to sequence seq.
+<<<<<<< HEAD
 	tk.MustExec("grant SELECT, INSERT on test.seq to 'myuser'@'localhost'")
+=======
+	s.tk.MustExec("grant SELECT, INSERT on test.seq to 'myuser'@'localhost'")
+	s.tk.MustExec("flush privileges")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// SELECT privilege required to use nextval.
 	tk1.MustQuery("select nextval(seq)").Check(testkit.Rows("1"))
@@ -912,9 +1065,15 @@ func (s *testSequenceSuite) TestSequenceFunctionPrivilege(c *C) {
 	tk1.MustQuery("select setval(seq, 10)").Check(testkit.Rows("10"))
 	tk1.MustExec("insert into t values()")
 
+<<<<<<< HEAD
 	tk.MustExec("drop table t")
 	tk.MustExec("drop sequence seq")
 	tk.MustExec("drop user myuser@localhost")
+=======
+	s.tk.MustExec("drop table t")
+	s.tk.MustExec("drop sequence seq")
+	s.tk.MustExec("drop user myuser@localhost")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // Background: the newly added column in TiDB won't fill the known rows with specific
@@ -937,6 +1096,7 @@ func (s *testSequenceSuite) TestSequenceFunctionPrivilege(c *C) {
 // [1]: forbid the new added column has sequence as it's default value.
 // [2]: allow the altered column with sequence as default value.
 func (s *testSequenceSuite) TestSequenceDefaultLogic(c *C) {
+<<<<<<< HEAD
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
 
@@ -962,10 +1122,38 @@ func (s *testSequenceSuite) TestSequenceDefaultLogic(c *C) {
 	tk.MustExec("insert into t values(-1),(-1),(-1)")
 	tk.MustGetErrMsg("alter table t add column b int default next value for seq", "[ddl:8230]Unsupported using sequence as default value in add column 'b'")
 	tk.MustQuery("select * from t").Check(testkit.Rows("-1", "-1", "-1"))
+=======
+	s.tk = testkit.NewTestKit(c, s.store)
+	s.tk.MustExec("use test")
+
+	s.tk.MustExec("drop sequence if exists seq")
+	s.tk.MustExec("drop table if exists t")
+	s.tk.MustExec("create sequence seq")
+	s.tk.MustExec("create table t(a int)")
+
+	// Alter table to use sequence as default value is ok.
+	s.tk.MustExec("insert into t values(-1),(-1),(-1)")
+	s.tk.MustExec("alter table t add column b int default -1")
+	s.tk.MustQuery("select * from t").Check(testkit.Rows("-1 -1", "-1 -1", "-1 -1"))
+	s.tk.MustExec("alter table t modify column b int default next value for seq")
+	s.tk.MustQuery("select * from t").Check(testkit.Rows("-1 -1", "-1 -1", "-1 -1"))
+	s.tk.MustExec("insert into t(a) values(-1),(-1)")
+	s.tk.MustQuery("select * from t").Check(testkit.Rows("-1 -1", "-1 -1", "-1 -1", "-1 1", "-1 2"))
+
+	// Add column to set sequence as default value is forbade.
+	s.tk.MustExec("drop sequence seq")
+	s.tk.MustExec("drop table t")
+	s.tk.MustExec("create sequence seq")
+	s.tk.MustExec("create table t(a int)")
+	s.tk.MustExec("insert into t values(-1),(-1),(-1)")
+	s.tk.MustGetErrMsg("alter table t add column b int default next value for seq", "[ddl:8230]Unsupported using sequence as default value in add column 'b'")
+	s.tk.MustQuery("select * from t").Check(testkit.Rows("-1", "-1", "-1"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // Close issue #17945, sequence cache shouldn't be negative.
 func (s *testSequenceSuite) TestSequenceCacheShouldNotBeNegative(c *C) {
+<<<<<<< HEAD
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
 
@@ -975,6 +1163,17 @@ func (s *testSequenceSuite) TestSequenceCacheShouldNotBeNegative(c *C) {
 	c.Assert(err.Error(), Equals, "[ddl:4136]Sequence 'test.seq' values are conflicting")
 
 	_, err = tk.Exec("create sequence seq cache 0")
+=======
+	s.tk = testkit.NewTestKit(c, s.store)
+	s.tk.MustExec("use test")
+
+	s.tk.MustExec("drop sequence if exists seq")
+	_, err := s.tk.Exec("create sequence seq cache -1")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[ddl:4136]Sequence 'test.seq' values are conflicting")
+
+	_, err = s.tk.Exec("create sequence seq cache 0")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, "[ddl:4136]Sequence 'test.seq' values are conflicting")
 
@@ -984,6 +1183,7 @@ func (s *testSequenceSuite) TestSequenceCacheShouldNotBeNegative(c *C) {
 	// 3: increment = -9223372036854775807 by user
 	// `seqInfo.CacheValue < (math.MaxInt64-absIncrement)/absIncrement` will
 	// ensure there is enough value for one cache allocation at least.
+<<<<<<< HEAD
 	_, err = tk.Exec("create sequence seq INCREMENT -9223372036854775807 cache 1")
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, "[ddl:4136]Sequence 'test.seq' values are conflicting")
@@ -1073,4 +1273,11 @@ func (s *testSequenceSuite) TestAlterSequencePrivilege(c *C) {
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, "[planner:1142]ALTER command denied to user 'myuser'@'localhost' for table 'my_seq'")
 	tk.MustExec("drop sequence if exists my_seq")
+=======
+	_, err = s.tk.Exec("create sequence seq INCREMENT -9223372036854775807 cache 1")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[ddl:4136]Sequence 'test.seq' values are conflicting")
+
+	s.tk.MustExec("create sequence seq cache 1")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

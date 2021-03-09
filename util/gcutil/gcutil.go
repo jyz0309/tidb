@@ -26,26 +26,57 @@ import (
 )
 
 const (
+<<<<<<< HEAD
+=======
+	insertVariableValueSQL = `INSERT HIGH_PRIORITY INTO mysql.tidb VALUES (%?, %?, %?)
+                              ON DUPLICATE KEY UPDATE variable_value = %?, comment = %?`
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	selectVariableValueSQL = `SELECT HIGH_PRIORITY variable_value FROM mysql.tidb WHERE variable_name=%?`
 )
 
 // CheckGCEnable is use to check whether GC is enable.
 func CheckGCEnable(ctx sessionctx.Context) (enable bool, err error) {
+<<<<<<< HEAD
 	val, err := ctx.GetSessionVars().GlobalVarsAccessor.GetGlobalSysVar(variable.TiDBGCEnable)
 	if err != nil {
 		return false, errors.Trace(err)
+=======
+	stmt, err1 := ctx.(sqlexec.RestrictedSQLExecutor).ParseWithParams(context.Background(), selectVariableValueSQL, "tikv_gc_enable")
+	if err1 != nil {
+		return false, errors.Trace(err1)
+	}
+	rows, _, err2 := ctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedStmt(context.Background(), stmt)
+	if err1 != nil {
+		return false, errors.Trace(err2)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	return variable.TiDBOptOn(val), nil
 }
 
 // DisableGC will disable GC enable variable.
 func DisableGC(ctx sessionctx.Context) error {
+<<<<<<< HEAD
 	return ctx.GetSessionVars().GlobalVarsAccessor.SetGlobalSysVar(variable.TiDBGCEnable, variable.BoolOff)
+=======
+	stmt, err := ctx.(sqlexec.RestrictedSQLExecutor).ParseWithParams(context.Background(), insertVariableValueSQL, "tikv_gc_enable", "false", "Current GC enable status", "false", "Current GC enable status")
+	if err == nil {
+		_, _, err = ctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedStmt(context.Background(), stmt)
+	}
+	return errors.Trace(err)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // EnableGC will enable GC enable variable.
 func EnableGC(ctx sessionctx.Context) error {
+<<<<<<< HEAD
 	return ctx.GetSessionVars().GlobalVarsAccessor.SetGlobalSysVar(variable.TiDBGCEnable, variable.BoolOn)
+=======
+	stmt, err := ctx.(sqlexec.RestrictedSQLExecutor).ParseWithParams(context.Background(), insertVariableValueSQL, "tikv_gc_enable", "true", "Current GC enable status", "true", "Current GC enable status")
+	if err == nil {
+		_, _, err = ctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedStmt(context.Background(), stmt)
+	}
+	return errors.Trace(err)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // ValidateSnapshot checks that the newly set snapshot time is after GC safe point time.

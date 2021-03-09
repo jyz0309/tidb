@@ -21,7 +21,10 @@ import (
 	"github.com/pingcap/parser/model"
 	"github.com/pingcap/parser/mysql"
 	"github.com/pingcap/tidb/expression"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/kv"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	_ "github.com/pingcap/tidb/planner/core"
 	"github.com/pingcap/tidb/sessionctx/stmtctx"
 	"github.com/pingcap/tidb/table/tables"
@@ -74,8 +77,13 @@ func (s *testDecoderSuite) TestRowDecoder(c *C) {
 		}
 		decodeColsMap[col.ID] = tpExpr
 	}
+<<<<<<< HEAD
 	de := decoder.NewRowDecoder(tbl, tbl.Cols(), decodeColsMap)
 	deWithNoGenCols := decoder.NewRowDecoder(tbl, tbl.Cols(), decodeColsMap2)
+=======
+	de := decoder.NewRowDecoder(tbl, decodeColsMap)
+	deWithNoGenCols := decoder.NewRowDecoder(tbl, decodeColsMap2)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	timeZoneIn8, err := time.LoadLocation("Asia/Shanghai")
 	c.Assert(err, IsNil)

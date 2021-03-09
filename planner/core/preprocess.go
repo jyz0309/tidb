@@ -67,6 +67,7 @@ func TryAddExtraLimit(ctx sessionctx.Context, node ast.StmtNode) ast.StmtNode {
 			Count: ast.NewValueExpr(ctx.GetSessionVars().SelectLimit, "", ""),
 		}
 		return &newSel
+<<<<<<< HEAD
 	} else if setOprStmt, ok := node.(*ast.SetOprStmt); ok {
 		if setOprStmt.Limit != nil {
 			return node
@@ -76,6 +77,17 @@ func TryAddExtraLimit(ctx sessionctx.Context, node ast.StmtNode) ast.StmtNode {
 			Count: ast.NewValueExpr(ctx.GetSessionVars().SelectLimit, "", ""),
 		}
 		return &newSetOpr
+=======
+	} else if union, ok := node.(*ast.UnionStmt); ok {
+		if union.Limit != nil {
+			return node
+		}
+		newUnion := *union
+		newUnion.Limit = &ast.Limit{
+			Count: ast.NewValueExpr(ctx.GetSessionVars().SelectLimit, "", ""),
+		}
+		return &newUnion
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	return node
 }
@@ -177,6 +189,7 @@ func (p *preprocessor) Enter(in ast.Node) (out ast.Node, skipChildren bool) {
 	case *ast.Join:
 		p.checkNonUniqTableAlias(node)
 	case *ast.CreateBindingStmt:
+<<<<<<< HEAD
 		p.stmtTp = TypeCreate
 		EraseLastSemicolon(node.OriginNode)
 		EraseLastSemicolon(node.HintedNode)
@@ -188,6 +201,17 @@ func (p *preprocessor) Enter(in ast.Node) (out ast.Node, skipChildren bool) {
 		if node.HintedNode != nil {
 			EraseLastSemicolon(node.HintedNode)
 			p.checkBindGrammar(node.OriginNode, node.HintedNode, p.ctx.GetSessionVars().CurrentDB)
+=======
+		EraseLastSemicolon(node.OriginSel)
+		EraseLastSemicolon(node.HintedSel)
+		p.checkBindGrammar(node.OriginSel, node.HintedSel, p.ctx.GetSessionVars().CurrentDB)
+		return in, true
+	case *ast.DropBindingStmt:
+		EraseLastSemicolon(node.OriginSel)
+		if node.HintedSel != nil {
+			EraseLastSemicolon(node.HintedSel)
+			p.checkBindGrammar(node.OriginSel, node.HintedSel, p.ctx.GetSessionVars().CurrentDB)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		return in, true
 	case *ast.RecoverTableStmt, *ast.FlashBackTableStmt:
@@ -223,6 +247,7 @@ func (p *preprocessor) Enter(in ast.Node) (out ast.Node, skipChildren bool) {
 		if _, ok := node.Source.(*ast.SelectStmt); ok && !isModeOracle && len(node.AsName.L) == 0 {
 			p.err = ddl.ErrDerivedMustHaveAlias.GenWithStackByArgs()
 		}
+<<<<<<< HEAD
 		if v, ok := node.Source.(*ast.TableName); ok && v.TableSample != nil {
 			switch v.TableSample.SampleMethod {
 			case ast.SampleMethodTypeTiDBRegion:
@@ -232,6 +257,8 @@ func (p *preprocessor) Enter(in ast.Node) (out ast.Node, skipChildren bool) {
 		}
 	case *ast.GroupByClause:
 		p.checkGroupBy(node)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	default:
 		p.flag &= ^parentIsJoin
 	}
@@ -246,6 +273,7 @@ func EraseLastSemicolon(stmt ast.StmtNode) {
 	}
 }
 
+<<<<<<< HEAD
 // EraseLastSemicolonInSQL removes last semicolon of the SQL.
 func EraseLastSemicolonInSQL(sql string) string {
 	if len(sql) > 0 && sql[len(sql)-1] == ';' {
@@ -281,12 +309,30 @@ const (
 	TypeShow
 )
 
+=======
+const (
+	// TypeInvalid for unexpected types.
+	TypeInvalid byte = iota
+	// TypeSelect for SelectStmt.
+	TypeSelect
+	// TypeDelete for DeleteStmt.
+	TypeDelete
+	// TypeUpdate for UpdateStmt.
+	TypeUpdate
+	// TypeInsert for InsertStmt.
+	TypeInsert
+)
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func bindableStmtType(node ast.StmtNode) byte {
 	switch node.(type) {
 	case *ast.SelectStmt:
 		return TypeSelect
+<<<<<<< HEAD
 	case *ast.SetOprStmt:
 		return TypeSetOpr
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case *ast.DeleteStmt:
 		return TypeDelete
 	case *ast.UpdateStmt:

@@ -205,7 +205,11 @@ func (b *builtinSysDateWithoutFspSig) vecEvalTime(input *chunk.Chunk, result *ch
 	return nil
 }
 
+<<<<<<< HEAD
 func (b *builtinExtractDatetimeFromStringSig) vectorized() bool {
+=======
+func (b *builtinExtractDatetimeSig) vectorized() bool {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// TODO: to fix https://github.com/pingcap/tidb/issues/9716 in vectorized evaluation.
 	return false
 }

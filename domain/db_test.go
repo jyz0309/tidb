@@ -20,6 +20,10 @@ import (
 	. "github.com/pingcap/check"
 	"github.com/pingcap/tidb/session"
 	"github.com/pingcap/tidb/store/mockstore"
+<<<<<<< HEAD
+=======
+	"github.com/pingcap/tidb/store/mockstore/mocktikv"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/util/testleak"
 )
 

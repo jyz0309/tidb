@@ -46,7 +46,10 @@ import (
 	"github.com/pingcap/errors"
 	"github.com/pingcap/parser/mysql"
 	"github.com/pingcap/parser/terror"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/kv"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/metrics"
 	plannercore "github.com/pingcap/tidb/planner/core"
 	"github.com/pingcap/tidb/sessionctx/stmtctx"
@@ -194,6 +197,7 @@ func (cc *clientConn) handleStmtExecute(ctx context.Context, data []byte) (err e
 		}
 	}
 	ctx = context.WithValue(ctx, execdetails.StmtExecDetailKey, &execdetails.StmtExecDetails{})
+<<<<<<< HEAD
 	retryable, err := cc.executePreparedStmtAndWriteResult(ctx, stmt, args, useCursor)
 	if cc.ctx.GetSessionVars().EnableTiFlashFallbackTiKV && err != nil && errors.ErrorEqual(err, tikv.ErrTiFlashServerTimeout) && retryable {
 		// When the TiFlash server seems down, we append a warning to remind the user to check the status of the TiFlash
@@ -213,12 +217,18 @@ func (cc *clientConn) handleStmtExecute(ctx context.Context, data []byte) (err e
 // The first return value indicates whether the call of executePreparedStmtAndWriteResult has no side effect and can be retried
 // to correct error. Currently the first return value is used to fallback to TiKV when TiFlash is down.
 func (cc *clientConn) executePreparedStmtAndWriteResult(ctx context.Context, stmt PreparedStatement, args []types.Datum, useCursor bool) (bool, error) {
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	rs, err := stmt.Execute(ctx, args)
 	if err != nil {
 		return true, errors.Annotate(err, cc.preparedStmt2String(uint32(stmt.ID())))
 	}
 	if rs == nil {
+<<<<<<< HEAD
 		return false, cc.writeOK(ctx)
+=======
+		return cc.writeOK(ctx)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	// if the client wants to use cursor
@@ -234,10 +244,17 @@ func (cc *clientConn) executePreparedStmtAndWriteResult(ctx context.Context, stm
 			cl.OnFetchReturned()
 		}
 		// explicitly flush columnInfo to client.
+<<<<<<< HEAD
 		return false, cc.flush(ctx)
 	}
 	defer terror.Call(rs.Close)
 	retryable, err := cc.writeResultset(ctx, rs, true, 0, 0)
+=======
+		return cc.flush(ctx)
+	}
+	defer terror.Call(rs.Close)
+	err = cc.writeResultset(ctx, rs, true, 0, 0)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return retryable, errors.Annotate(err, cc.preparedStmt2String(uint32(stmt.ID())))
 	}

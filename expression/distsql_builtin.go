@@ -488,6 +488,7 @@ func getSignatureByPB(ctx sessionctx.Context, sigCode tipb.ScalarFuncSig, tp *ti
 		f = &builtinGetParamStringSig{base}
 	case tipb.ScalarFuncSig_GetVar:
 		f = &builtinGetStringVarSig{base}
+<<<<<<< HEAD
 	// case tipb.ScalarFuncSig_RowSig:
 	case tipb.ScalarFuncSig_SetVar:
 		f = &builtinSetStringVarSig{base}
@@ -505,6 +506,25 @@ func getSignatureByPB(ctx sessionctx.Context, sigCode tipb.ScalarFuncSig, tp *ti
 	// 	f = &builtinValuesStringSig{base}
 	// case tipb.ScalarFuncSig_ValuesTime:
 	// 	f = &builtinValuesTimeSig{base}
+=======
+	//case tipb.ScalarFuncSig_RowSig:
+	case tipb.ScalarFuncSig_SetVar:
+		f = &builtinSetStringVarSig{base}
+	//case tipb.ScalarFuncSig_ValuesDecimal:
+	//	f = &builtinValuesDecimalSig{base}
+	//case tipb.ScalarFuncSig_ValuesDuration:
+	//	f = &builtinValuesDurationSig{base}
+	//case tipb.ScalarFuncSig_ValuesInt:
+	//	f = &builtinValuesIntSig{base}
+	//case tipb.ScalarFuncSig_ValuesJSON:
+	//	f = &builtinValuesJSONSig{base}
+	//case tipb.ScalarFuncSig_ValuesReal:
+	//	f = &builtinValuesRealSig{base}
+	//case tipb.ScalarFuncSig_ValuesString:
+	//	f = &builtinValuesStringSig{base}
+	//case tipb.ScalarFuncSig_ValuesTime:
+	//	f = &builtinValuesTimeSig{base}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case tipb.ScalarFuncSig_InInt:
 		f = &builtinInIntSig{baseInSig: baseInSig{baseBuiltinFunc: base}}
 	case tipb.ScalarFuncSig_InReal:
@@ -641,10 +661,17 @@ func getSignatureByPB(ctx sessionctx.Context, sigCode tipb.ScalarFuncSig, tp *ti
 		f = &builtinUUIDSig{base}
 	case tipb.ScalarFuncSig_LikeSig:
 		f = &builtinLikeSig{base, nil, false, sync.Once{}}
+<<<<<<< HEAD
 	// case tipb.ScalarFuncSig_RegexpSig:
 	// 	f = &builtinRegexpSig{base}
 	// case tipb.ScalarFuncSig_RegexpUTF8Sig:
 	// 	f = &builtinRegexpUTF8Sig{base}
+=======
+	//case tipb.ScalarFuncSig_RegexpSig:
+	//	f = &builtinRegexpSig{base}
+	//case tipb.ScalarFuncSig_RegexpUTF8Sig:
+	//	f = &builtinRegexpUTF8Sig{base}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case tipb.ScalarFuncSig_JsonExtractSig:
 		f = &builtinJSONExtractSig{base}
 	case tipb.ScalarFuncSig_JsonUnquoteSig:

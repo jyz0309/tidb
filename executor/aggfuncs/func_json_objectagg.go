@@ -22,11 +22,14 @@ import (
 	"github.com/pingcap/tidb/types/json"
 	"github.com/pingcap/tidb/util/chunk"
 	"github.com/pingcap/tidb/util/stringutil"
+<<<<<<< HEAD
 )
 
 const (
 	// DefPartialResult4JsonObjectAgg is the size of partialResult4JsonObject
 	DefPartialResult4JsonObjectAgg = int64(unsafe.Sizeof(partialResult4JsonObjectAgg{}))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 type jsonObjectAgg struct {

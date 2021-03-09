@@ -79,12 +79,21 @@ func (s *testUtilSuite) TestDumpBinaryTime(c *C) {
 	c.Assert(d, DeepEquals, []byte{11, 199, 7, 5, 1, 1, 1, 1, 161, 134, 1, 0})
 
 	t, err = types.ParseDatetime(nil, "0000-00-00 00:00:00.000000")
+<<<<<<< HEAD
 	c.Assert(err, IsNil)
 	d = dumpBinaryDateTime(nil, t)
 	c.Assert(d, DeepEquals, []byte{0})
 	t, err = types.ParseDatetime(nil, "1993-07-13 01:01:01.000000")
 	c.Assert(err, IsNil)
 	d = dumpBinaryDateTime(nil, t)
+=======
+	c.Assert(err, IsNil)
+	d = dumpBinaryDateTime(nil, t)
+	c.Assert(d, DeepEquals, []byte{0})
+	t, err = types.ParseDatetime(nil, "1993-07-13 01:01:01.000000")
+	c.Assert(err, IsNil)
+	d = dumpBinaryDateTime(nil, t)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// 201 & 7 composed to uint16 1993 (litter-endian)
 	c.Assert(d, DeepEquals, []byte{7, 201, 7, 7, 13, 1, 1, 1})
 
@@ -415,6 +424,7 @@ func (s *testUtilSuite) TestAppendFormatFloat(c *C) {
 			-1,
 			64,
 		},
+<<<<<<< HEAD
 		{
 			1e14,
 			"100000000000000",
@@ -427,6 +437,8 @@ func (s *testUtilSuite) TestAppendFormatFloat(c *C) {
 			-1,
 			64,
 		},
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	for _, t := range tests {
 		c.Assert(string(appendFormatFloat(nil, t.fVal, t.prec, t.bitSize)), Equals, t.out)

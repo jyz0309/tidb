@@ -63,6 +63,31 @@ func (d *ddl) generalWorker() *worker {
 	return d.workers[generalWorker]
 }
 
+<<<<<<< HEAD
+=======
+// restartWorkers is like the function of d.start. But it won't initialize the "workers" and create a new worker.
+// It only starts the original workers.
+func (d *ddl) restartWorkers(ctx context.Context) {
+	d.quitCh = make(chan struct{})
+
+	d.wg.Add(1)
+	go d.limitDDLJobs()
+	if !RunWorker {
+		return
+	}
+
+	err := d.ownerManager.CampaignOwner()
+	terror.Log(err)
+	for _, worker := range d.workers {
+		worker.wg.Add(1)
+		worker.quitCh = make(chan struct{})
+		w := worker
+		go w.start(d.ddlCtx)
+		asyncNotify(worker.ddlJobCh)
+	}
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func TestT(t *testing.T) {
 	CustomVerboseFlag = true
 	*CustomParallelSuiteFlag = true
@@ -78,6 +103,7 @@ func TestT(t *testing.T) {
 		conf.Log.SlowThreshold = 10000
 		// Test for add/drop primary key.
 		conf.AlterPrimaryKey = true
+<<<<<<< HEAD
 		conf.TiKVClient.AsyncCommit.SafeWindow = 0
 		conf.TiKVClient.AsyncCommit.AllowedClockDrift = 0
 	})
@@ -86,6 +112,9 @@ func TestT(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+=======
+	})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	testleak.BeforeTest()
 	TestingT(t)

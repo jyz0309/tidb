@@ -110,7 +110,11 @@ func getForeignKey(t table.Table, name string) *model.FKInfo {
 	return nil
 }
 
+<<<<<<< HEAD
 func (s *testForeignKeySuite) TestForeignKey(c *C) {
+=======
+func (s *testForeighKeySuite) TestForeignKey(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	d := testNewDDLAndStart(
 		context.Background(),
 		c,

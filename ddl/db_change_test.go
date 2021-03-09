@@ -157,7 +157,14 @@ func (s *serialTestStateChangeSuite) TestShowCreateTable(c *C) {
 			if got != expected {
 				checkErr = errors.Errorf("got %s, expected %s", got, expected)
 			}
+<<<<<<< HEAD
 			terror.Log(result.Close())
+=======
+			checkErr = result.Close()
+			if checkErr != nil {
+				return
+			}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 	}
 	d := s.dom.DDL()
@@ -482,6 +489,10 @@ func (s *testStateChangeSuite) TestAppendEnum(c *C) {
 	c.Assert(err, IsNil)
 
 	_, err = s.se.Execute(context.Background(), "insert into t values('a', 'A', '2018-09-19', 9)")
+<<<<<<< HEAD
+=======
+	c.Assert(err.Error(), Equals, "[types:1265]Data truncated for column 'c2' at row 1")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	failAlterTableSQL1 := "alter table t change c2 c2 enum('N') DEFAULT 'N'"
 	_, err = s.se.Execute(context.Background(), failAlterTableSQL1)
 	c.Assert(err.Error(), Equals, "[ddl:8200]Unsupported modify column: the number of enum column's elements is less than the original: 2, and tidb_enable_change_column_type is false")
@@ -528,6 +539,7 @@ func (s *testStateChangeSuite) TestWriteOnlyOnDupUpdate(c *C) {
 	addColumnSQL := "alter table t add column c5 int not null default 1 after c4"
 	expectQuery := &expectQuery{"select c4, c5 from t", []string{"2 1"}}
 	s.runTestInSchemaState(c, model.StateWriteOnly, true, addColumnSQL, sqls, expectQuery)
+<<<<<<< HEAD
 }
 
 func (s *testStateChangeSuite) TestWriteOnlyOnDupUpdateForAddColumns(c *C) {
@@ -677,6 +689,8 @@ func (s *serialTestStateChangeSuite) testModifyColumn(c *C, state model.SchemaSt
 
 	query := &expectQuery{sql: "admin check table tt;", rows: nil}
 	s.runTestInSchemaState(c, state, false, modifyColumnSQL, sqls, query)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // TestWriteOnly tests whether the correct columns is used in PhysicalIndexScan's ToPB function.
@@ -1604,6 +1618,7 @@ func (s *serialTestStateChangeSuite) TestParallelFlashbackTable(c *C) {
 	sql1 = "flashback table t_flashback"
 	sql2 := "flashback table t_flashback to t_flashback2"
 	s.testControlParallelExecSQL(c, sql1, sql2, f)
+<<<<<<< HEAD
 }
 
 // TestModifyColumnTypeArgs test job raw args won't be updated when error occurs in `updateVersionAndTableInfo`.
@@ -1662,4 +1677,6 @@ func (s *serialTestStateChangeSuite) TestModifyColumnTypeArgs(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(changingCol, IsNil)
 	c.Assert(changingIdxs, IsNil)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

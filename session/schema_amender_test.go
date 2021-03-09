@@ -28,7 +28,10 @@ import (
 	"github.com/pingcap/tidb/planner/core"
 	"github.com/pingcap/tidb/sessionctx/variable"
 	"github.com/pingcap/tidb/store/tikv"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/store/tikv/oracle"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/table"
 	"github.com/pingcap/tidb/tablecodec"
 	"github.com/pingcap/tidb/types"
@@ -64,7 +67,11 @@ func initTblColIdxID(metaInfo *model.TableInfo) {
 	metaInfo.State = model.StatePublic
 }
 
+<<<<<<< HEAD
 func mutationsEqual(res *tikv.PlainMutations, expected *tikv.PlainMutations, c *C) {
+=======
+func mutationsEqual(res *tikv.CommitterMutations, expected *tikv.CommitterMutations, c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(len(res.GetKeys()), Equals, len(expected.GetKeys()))
 	for i := 0; i < len(res.GetKeys()); i++ {
 		foundIdx := -1
@@ -91,8 +98,13 @@ type data struct {
 
 // Generate exist old data and new data in transaction to be amended. Also generate the expected amend mutations
 // according to the old and new data and the full generated expected mutations.
+<<<<<<< HEAD
 func prepareTestData(se *session, mutations *tikv.PlainMutations, oldTblInfo table.Table, newTblInfo table.Table,
 	expectedAmendOps []amendOp, c *C) (*data, tikv.PlainMutations) {
+=======
+func prepareTestData(se *session, mutations *tikv.CommitterMutations, oldTblInfo table.Table, newTblInfo table.Table,
+	expectedAmendOps []amendOp, c *C) (*data, tikv.CommitterMutations) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	var err error
 	// Generated test data.
 	colIds := make([]int64, len(oldTblInfo.Meta().Columns))
@@ -112,7 +124,11 @@ func prepareTestData(se *session, mutations *tikv.PlainMutations, oldTblInfo tab
 	newRowValues := make([][]types.Datum, numberOfRows)
 	rd := rowcodec.Encoder{Enable: true}
 	oldData := &data{}
+<<<<<<< HEAD
 	expecteMutations := tikv.NewPlainMutations(8)
+=======
+	expecteMutations := tikv.NewCommiterMutations(8)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	oldRowKvMap := make(map[string][]types.Datum)
 	newRowKvMap := make(map[string][]types.Datum)
 
@@ -129,7 +145,11 @@ func prepareTestData(se *session, mutations *tikv.PlainMutations, oldTblInfo tab
 		thisRowValue[8] = types.NewIntDatum(int64(i + 1 + 8))
 
 		// Save old data, they will be put into db first.
+<<<<<<< HEAD
 		rowKey := tablecodec.EncodeRowKeyWithHandle(oldTblInfo.Meta().ID, kv.IntHandle(int64(i+1)))
+=======
+		rowKey := tablecodec.EncodeRowKeyWithHandle(oldTblInfo.Meta().ID, int64(i+1))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		var rowValue []byte
 		rowValue, err = rd.Encode(se.sessionVars.StmtCtx, colIds, thisRowValue, nil)
 		c.Assert(err, IsNil)
@@ -164,7 +184,11 @@ func prepareTestData(se *session, mutations *tikv.PlainMutations, oldTblInfo tab
 
 		var rowValue []byte
 		// Save new data.
+<<<<<<< HEAD
 		rowKey := tablecodec.EncodeRowKeyWithHandle(oldTblInfo.Meta().ID, kv.IntHandle(int64(i+1)))
+=======
+		rowKey := tablecodec.EncodeRowKeyWithHandle(oldTblInfo.Meta().ID, int64(i+1))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if keyOp == kvrpcpb.Op_Insert {
 			rowValue, err = tablecodec.EncodeOldRow(se.sessionVars.StmtCtx, thisRowValue, colIds, nil, nil)
 		} else {
@@ -192,7 +216,11 @@ func prepareTestData(se *session, mutations *tikv.PlainMutations, oldTblInfo tab
 			for colIdx, col := range info.relatedOldIdxCols {
 				indexDatums[colIdx] = inputRow[col.Offset]
 			}
+<<<<<<< HEAD
 			kvHandle := kv.IntHandle(inputRow[0].GetInt64())
+=======
+			kvHandle := inputRow[0].GetInt64()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			idxKey, _, err := tablecodec.GenIndexKey(se.sessionVars.StmtCtx, newTblInfo.Meta(),
 				info.indexInfoAtCommit.Meta(), newTblInfo.Meta().ID, indexDatums, kvHandle, nil)
 			c.Assert(err, IsNil)
@@ -202,8 +230,13 @@ func prepareTestData(se *session, mutations *tikv.PlainMutations, oldTblInfo tab
 			return idxKey, idxVal
 		}
 		for i := 0; i < len(mutations.GetKeys()); i++ {
+<<<<<<< HEAD
 			oldIdxKeyMutation := tikv.PlainMutations{}
 			newIdxKeyMutation := tikv.PlainMutations{}
+=======
+			oldIdxKeyMutation := tikv.CommitterMutations{}
+			newIdxKeyMutation := tikv.CommitterMutations{}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			key := mutations.GetKeys()[i]
 			keyOp := mutations.GetOps()[i]
 			if addIndexNeedRemoveOp(info.AmendOpType) && mayGenDelIndexRowKeyOp(keyOp) {
@@ -383,7 +416,11 @@ func (s *testSchemaAmenderSuite) TestAmendCollectAndGenMutations(c *C) {
 				}
 			}
 			// Generated test data.
+<<<<<<< HEAD
 			mutations := tikv.NewPlainMutations(8)
+=======
+			mutations := tikv.NewCommiterMutations(8)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			oldData, expectedMutations := prepareTestData(se, &mutations, oldTbInfo, newTblInfo, expectedAmendOps, c)
 			// Prepare old data in table.
 			txnPrepare, err := se.store.Begin()
@@ -426,7 +463,11 @@ func (s *testSchemaAmenderSuite) TestAmendCollectAndGenMutations(c *C) {
 				}
 				c.Assert(err, IsNil)
 			}
+<<<<<<< HEAD
 			curVer, err := se.store.CurrentVersion(oracle.GlobalTxnScope)
+=======
+			curVer, err := se.store.CurrentVersion()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			c.Assert(err, IsNil)
 			se.sessionVars.TxnCtx.SetForUpdateTS(curVer.Ver + 1)
 			mutationVals, err := txn.BatchGet(ctx, checkKeys)
@@ -444,7 +485,11 @@ func (s *testSchemaAmenderSuite) TestAmendCollectAndGenMutations(c *C) {
 				mutations.Push(kvrpcpb.Op_Put, idxKey, idxValue, false)
 			}
 
+<<<<<<< HEAD
 			res, err := schemaAmender.genAllAmendMutations(ctx, &mutations, collector)
+=======
+			res, err := schemaAmender.genAllAmendMutations(ctx, mutations, collector)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			c.Assert(err, IsNil)
 			logutil.BgLogger().Info("[TEST]finish to amend and generate new mutations")
 

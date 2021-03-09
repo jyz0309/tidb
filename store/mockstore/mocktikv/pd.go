@@ -51,6 +51,13 @@ func NewPDClient(cluster *Cluster) pd.Client {
 	}
 }
 
+<<<<<<< HEAD
+=======
+func (c *pdClient) GetAllMembers(ctx context.Context) ([]*pdpb.Member, error) {
+	return nil, nil
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (c *pdClient) GetClusterID(ctx context.Context) uint64 {
 	return 1
 }
@@ -98,10 +105,13 @@ func (m *mockTSFuture) Wait() (int64, int64, error) {
 func (c *pdClient) GetRegion(ctx context.Context, key []byte) (*pd.Region, error) {
 	region, peer := c.cluster.GetRegionByKey(key)
 	return &pd.Region{Meta: region, Leader: peer}, nil
+<<<<<<< HEAD
 }
 
 func (c *pdClient) GetRegionFromMember(ctx context.Context, key []byte, memberURLs []string) (*pd.Region, error) {
 	return &pd.Region{}, nil
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (c *pdClient) GetPrevRegion(ctx context.Context, key []byte) (*pd.Region, error) {
@@ -179,19 +189,28 @@ func (c *pdClient) ScatterRegion(ctx context.Context, regionID uint64) error {
 	return nil
 }
 
+<<<<<<< HEAD
 func (c *pdClient) ScatterRegions(ctx context.Context, regionsID []uint64, opts ...pd.RegionsOption) (*pdpb.ScatterRegionResponse, error) {
 	return nil, nil
 }
 
 func (c *pdClient) SplitRegions(ctx context.Context, splitKeys [][]byte, opts ...pd.RegionsOption) (*pdpb.SplitRegionsResponse, error) {
 	return nil, nil
+=======
+func (c *pdClient) ScatterRegionWithOption(ctx context.Context, regionID uint64, opts ...pd.ScatterRegionOption) error {
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (c *pdClient) GetOperator(ctx context.Context, regionID uint64) (*pdpb.GetOperatorResponse, error) {
 	return &pdpb.GetOperatorResponse{Status: pdpb.OperatorStatus_SUCCESS}, nil
 }
 
+<<<<<<< HEAD
 func (c *pdClient) GetAllMembers(ctx context.Context) ([]*pdpb.Member, error) {
+=======
+func (c *pdClient) GetMemberInfo(ctx context.Context) ([]*pdpb.Member, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return nil, nil
 }
 

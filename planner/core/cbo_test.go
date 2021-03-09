@@ -420,10 +420,17 @@ func (s *testAnalyzeSuite) TestOutdatedAnalyze(c *C) {
 	c.Assert(h.DumpStatsDeltaToKV(handle.DumpAll), IsNil)
 	c.Assert(h.Update(dom.InfoSchema()), IsNil)
 	statistics.RatioOfPseudoEstimate.Store(10.0)
+<<<<<<< HEAD
 	testKit.MustQuery("explain format = 'brief' select * from t where a <= 5 and b <= 5").Check(testkit.Rows(
 		"TableReader 29.77 root  data:Selection",
 		"└─Selection 29.77 cop[tikv]  le(test.t.a, 5), le(test.t.b, 5)",
 		"  └─TableFullScan 80.00 cop[tikv] table:t keep order:false",
+=======
+	testKit.MustQuery("explain select * from t where a <= 5 and b <= 5").Check(testkit.Rows(
+		"TableReader_7 29.77 root  data:Selection_6",
+		"└─Selection_6 29.77 cop[tikv]  le(test.t.a, 5), le(test.t.b, 5)",
+		"  └─TableFullScan_5 80.00 cop[tikv] table:t keep order:false",
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	))
 	statistics.RatioOfPseudoEstimate.Store(0.7)
 	testKit.MustQuery("explain format = 'brief' select * from t where a <= 5 and b <= 5").Check(testkit.Rows(
@@ -911,7 +918,10 @@ func (s *testAnalyzeSuite) TestIndexEqualUnknown(c *C) {
 	}()
 	testKit.MustExec("use test")
 	testKit.MustExec("drop table if exists t, t1")
+<<<<<<< HEAD
 	testKit.Se.GetSessionVars().EnableClusteredIndex = false
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	testKit.MustExec("CREATE TABLE t(a bigint(20) NOT NULL, b bigint(20) NOT NULL, c bigint(20) NOT NULL, PRIMARY KEY (a,c,b), KEY (b))")
 	err = s.loadTableStats("analyzeSuiteTestIndexEqualUnknownT.json", dom)
 	c.Assert(err, IsNil)
@@ -929,6 +939,7 @@ func (s *testAnalyzeSuite) TestIndexEqualUnknown(c *C) {
 		testKit.MustQuery(tt).Check(testkit.Rows(output[i].Plan...))
 	}
 }
+<<<<<<< HEAD
 
 func (s *testAnalyzeSuite) TestLimitIndexEstimation(c *C) {
 	defer testleak.AfterTest(c)()
@@ -961,3 +972,5 @@ func (s *testAnalyzeSuite) TestLimitIndexEstimation(c *C) {
 		tk.MustQuery(tt).Check(testkit.Rows(output[i].Plan...))
 	}
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

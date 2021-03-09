@@ -113,7 +113,11 @@ func (s *seqTestSuite) TestPrepared(c *C) {
 		c.Assert(err, IsNil)
 		rs, err = tk.Se.ExecutePreparedStmt(ctx, stmtID, []types.Datum{types.NewDatum(3)})
 		c.Assert(err, IsNil)
+<<<<<<< HEAD
 		c.Assert(rs.Close(), IsNil)
+=======
+		tk.ResultSetToResult(rs, Commentf("%v", rs)).Check(testkit.Rows())
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		tk1.MustExec("insert prepare_test (c1) values (3)")
 		rs, err = tk.Se.ExecutePreparedStmt(ctx, stmtID, []types.Datum{types.NewDatum(3)})
 		c.Assert(err, IsNil)
@@ -125,7 +129,12 @@ func (s *seqTestSuite) TestPrepared(c *C) {
 		c.Assert(err, IsNil)
 		rs, err = tk.Se.ExecutePreparedStmt(ctx, stmtID, []types.Datum{types.NewDatum(3)})
 		c.Assert(err, IsNil)
+<<<<<<< HEAD
 		c.Assert(rs.Close(), IsNil)
+=======
+		tk.ResultSetToResult(rs, Commentf("%v", rs)).Check(testkit.Rows())
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		tk1.MustExec("insert prepare_test (c1) values (3)")
 		rs, err = tk.Se.ExecutePreparedStmt(ctx, stmtID, []types.Datum{types.NewDatum(3)})
 		c.Assert(err, IsNil)
@@ -531,19 +540,19 @@ func (s *seqTestSuite) TestPreparedUpdate(c *C) {
 		if flag {
 			counter.Write(pb)
 			hit := pb.GetCounter().GetValue()
-			c.Check(hit, Equals, float64(2))
+			c.Check(hit, Equals, float64(0))
 		}
 		tk.MustExec(`set @a=2,@b=200; execute stmt_update using @b,@a;`)
 		if flag {
 			counter.Write(pb)
 			hit := pb.GetCounter().GetValue()
-			c.Check(hit, Equals, float64(3))
+			c.Check(hit, Equals, float64(1))
 		}
 		tk.MustExec(`set @a=3,@b=300; execute stmt_update using @b,@a;`)
 		if flag {
 			counter.Write(pb)
 			hit := pb.GetCounter().GetValue()
-			c.Check(hit, Equals, float64(4))
+			c.Check(hit, Equals, float64(2))
 		}
 
 		result := tk.MustQuery("select id, c1 from prepare_test where id = ?", 1)
@@ -553,6 +562,30 @@ func (s *seqTestSuite) TestPreparedUpdate(c *C) {
 		result = tk.MustQuery("select id, c1 from prepare_test where id = ?", 3)
 		result.Check(testkit.Rows("3 303"))
 	}
+}
+
+func (s *seqTestSuite) TestIssue21884(c *C) {
+	orgEnable := plannercore.PreparedPlanCacheEnabled()
+	defer func() {
+		plannercore.SetPreparedPlanCache(orgEnable)
+	}()
+	plannercore.SetPreparedPlanCache(false)
+
+	tk := testkit.NewTestKit(c, s.store)
+
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists prepare_test")
+	tk.MustExec("create table prepare_test(a bigint primary key, status bigint, last_update_time datetime)")
+	tk.MustExec("insert into prepare_test values (100, 0, '2020-12-18 20:00:00')")
+	tk.MustExec("prepare stmt from 'update prepare_test set status = ?, last_update_time = now() where a = 100'")
+	tk.MustExec("set @status = 1")
+	tk.MustExec("execute stmt using @status")
+	updateTime := tk.MustQuery("select last_update_time from prepare_test").Rows()[0][0]
+	// Sleep 1 second to make sure `last_update_time` is updated.
+	time.Sleep(1 * time.Second)
+	tk.MustExec("execute stmt using @status")
+	newUpdateTime := tk.MustQuery("select last_update_time from prepare_test").Rows()[0][0]
+	c.Assert(updateTime == newUpdateTime, IsFalse)
 }
 
 func (s *seqTestSuite) TestPreparedDelete(c *C) {
@@ -749,7 +782,70 @@ func (s *seqTestSuite) TestPreparedIssue8644(c *C) {
 
 		r = tk.MustQuery(`select * from t`)
 		r.Check(testkit.Rows("1.100", "11.110"))
+<<<<<<< HEAD
+=======
 	}
+}
+
+// mockSessionManager is a mocked session manager which is used for test.
+type mockSessionManager1 struct {
+	Se session.Session
+}
+
+// ShowProcessList implements the SessionManager.ShowProcessList interface.
+func (msm *mockSessionManager1) ShowProcessList() map[uint64]*util.ProcessInfo {
+	ret := make(map[uint64]*util.ProcessInfo)
+	return ret
+}
+
+func (msm *mockSessionManager1) GetProcessInfo(id uint64) (*util.ProcessInfo, bool) {
+	pi := msm.Se.ShowProcess()
+	return pi, true
+}
+
+// Kill implements the SessionManager.Kill interface.
+func (msm *mockSessionManager1) Kill(cid uint64, query bool) {}
+
+func (msm *mockSessionManager1) UpdateTLSConfig(cfg *tls.Config) {}
+
+func (s *seqTestSuite) TestPreparedIssue17419(c *C) {
+	ctx := context.Background()
+	tk := testkit.NewTestKit(c, s.store)
+
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t")
+	tk.MustExec("create table t (a int)")
+	tk.MustExec("insert into t (a) values (1), (2), (3)")
+
+	tk1 := testkit.NewTestKit(c, s.store)
+
+	var err error
+	tk1.Se, err = session.CreateSession4Test(s.store)
+	c.Assert(err, IsNil)
+	tk1.GetConnectionID()
+
+	query := "select * from test.t"
+	stmtID, _, _, err := tk1.Se.PrepareStmt(query)
+	c.Assert(err, IsNil)
+
+	sm := &mockSessionManager1{
+		Se: tk1.Se,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
+	}
+	tk1.Se.SetSessionManager(sm)
+	s.domain.ExpensiveQueryHandle().SetSessionManager(sm)
+
+	rs, err := tk1.Se.ExecutePreparedStmt(ctx, stmtID, []types.Datum{})
+	c.Assert(err, IsNil)
+	tk1.ResultSetToResult(rs, Commentf("%v", rs)).Check(testkit.Rows("1", "2", "3"))
+	tk1.Se.SetProcessInfo("", time.Now(), mysql.ComStmtExecute, 0)
+
+	s.domain.ExpensiveQueryHandle().LogOnQueryExceedMemQuota(tk.Se.GetSessionVars().ConnectionID)
+
+	// After entirely fixing https://github.com/pingcap/tidb/issues/17419
+	// c.Assert(tk1.Se.ShowProcess().Plan, NotNil)
+	// _, ok := tk1.Se.ShowProcess().Plan.(*plannercore.Execute)
+	// c.Assert(ok, IsTrue)
 }
 
 // mockSessionManager is a mocked session manager which is used for test.

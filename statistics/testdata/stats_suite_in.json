@@ -113,6 +113,7 @@
       "explain select * from t where a='aÄa'",
       "explain select * from t where a > 'aÄa'"
     ]
+<<<<<<< HEAD
   },
   {
     "name": "TestDNFCondSelectivity",
@@ -122,5 +123,7 @@
       "select * from t where a > 8 or d < 4 or c > 7 or b < 5",
       "select * from t where a < 8 and (b > 10 or c < 3 or b > 4) and a > 2"
     ]
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
   }
 ]

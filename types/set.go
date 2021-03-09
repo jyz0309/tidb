@@ -48,6 +48,7 @@ func (e Set) Copy() Set {
 	}
 }
 
+<<<<<<< HEAD
 // ParseSet creates a Set with name or value.
 func ParseSet(elems []string, name string, collation string) (Set, error) {
 	if setName, err := ParseSetName(elems, name, collation); err == nil {
@@ -61,6 +62,8 @@ func ParseSet(elems []string, name string, collation string) (Set, error) {
 	return Set{}, errors.Errorf("item %s is not in Set %v", name, elems)
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // ParseSetName creates a Set with name.
 func ParseSetName(elems []string, name string, collation string) (Set, error) {
 	if len(name) == 0 {

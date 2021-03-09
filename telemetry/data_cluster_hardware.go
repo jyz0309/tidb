@@ -14,7 +14,10 @@
 package telemetry
 
 import (
+<<<<<<< HEAD
 	"context"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"regexp"
 	"sort"
 	"strings"
@@ -67,12 +70,16 @@ func normalizeFieldName(name string) string {
 }
 
 func getClusterHardware(ctx sessionctx.Context) ([]*clusterHardwareItem, error) {
+<<<<<<< HEAD
 	exec := ctx.(sqlexec.RestrictedSQLExecutor)
 	stmt, err := exec.ParseWithParams(context.TODO(), `SELECT TYPE, INSTANCE, DEVICE_TYPE, DEVICE_NAME, NAME, VALUE FROM information_schema.cluster_hardware`)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	rows, _, err := exec.ExecRestrictedStmt(context.TODO(), stmt)
+=======
+	rows, _, err := ctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQL(`SELECT TYPE, INSTANCE, DEVICE_TYPE, DEVICE_NAME, NAME, VALUE FROM information_schema.cluster_hardware`)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

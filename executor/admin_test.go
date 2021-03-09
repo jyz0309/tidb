@@ -23,7 +23,10 @@ import (
 	"github.com/pingcap/parser/model"
 	mysql "github.com/pingcap/tidb/errno"
 	"github.com/pingcap/tidb/executor"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/kv"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/table"
 	"github.com/pingcap/tidb/table/tables"
 	"github.com/pingcap/tidb/types"
@@ -189,6 +192,7 @@ func (s *testSuite5) TestAdminRecoverIndex(c *C) {
 	tk.MustExec("admin check table admin_test")
 }
 
+<<<<<<< HEAD
 func (s *testSuite5) TestClusteredIndexAdminRecoverIndex(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("drop database if exists test_cluster_index_admin_recover;")
@@ -232,6 +236,8 @@ func (s *testSuite5) TestClusteredIndexAdminRecoverIndex(c *C) {
 	tk.MustExec("admin check table t;")
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testSuite5) TestAdminRecoverPartitionTableIndex(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -252,7 +258,11 @@ func (s *testSuite5) TestAdminRecoverPartitionTableIndex(c *C) {
 		sc := s.ctx.GetSessionVars().StmtCtx
 		txn, err := s.store.Begin()
 		c.Assert(err, IsNil)
+<<<<<<< HEAD
 		err = indexOpr.Delete(sc, txn.GetUnionStore(), types.MakeDatums(idxValue), kv.IntHandle(idxValue))
+=======
+		err = indexOpr.Delete(sc, txn, types.MakeDatums(idxValue), int64(idxValue))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		c.Assert(err, IsNil)
 		err = txn.Commit(context.Background())
 		c.Assert(err, IsNil)
@@ -455,9 +465,15 @@ func (s *testSuite5) TestAdminCleanupIndexForPartitionTable(c *C) {
 
 		txn, err := s.store.Begin()
 		c.Assert(err, IsNil)
+<<<<<<< HEAD
 		_, err = indexOpr2.Create(s.ctx, txn.GetUnionStore(), types.MakeDatums(idxValue), kv.IntHandle(handle))
 		c.Assert(err, IsNil)
 		_, err = indexOpr3.Create(s.ctx, txn.GetUnionStore(), types.MakeDatums(idxValue), kv.IntHandle(handle))
+=======
+		_, err = indexOpr2.Create(s.ctx, txn, types.MakeDatums(idxValue), int64(handle))
+		c.Assert(err, IsNil)
+		_, err = indexOpr3.Create(s.ctx, txn, types.MakeDatums(idxValue), int64(handle))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		c.Assert(err, IsNil)
 		err = txn.Commit(context.Background())
 		c.Assert(err, IsNil)

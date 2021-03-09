@@ -14,6 +14,7 @@
 package aggfuncs
 
 import (
+<<<<<<< HEAD
 	"unsafe"
 
 	"github.com/pingcap/tidb/sessionctx"
@@ -23,6 +24,10 @@ import (
 const (
 	// DefPartialResult4CountSize is the size of partialResult4Count
 	DefPartialResult4CountSize = int64(unsafe.Sizeof(partialResult4Count(0)))
+=======
+	"github.com/pingcap/tidb/sessionctx"
+	"github.com/pingcap/tidb/util/chunk"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 type baseCount struct {
@@ -398,5 +403,9 @@ func (e *countPartial) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup 
 func (*countPartial) MergePartialResult(sctx sessionctx.Context, src, dst PartialResult) (memDelta int64, err error) {
 	p1, p2 := (*partialResult4Count)(src), (*partialResult4Count)(dst)
 	*p2 += *p1
+<<<<<<< HEAD
 	return 0, nil
+=======
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

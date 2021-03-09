@@ -846,6 +846,7 @@ func HelperTestAdminShowNextID(c *C, s *seqTestSuite, str string) {
 	tk.MustExec("create table t3(id bigint primary key auto_random(5), c int)")
 	// Start handle is 1.
 	r = tk.MustQuery(str + " t3 next_row_id")
+<<<<<<< HEAD
 	r.Check(testkit.Rows("test1 t3 id 1 AUTO_RANDOM"))
 	// Insert some rows.
 	tk.MustExec("insert into t3 (c) values (1), (2);")
@@ -855,6 +856,17 @@ func HelperTestAdminShowNextID(c *C, s *seqTestSuite, str string) {
 	tk.MustExec("insert into t3 (id, c) values (103, 3);")
 	r = tk.MustQuery(str + " t3 next_row_id")
 	r.Check(testkit.Rows("test1 t3 id 114 AUTO_RANDOM"))
+=======
+	r.Check(testkit.Rows("test1 t3 _tidb_rowid 1 AUTO_INCREMENT", "test1 t3 id 1 AUTO_RANDOM"))
+	// Insert some rows.
+	tk.MustExec("insert into t3 (c) values (1), (2);")
+	r = tk.MustQuery(str + " t3 next_row_id")
+	r.Check(testkit.Rows("test1 t3 _tidb_rowid 1 AUTO_INCREMENT", "test1 t3 id 11 AUTO_RANDOM"))
+	// Rebase.
+	tk.MustExec("insert into t3 (id, c) values (103, 3);")
+	r = tk.MustQuery(str + " t3 next_row_id")
+	r.Check(testkit.Rows("test1 t3 _tidb_rowid 1 AUTO_INCREMENT", "test1 t3 id 114 AUTO_RANDOM"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// Test for a sequence.
 	tk.MustExec("create sequence seq1 start 15 cache 57")
@@ -1245,7 +1257,10 @@ func (s *seqTestSuite) TestShowForNewCollations(c *C) {
 		"utf8mb4_bin utf8mb4 46 Yes Yes 1",
 		"utf8mb4_general_ci utf8mb4 45  Yes 1",
 		"utf8mb4_unicode_ci utf8mb4 224  Yes 1",
+<<<<<<< HEAD
 		"utf8mb4_zh_pinyin_tidb_as_cs utf8mb4 2048  Yes 1",
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	)
 	tk.MustQuery("show collation").Check(expectRows)
 	tk.MustQuery("select * from information_schema.COLLATIONS").Check(expectRows)
@@ -1552,6 +1567,7 @@ func (s *seqTestSuite) TestIssue18744(c *C) {
 	}()
 	err := tk.QueryToErr(`select /*+ inl_hash_join(t2) */ t1.id, t2.id from t1 join t t2 on t1.a = t2.a order by t1.a ASC limit 1;`)
 	c.Assert(err.Error(), Equals, "mockIndexHashJoinOuterWorkerErr")
+<<<<<<< HEAD
 }
 
 func (s *seqTestSuite) TestIssue19410(c *C) {
@@ -1574,4 +1590,6 @@ func (s *seqTestSuite) TestIssue19410(c *C) {
 	tk.MustExec("insert into t3 values (1, 'A');")
 	tk.MustQuery("select /*+ INL_HASH_JOIN(t3) */ * from t join t3 on t.b = t3.b1;").Check(testkit.Rows("1 A 1 A"))
 	tk.MustQuery("select /*+ INL_JOIN(t3) */ * from t join t3 on t.b = t3.b1;").Check(testkit.Rows("1 A 1 A"))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

@@ -134,7 +134,11 @@ func (e *BatchPointGetExec) Close() error {
 	if e.runtimeStats != nil && e.snapshot != nil {
 		e.snapshot.DelOption(kv.CollectRuntimeStats)
 	}
+<<<<<<< HEAD
 	e.inited = 0
+=======
+	e.inited = false
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	e.index = 0
 	return nil
 }
@@ -170,6 +174,7 @@ func (e *BatchPointGetExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	return nil
 }
 
+<<<<<<< HEAD
 func datumsContainNull(vals []types.Datum) bool {
 	for _, val := range vals {
 		if val.IsNull() {
@@ -178,14 +183,65 @@ func datumsContainNull(vals []types.Datum) bool {
 	}
 	return false
 }
+=======
+func (e *BatchPointGetExec) initialize(ctx context.Context) error {
+	e.snapshotTS = e.startTS
+	sessVars := e.ctx.GetSessionVars()
+	txnCtx := sessVars.TxnCtx
+	if e.lock {
+		e.snapshotTS = txnCtx.GetForUpdateTS()
+	}
+	txn, err := e.ctx.Txn(false)
+	if err != nil {
+		return err
+	}
+	e.txn = txn
+	var snapshot kv.Snapshot
+	if sessVars.InTxn() && txnCtx.StartTS == txnCtx.GetForUpdateTS() {
+		// We can safely reuse the transaction snapshot if startTS is equal to forUpdateTS.
+		// The snapshot may contains cache that can reduce RPC call.
+		snapshot = txn.GetSnapshot()
+	} else {
+		snapshot, err = e.ctx.GetStore().GetSnapshot(kv.Version{Ver: e.snapshotTS})
+		if err != nil {
+			return err
+		}
+	}
+	if e.runtimeStats != nil {
+		snapshotStats := &tikv.SnapshotRuntimeStats{}
+		e.stats = &runtimeStatsWithSnapshot{
+			SnapshotRuntimeStats: snapshotStats,
+		}
+		snapshot.SetOption(kv.CollectRuntimeStats, snapshotStats)
+		e.ctx.GetSessionVars().StmtCtx.RuntimeStatsColl.RegisterStats(e.id, e.stats)
+		e.snapshot = snapshot
+	}
+	if e.ctx.GetSessionVars().GetReplicaRead().IsFollowerRead() {
+		snapshot.SetOption(kv.ReplicaRead, kv.ReplicaReadFollower)
+	}
+	snapshot.SetOption(kv.TaskID, e.ctx.GetSessionVars().StmtCtx.TaskID)
+	var batchGetter kv.BatchGetter = snapshot
+	if sessVars.InTxn() {
+		if e.lock {
+			batchGetter = kv.NewBufferBatchGetter(txn.GetMemBuffer(), &PessimisticLockCacheGetter{txnCtx: txnCtx}, snapshot)
+		} else {
+			batchGetter = kv.NewBufferBatchGetter(txn.GetMemBuffer(), nil, snapshot)
+		}
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 func (e *BatchPointGetExec) initialize(ctx context.Context) error {
 	var handleVals map[string][]byte
 	var indexKeys []kv.Key
+<<<<<<< HEAD
 	var err error
 	batchGetter := e.batchGetter
 	rc := e.ctx.GetSessionVars().IsPessimisticReadConsistency()
 	if e.idxInfo != nil && !isCommonHandleRead(e.tblInfo, e.idxInfo) {
+=======
+	rc := e.ctx.GetSessionVars().IsPessimisticReadConsistency()
+	if e.idxInfo != nil {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		// `SELECT a, b FROM t WHERE (a, b) IN ((1, 2), (1, 2), (2, 1), (1, 2))` should not return duplicated rows
 		dedup := make(map[hack.MutableString]struct{})
 		toFetchIndexKeys := make([]kv.Key, 0, len(e.idxVals))
@@ -196,7 +252,14 @@ func (e *BatchPointGetExec) initialize(ctx context.Context) error {
 			}
 
 			physID := getPhysID(e.tblInfo, idxVals[e.partPos].GetInt64())
+<<<<<<< HEAD
 			idxKey, err1 := EncodeUniqueIndexKey(e.ctx, e.tblInfo, e.idxInfo, idxVals, physID)
+=======
+			idxKey, hasNull, err1 := encodeIndexKey(e.base(), e.tblInfo, e.idxInfo, idxVals, physID)
+			if hasNull {
+				continue
+			}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			if err1 != nil && !kv.ErrNotExist.Equal(err1) {
 				return err1
 			}
@@ -236,7 +299,11 @@ func (e *BatchPointGetExec) initialize(ctx context.Context) error {
 			return err
 		}
 
+<<<<<<< HEAD
 		e.handles = make([]kv.Handle, 0, len(toFetchIndexKeys))
+=======
+		e.handles = make([]int64, 0, len(toFetchIndexKeys))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if e.tblInfo.Partition != nil {
 			e.physIDs = make([]int64, 0, len(toFetchIndexKeys))
 		}
@@ -245,7 +312,11 @@ func (e *BatchPointGetExec) initialize(ctx context.Context) error {
 			if len(handleVal) == 0 {
 				continue
 			}
+<<<<<<< HEAD
 			handle, err1 := tablecodec.DecodeHandleInUniqueIndexValue(handleVal, e.tblInfo.IsCommonHandle)
+=======
+			handle, err1 := tablecodec.DecodeHandle(handleVal)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			if err1 != nil {
 				return err1
 			}
@@ -280,6 +351,7 @@ func (e *BatchPointGetExec) initialize(ctx context.Context) error {
 			if e.desc {
 				return e.handles[i].Compare(e.handles[j]) > 0
 			}
+<<<<<<< HEAD
 			return e.handles[i].Compare(e.handles[j]) < 0
 
 		}
@@ -303,6 +375,16 @@ func (e *BatchPointGetExec) initialize(ctx context.Context) error {
 					return uintComparator(e.handles[i], e.handles[j]) > 0
 				}
 				return uintComparator(e.handles[i], e.handles[j]) < 0
+=======
+			return e.handles[i] < e.handles[j]
+		}
+		if e.tblInfo.PKIsHandle && mysql.HasUnsignedFlag(e.tblInfo.GetPkColInfo().Flag) {
+			less = func(i int, j int) bool {
+				if e.desc {
+					return uint64(e.handles[i]) > uint64(e.handles[j])
+				}
+				return uint64(e.handles[i]) < uint64(e.handles[j])
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 		}
 		sort.Slice(e.handles, less)
@@ -328,15 +410,26 @@ func (e *BatchPointGetExec) initialize(ctx context.Context) error {
 		keys[i] = key
 	}
 
+<<<<<<< HEAD
+=======
+	hasKeysToLock := false
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	var values map[string][]byte
 	// Lock keys (include exists and non-exists keys) before fetch all values for Repeatable Read Isolation.
 	if e.lock && !rc {
 		lockKeys := make([]kv.Key, len(keys)+len(indexKeys))
 		copy(lockKeys, keys)
 		copy(lockKeys[len(keys):], indexKeys)
+<<<<<<< HEAD
 		err = LockKeys(ctx, e.ctx, e.waitTime, lockKeys...)
+=======
+		err = e.lockKeys(ctx, lockKeys)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			return err
+		}
+		if len(lockKeys) > 0 {
+			hasKeysToLock = true
 		}
 	}
 	// Fetch all values.
@@ -344,7 +437,11 @@ func (e *BatchPointGetExec) initialize(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+<<<<<<< HEAD
 	handles := make([]kv.Handle, 0, len(values))
+=======
+	handles := make([]int64, 0, len(values))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	var existKeys []kv.Key
 	if e.lock && rc {
 		existKeys = make([]kv.Key, 0, 2*len(values))
@@ -363,19 +460,43 @@ func (e *BatchPointGetExec) initialize(ctx context.Context) error {
 		handles = append(handles, e.handles[i])
 		if e.lock && rc {
 			existKeys = append(existKeys, key)
+<<<<<<< HEAD
 			// when e.handles is set in builder directly, index should be primary key and the plan is CommonHandleRead
 			// with clustered index enabled, indexKeys is empty in this situation
 			// lock primary key for clustered index table is redundant
 			if len(indexKeys) != 0 {
+=======
+			if len(indexKeys) > 0 {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				existKeys = append(existKeys, indexKeys[i])
 			}
 		}
 	}
 	// Lock exists keys only for Read Committed Isolation.
+<<<<<<< HEAD
 	if e.lock && rc {
 		err = LockKeys(ctx, e.ctx, e.waitTime, existKeys...)
 		if err != nil {
 			return err
+=======
+	if e.lock {
+		if rc {
+			err = e.lockKeys(ctx, existKeys)
+			if err != nil {
+				return err
+			}
+			if len(existKeys) > 0 {
+				hasKeysToLock = true
+			}
+		}
+		if hasKeysToLock {
+			// Update partition table IDs
+			for _, pid := range e.physIDs {
+				e.updateDeltaForTableID(pid)
+			}
+			// Update table ID
+			e.updateDeltaForTableID(e.tblInfo.ID)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 	}
 	e.handles = handles
@@ -427,7 +548,11 @@ func getPhysID(tblInfo *model.TableInfo, intVal int64) int64 {
 	if pi == nil {
 		return tblInfo.ID
 	}
+<<<<<<< HEAD
 	partIdx := math.Abs(intVal % int64(pi.Num))
+=======
+	partIdx := math.Abs(val % int64(pi.Num))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return pi.Definitions[partIdx].ID
 }
 

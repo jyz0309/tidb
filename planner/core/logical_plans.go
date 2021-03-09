@@ -520,7 +520,10 @@ type DataSource struct {
 	preferStoreType int
 	// preferPartitions store the map, the key represents store type, the value represents the partition name list.
 	preferPartitions map[int][]model.CIStr
+<<<<<<< HEAD
 	SampleInfo       *TableSampleInfo
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	is               infoschema.InfoSchema
 	// isForUpdateRead should be true in either of the following situations
 	// 1. use `inside insert`, `update`, `delete` or `select for update` statement
@@ -759,6 +762,8 @@ func (ds *DataSource) deriveTablePathStats(path *util.AccessPath, conds []expres
 		return false, nil
 	}
 
+	path.PkCol = pkCol
+
 	path.Ranges = ranger.FullIntRange(isUnsigned)
 	if len(conds) == 0 {
 		return false, nil
@@ -890,7 +895,11 @@ func (ds *DataSource) deriveIndexPathStats(path *util.AccessPath, conds []expres
 		}
 	}
 	var indexFilters []expression.Expression
+<<<<<<< HEAD
 	indexFilters, path.TableFilters = ds.splitIndexFilterConditions(path.TableFilters, path.FullIdxCols, path.FullIdxColLens, ds.tableInfo)
+=======
+	indexFilters, path.TableFilters = splitIndexFilterConditions(path.TableFilters, path.FullIdxCols, path.FullIdxColLens, ds.tableInfo)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	path.IndexFilters = append(path.IndexFilters, indexFilters...)
 	// If the `CountAfterAccess` is less than `stats.RowCount`, there must be some inconsistent stats info.
 	// We prefer the `stats.RowCount` because it could use more stats info to calculate the selectivity.
@@ -996,9 +1005,16 @@ func (ls *LogicalSort) ExtractCorrelatedCols() []*expression.CorrelatedColumn {
 type LogicalTopN struct {
 	baseLogicalPlan
 
+<<<<<<< HEAD
 	ByItems    []*util.ByItems
 	Offset     uint64
 	Count      uint64
+=======
+	ByItems []*util.ByItems
+	Offset  uint64
+	Count   uint64
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	limitHints limitHintInfo
 }
 
@@ -1020,8 +1036,14 @@ func (lt *LogicalTopN) isLimit() bool {
 type LogicalLimit struct {
 	logicalSchemaProducer
 
+<<<<<<< HEAD
 	Offset     uint64
 	Count      uint64
+=======
+	Offset uint64
+	Count  uint64
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	limitHints limitHintInfo
 }
 

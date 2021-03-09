@@ -1446,6 +1446,7 @@ func (s *testSuite8) TestUpdate(c *C) {
 
 	// test issue21965
 	tk.MustExec("drop table if exists t;")
+<<<<<<< HEAD
 	tk.MustExec("set @@session.tidb_enable_table_partition = nightly")
 	tk.MustExec("create table t (a int) partition by list (a) (partition p0 values in (0,1));")
 	tk.MustExec("insert ignore into t values (1);")
@@ -1455,6 +1456,26 @@ func (s *testSuite8) TestUpdate(c *C) {
 	tk.MustExec("create table t (a int key) partition by list (a) (partition p0 values in (0,1));")
 	tk.MustExec("insert ignore into t values (1);")
 	tk.MustExec("update ignore t set a=2 where a=1;")
+=======
+	tk.MustExec(`create table t (a int)
+			PARTITION BY RANGE ( a ) (
+			PARTITION p0 VALUES LESS THAN (6),
+			PARTITION p1 VALUES LESS THAN (11),
+			PARTITION p2 VALUES LESS THAN (16),
+			PARTITION p3 VALUES LESS THAN (21))`)
+	tk.MustExec("insert ignore into t values (1);")
+	tk.MustExec("update ignore t set a=100 where a=1;")
+	tk.CheckLastMessage("Rows matched: 1  Changed: 0  Warnings: 0")
+	tk.MustExec("drop table if exists t;")
+	tk.MustExec(`create table t (a int key)
+			PARTITION BY RANGE ( a ) (
+			PARTITION p0 VALUES LESS THAN (6),
+			PARTITION p1 VALUES LESS THAN (11),
+			PARTITION p2 VALUES LESS THAN (16),
+			PARTITION p3 VALUES LESS THAN (21))`)
+	tk.MustExec("insert ignore into t values (1);")
+	tk.MustExec("update ignore t set a=100 where a=1;")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.CheckLastMessage("Rows matched: 1  Changed: 0  Warnings: 0")
 
 	tk.MustExec("drop table if exists t")
@@ -2959,6 +2980,7 @@ from t order by c_str;`).Check(testkit.Rows("10"))
 from t order by c_str;`).Check(testkit.Rows("10"))
 }
 
+<<<<<<< HEAD
 func (s *testSuite4) TestWriteListPartitionTable(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.store)
 	tk.MustExec("use test")
@@ -3859,6 +3881,9 @@ func (s *testSerialSuite2) TestListColumnsPartitionWithGlobalIndex(c *C) {
 }
 
 func (s *testSerialSuite) TestIssue20724(c *C) {
+=======
+func (s *testSerialSuite1) TestIssue20724(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	collate.SetNewCollationEnabledForTest(true)
 	defer collate.SetNewCollationEnabledForTest(false)
 
@@ -3872,6 +3897,11 @@ func (s *testSerialSuite) TestIssue20724(c *C) {
 	tk.MustExec("drop table t1")
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testSerialSuite) TestIssue20840(c *C) {
 	collate.SetNewCollationEnabledForTest(true)
 	defer collate.SetNewCollationEnabledForTest(false)
@@ -3887,6 +3917,22 @@ func (s *testSerialSuite) TestIssue20840(c *C) {
 	tk.MustExec("drop table t1")
 }
 
+<<<<<<< HEAD
+=======
+func (s *testSerialSuite) TestIssue22496(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t12")
+	tk.MustExec("create table t12(d decimal(15,2));")
+	_, err := tk.Exec("insert into t12 values('1,9999.00')")
+	c.Assert(err, NotNil)
+	tk.MustExec("set sql_mode=''")
+	tk.MustExec("insert into t12 values('1,999.00');")
+	tk.MustQuery("SELECT * FROM t12;").Check(testkit.Rows("1.00"))
+	tk.MustExec("drop table t12")
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testSuite) TestEqualDatumsAsBinary(c *C) {
 	tests := []struct {
 		a    []interface{}
@@ -3915,6 +3961,10 @@ func (s *testSuite) TestEqualDatumsAsBinary(c *C) {
 	}
 }
 
+<<<<<<< HEAD
+=======
+>>>>>>> aa82a038f... types: fix the bug about the wrong query result for decimal type  (#22507)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testSuite) TestIssue21232(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -3933,6 +3983,7 @@ func (s *testSuite) TestIssue21232(c *C) {
 	tk.MustQuery("show warnings").Check(testkit.Rows())
 	tk.MustQuery("select * from t").Check(testkit.Rows("a", "b"))
 }
+<<<<<<< HEAD
 
 func testEqualDatumsAsBinary(c *C, a []interface{}, b []interface{}, same bool) {
 	sc := new(stmtctx.StatementContext)
@@ -3942,3 +3993,5 @@ func testEqualDatumsAsBinary(c *C, a []interface{}, b []interface{}, same bool) 
 	c.Assert(err, IsNil)
 	c.Assert(res, Equals, same, Commentf("a: %v, b: %v", a, b))
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

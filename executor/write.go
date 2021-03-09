@@ -114,7 +114,11 @@ func updateRecord(ctx context.Context, sctx sessionctx.Context, h kv.Handle, old
 					return false, err
 				}
 				if err = t.RebaseAutoID(sctx, recordID, true, autoid.RowIDAllocType); err != nil {
+<<<<<<< HEAD
 					return false, err
+=======
+					return false, false, 0, err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				}
 			}
 			if col.IsPKHandleColumn(t.Meta()) {
@@ -196,9 +200,16 @@ func updateRecord(ctx context.Context, sctx sessionctx.Context, h kv.Handle, old
 			err = tables.CheckHandleExists(ctx, sctx, t, newHandle, newData)
 			if err != nil {
 				if terr, ok := errors.Cause(err).(*terror.Error); sctx.GetSessionVars().StmtCtx.IgnoreNoPartition && ok && terr.Code() == errno.ErrNoPartitionForGivenValue {
+<<<<<<< HEAD
 					return false, nil
 				}
 				return false, err
+=======
+					//return false, nil
+					return false, handleChanged, newHandle, nil
+				}
+				return false, handleChanged, newHandle, err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 		}
 		if err = t.RemoveRecord(sctx, h, oldData); err != nil {
@@ -221,9 +232,15 @@ func updateRecord(ctx context.Context, sctx sessionctx.Context, h kv.Handle, old
 		// Update record to new value and update index.
 		if err = t.UpdateRecord(ctx, sctx, h, oldData, newData, modified); err != nil {
 			if terr, ok := errors.Cause(err).(*terror.Error); sctx.GetSessionVars().StmtCtx.IgnoreNoPartition && ok && terr.Code() == errno.ErrNoPartitionForGivenValue {
+<<<<<<< HEAD
 				return false, nil
 			}
 			return false, err
+=======
+				return false, false, 0, nil
+			}
+			return false, false, 0, err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 
 		if onDup {

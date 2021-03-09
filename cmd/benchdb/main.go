@@ -106,11 +106,18 @@ func newBenchDB() *benchDB {
 	}
 }
 
+<<<<<<< HEAD
 func (ut *benchDB) mustExec(sql string, args ...interface{}) {
 	// executeInternal only return one resultSet for this.
 	rs, err := ut.session.ExecuteInternal(context.Background(), sql, args...)
 	defer func() {
 		if rs != nil {
+=======
+func (ut *benchDB) mustExec(sql string) {
+	rss, err := ut.session.Execute(context.Background(), sql)
+	defer func() {
+		for _, rs := range rss {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			err = rs.Close()
 			if err != nil {
 				log.Fatal(err.Error())

@@ -140,7 +140,11 @@ func (br *BindRecord) prepareHints(sctx sessionctx.Context) error {
 		}
 		// For `create global binding for select * from t using select * from t`, we allow it though hintsStr is empty.
 		// For `create global binding for select * from t using select /*+ non_exist_hint() */ * from t`,
+<<<<<<< HEAD
 		// the hint is totally invalid, we escalate warning to error.
+=======
+		// the hint is totally invaild, we escalate warning to error.
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if hintsStr == "" && len(warns) > 0 {
 			return warns[0]
 		}

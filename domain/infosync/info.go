@@ -31,7 +31,6 @@ import (
 	"github.com/pingcap/errors"
 	"github.com/pingcap/failpoint"
 	"github.com/pingcap/parser/mysql"
-	"github.com/pingcap/parser/terror"
 	"github.com/pingcap/tidb/config"
 	"github.com/pingcap/tidb/ddl/placement"
 	"github.com/pingcap/tidb/ddl/util"
@@ -81,9 +80,12 @@ const (
 
 // ErrPrometheusAddrIsNotSet is the error that Prometheus address is not set in PD and etcd
 var ErrPrometheusAddrIsNotSet = dbterror.ClassDomain.NewStd(errno.ErrPrometheusAddrIsNotSet)
+<<<<<<< HEAD
 
 // errPlacementRulesDisabled is exported for internal usage, indicating PD rejected the request due to disabled placement feature.
 var errPlacementRulesDisabled = errors.New("placement rules feature is disabled")
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 // InfoSyncer stores server info to etcd when the tidb-server starts and delete when tidb-server shuts down.
 type InfoSyncer struct {
@@ -164,7 +166,11 @@ func setGlobalInfoSyncer(is *InfoSyncer) {
 }
 
 // GlobalInfoSyncerInit return a new InfoSyncer. It is exported for testing.
+<<<<<<< HEAD
 func GlobalInfoSyncerInit(ctx context.Context, id string, serverIDGetter func() uint64, etcdCli *clientv3.Client, skipRegisterToDashBoard bool) (*InfoSyncer, error) {
+=======
+func GlobalInfoSyncerInit(ctx context.Context, id string, etcdCli *clientv3.Client, skipRegisterToDashBoard bool) (*InfoSyncer, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	is := &InfoSyncer{
 		etcdCli:        etcdCli,
 		info:           getServerInfo(id, serverIDGetter),
@@ -476,10 +482,16 @@ func (is *InfoSyncer) RemoveServerInfo() {
 
 type topologyInfo struct {
 	ServerVersionInfo
+<<<<<<< HEAD
 	StatusPort     uint              `json:"status_port"`
 	DeployPath     string            `json:"deploy_path"`
 	StartTimestamp int64             `json:"start_timestamp"`
 	Labels         map[string]string `json:"labels"`
+=======
+	StatusPort     uint   `json:"status_port"`
+	DeployPath     string `json:"deploy_path"`
+	StartTimestamp int64  `json:"start_timestamp"`
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (is *InfoSyncer) getTopologyInfo() topologyInfo {
@@ -496,7 +508,10 @@ func (is *InfoSyncer) getTopologyInfo() topologyInfo {
 		StatusPort:     is.info.StatusPort,
 		DeployPath:     dir,
 		StartTimestamp: is.info.StartTimestamp,
+<<<<<<< HEAD
 		Labels:         is.info.Labels,
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 }
 
@@ -800,9 +815,12 @@ func getServerInfo(id string, serverIDGetter func() uint64) *ServerInfo {
 	failpoint.Inject("mockServerInfo", func(val failpoint.Value) {
 		if val.(bool) {
 			info.StartTimestamp = 1282967700000
+<<<<<<< HEAD
 			info.Labels = map[string]string{
 				"foo": "bar",
 			}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 	})
 

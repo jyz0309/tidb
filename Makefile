@@ -13,7 +13,65 @@
 
 include Makefile.common
 
+<<<<<<< HEAD
 .PHONY: all clean test gotest server dev benchkv benchraw check checklist parser tidy ddltest
+=======
+# Ensure GOPATH is set before running build process.
+ifeq "$(GOPATH)" ""
+  $(error Please set the environment variable GOPATH before running `make`)
+endif
+FAIL_ON_STDOUT := awk '{ print } END { if (NR > 0) { exit 1 } }'
+
+CURDIR := $(shell pwd)
+path_to_add := $(addsuffix /bin,$(subst :,/bin:,$(GOPATH))):$(PWD)/tools/bin
+export PATH := $(path_to_add):$(PATH)
+
+GO              := GO111MODULE=on go
+GOBUILD         := $(GO) build $(BUILD_FLAG) -tags codes
+GOBUILDCOVERAGE := GOPATH=$(GOPATH) cd tidb-server; $(GO) test -coverpkg="../..." -c .
+GOTEST          := $(GO) test -p $(P)
+OVERALLS        := GO111MODULE=on overalls
+STATICCHECK     := GO111MODULE=on staticcheck
+TIDB_EDITION    ?= Community
+
+# Ensure TIDB_EDITION is set to Community or Enterprise before running build process.
+ifneq "$(TIDB_EDITION)" "Community"
+ifneq "$(TIDB_EDITION)" "Enterprise"
+  $(error Please set the correct environment variable TIDB_EDITION before running `make`)
+endif
+endif
+
+ARCH      := "`uname -s`"
+LINUX     := "Linux"
+MAC       := "Darwin"
+PACKAGE_LIST  := go list ./...| grep -vE "cmd"
+PACKAGES  := $$($(PACKAGE_LIST))
+PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/$(PROJECT)/||'
+FILES     := $$(find $$($(PACKAGE_DIRECTORIES)) -name "*.go")
+
+FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|tools)" | xargs tools/bin/failpoint-ctl enable)
+FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|tools)" | xargs tools/bin/failpoint-ctl disable)
+
+LDFLAGS += -X "github.com/pingcap/parser/mysql.TiDBReleaseVersion=$(shell git describe --tags --dirty --always)"
+LDFLAGS += -X "github.com/pingcap/tidb/util/versioninfo.TiDBBuildTS=$(shell date -u '+%Y-%m-%d %I:%M:%S')"
+LDFLAGS += -X "github.com/pingcap/tidb/util/versioninfo.TiDBGitHash=$(shell git rev-parse HEAD)"
+LDFLAGS += -X "github.com/pingcap/tidb/util/versioninfo.TiDBGitBranch=$(shell git rev-parse --abbrev-ref HEAD)"
+LDFLAGS += -X "github.com/pingcap/tidb/util/versioninfo.TiDBEdition=$(TIDB_EDITION)"
+
+TEST_LDFLAGS =  -X "github.com/pingcap/tidb/config.checkBeforeDropLDFlag=1"
+COVERAGE_SERVER_LDFLAGS =  -X "github.com/pingcap/tidb/tidb-server.isCoverageServer=1"
+
+CHECK_LDFLAGS += $(LDFLAGS) ${TEST_LDFLAGS}
+
+TARGET = ""
+
+# VB = Vector Benchmark
+VB_FILE =
+VB_FUNC =
+
+
+.PHONY: all build update clean todo test gotest interpreter server dev benchkv benchraw check checklist parser tidy ddltest
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 default: server buildsucc
 
@@ -32,7 +90,11 @@ dev: checklist check test
 # Install the check tools.
 check-setup:tools/bin/revive tools/bin/goword tools/bin/gometalinter tools/bin/gosec
 
+<<<<<<< HEAD
 check: fmt errcheck unconvert lint tidy testSuite check-static vet staticcheck errdoc
+=======
+check: fmt errcheck lint tidy testSuite check-static vet staticcheck errdoc
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 # These need to be fixed before they can be ran regularly
 check-fail: goword check-slow
@@ -239,6 +301,17 @@ tools/bin/failpoint-ctl: go.mod
 tools/bin/errdoc-gen: go.mod
 	$(GO) build -o $@ github.com/pingcap/errors/errdoc-gen
 
+<<<<<<< HEAD
+=======
+tools/bin/ineffassign:tools/check/go.mod
+	cd tools/check; \
+	$(GO) build -o ../bin/ineffassign github.com/gordonklaus/ineffassign
+
+tools/bin/errdoc-gen: tools/check/go.mod
+	cd tools/check; \
+	$(GO) build -o ../bin/errdoc-gen github.com/pingcap/errors/errdoc-gen
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 tools/bin/golangci-lint:
 	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b ./tools/bin v1.29.0
 

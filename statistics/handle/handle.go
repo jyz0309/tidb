@@ -156,20 +156,30 @@ func (h *Handle) Clear() {
 	h.mu.Unlock()
 }
 
+<<<<<<< HEAD
 type sessionPool interface {
 	Get() (pools.Resource, error)
 	Put(pools.Resource)
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // NewHandle creates a Handle for update stats.
 func NewHandle(ctx sessionctx.Context, lease time.Duration, pool sessionPool) (*Handle, error) {
 	handle := &Handle{
+<<<<<<< HEAD
 		ddlEventCh:       make(chan *util.Event, 100),
 		listHead:         &SessionStatsCollector{mapper: make(tableDeltaMap), rateMap: make(errorRateDeltaMap)},
 		globalMap:        make(tableDeltaMap),
 		feedback:         statistics.NewQueryFeedbackMap(),
 		idxUsageListHead: &SessionIndexUsageCollector{mapper: make(indexUsageMap)},
 		pool:             pool,
+=======
+		ddlEventCh: make(chan *util.Event, 100),
+		listHead:   &SessionStatsCollector{mapper: make(tableDeltaMap), rateMap: make(errorRateDeltaMap)},
+		globalMap:  make(tableDeltaMap),
+		feedback:   statistics.NewQueryFeedbackMap(),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	handle.lease.Store(lease)
 	handle.pool = pool
@@ -525,7 +535,11 @@ func (sc statsCache) update(tables []*statistics.Table, deletedIDs []int64, newV
 // LoadNeededHistograms will load histograms for those needed columns.
 func (h *Handle) LoadNeededHistograms() (err error) {
 	cols := statistics.HistogramNeededColumns.AllCols()
+<<<<<<< HEAD
 	reader, err := h.getStatsReader(0)
+=======
+	reader, err := h.getStatsReader(nil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return err
 	}
@@ -772,9 +786,15 @@ func (h *Handle) columnStatsFromStorage(reader *statsReader, row chunk.Row, tabl
 	return nil
 }
 
+<<<<<<< HEAD
 // TableStatsFromStorage loads table stats info from storage.
 func (h *Handle) TableStatsFromStorage(tableInfo *model.TableInfo, physicalID int64, loadAll bool, snapshot uint64) (_ *statistics.Table, err error) {
 	reader, err := h.getStatsReader(snapshot)
+=======
+// tableStatsFromStorage loads table stats info from storage.
+func (h *Handle) tableStatsFromStorage(tableInfo *model.TableInfo, physicalID int64, loadAll bool, historyStatsExec sqlexec.RestrictedSQLExecutor) (_ *statistics.Table, err error) {
+	reader, err := h.getStatsReader(historyStatsExec)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return nil, err
 	}
@@ -1273,6 +1293,7 @@ func (h *Handle) fillExtendedStatsItemVals(item *statistics.ExtendedStatsItem, c
 	return nil
 }
 
+<<<<<<< HEAD
 func (h *Handle) fillExtStatsCorrVals(item *statistics.ExtendedStatsItem, cols []*model.ColumnInfo, collectors []*statistics.SampleCollector) *statistics.ExtendedStatsItem {
 	colOffsets := make([]int, 0, 2)
 	for _, id := range item.ColIDs {
@@ -1303,6 +1324,28 @@ func (h *Handle) fillExtStatsCorrVals(item *statistics.ExtendedStatsItem, cols [
 	h.mu.Unlock()
 	var err error
 	samplesX, err = statistics.SortSampleItems(sc, samplesX)
+=======
+func (h *Handle) getStatsReader(history sqlexec.RestrictedSQLExecutor) (reader *statsReader, err error) {
+	failpoint.Inject("mockGetStatsReaderFail", func(val failpoint.Value) {
+		if val.(bool) {
+			failpoint.Return(nil, errors.New("gofail genStatsReader error"))
+		}
+	})
+	if history != nil {
+		return &statsReader{history: history}, nil
+	}
+	h.mu.Lock()
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("getStatsReader panic %v", r)
+		}
+		if err != nil {
+			h.mu.Unlock()
+		}
+	}()
+	failpoint.Inject("mockGetStatsReaderPanic", nil)
+	_, err = h.mu.ctx.(sqlexec.SQLExecutor).Execute(context.TODO(), "begin")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return nil
 	}

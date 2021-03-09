@@ -31,7 +31,10 @@ import (
 	"github.com/pingcap/kvproto/pkg/errorpb"
 	"github.com/pingcap/kvproto/pkg/kvrpcpb"
 	"github.com/pingcap/kvproto/pkg/metapb"
+<<<<<<< HEAD:store/gcworker/gc_worker_test.go
 	"github.com/pingcap/tidb/ddl/placement"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker_test.go
 	"github.com/pingcap/tidb/ddl/util"
 	"github.com/pingcap/tidb/domain"
 	"github.com/pingcap/tidb/domain/infosync"
@@ -53,8 +56,13 @@ func TestT(t *testing.T) {
 
 type testGCWorkerSuite struct {
 	store      tikv.Storage
+<<<<<<< HEAD:store/gcworker/gc_worker_test.go
 	cluster    cluster.Cluster
 	oracle     *oracles.MockOracle
+=======
+	cluster    *mocktikv.Cluster
+	oracle     *mockoracle.MockOracle
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker_test.go
 	gcWorker   *GCWorker
 	dom        *domain.Domain
 	client     *testGCWorkerClient
@@ -77,6 +85,7 @@ func (s *testGCWorkerSuite) SetUpTest(c *C) {
 		return client
 	}
 
+<<<<<<< HEAD:store/gcworker/gc_worker_test.go
 	store, err := mockstore.NewMockStore(
 		mockstore.WithStoreType(mockstore.MockTiKV),
 		mockstore.WithClusterInspector(func(c cluster.Cluster) {
@@ -90,6 +99,13 @@ func (s *testGCWorkerSuite) SetUpTest(c *C) {
 		}),
 	)
 	c.Assert(err, IsNil)
+=======
+	s.cluster = mocktikv.NewCluster()
+	s.initRegion.storeIDs, s.initRegion.peerIDs, s.initRegion.regionID, _ = mocktikv.BootstrapWithMultiStores(s.cluster, 3)
+	store, err := mockstore.NewMockTikvStore(
+		mockstore.WithCluster(s.cluster),
+		mockstore.WithHijackClient(hijackClient))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker_test.go
 
 	s.store = store.(tikv.Storage)
 	c.Assert(err, IsNil)
@@ -238,6 +254,7 @@ func (s *testGCWorkerSuite) TestMinStartTS(c *C) {
 	spkv := s.store.GetSafePointKV()
 	err := spkv.Put(fmt.Sprintf("%s/%s", infosync.ServerMinStartTSPath, "a"), strconv.FormatUint(math.MaxUint64, 10))
 	c.Assert(err, IsNil)
+<<<<<<< HEAD:store/gcworker/gc_worker_test.go
 	now := oracle.GoTimeToTS(time.Now())
 	sp := s.gcWorker.calcSafePointByMinStartTS(ctx, now)
 	c.Assert(sp, Equals, now)
@@ -245,13 +262,28 @@ func (s *testGCWorkerSuite) TestMinStartTS(c *C) {
 	c.Assert(err, IsNil)
 	sp = s.gcWorker.calcSafePointByMinStartTS(ctx, now)
 	c.Assert(sp, Equals, uint64(0))
+=======
+	now := time.Now()
+	sp := s.gcWorker.calSafePointByMinStartTS(ctx, now)
+	c.Assert(sp.Second(), Equals, now.Second())
+	err = spkv.Put(fmt.Sprintf("%s/%s", infosync.ServerMinStartTSPath, "a"), "0")
+	c.Assert(err, IsNil)
+	sp = s.gcWorker.calSafePointByMinStartTS(ctx, now)
+	zeroTime := time.Unix(0, oracle.ExtractPhysical(0)*1e6)
+	c.Assert(sp, Equals, zeroTime)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker_test.go
 
 	err = spkv.Put(fmt.Sprintf("%s/%s", infosync.ServerMinStartTSPath, "a"), "0")
 	c.Assert(err, IsNil)
 	err = spkv.Put(fmt.Sprintf("%s/%s", infosync.ServerMinStartTSPath, "b"), "1")
 	c.Assert(err, IsNil)
+<<<<<<< HEAD:store/gcworker/gc_worker_test.go
 	sp = s.gcWorker.calcSafePointByMinStartTS(ctx, now)
 	c.Assert(sp, Equals, uint64(0))
+=======
+	sp = s.gcWorker.calSafePointByMinStartTS(ctx, now)
+	c.Assert(sp, Equals, zeroTime)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker_test.go
 
 	err = spkv.Put(fmt.Sprintf("%s/%s", infosync.ServerMinStartTSPath, "a"),
 		strconv.FormatUint(now, 10))
@@ -259,8 +291,13 @@ func (s *testGCWorkerSuite) TestMinStartTS(c *C) {
 	err = spkv.Put(fmt.Sprintf("%s/%s", infosync.ServerMinStartTSPath, "b"),
 		strconv.FormatUint(now-oracle.EncodeTSO(20000), 10))
 	c.Assert(err, IsNil)
+<<<<<<< HEAD:store/gcworker/gc_worker_test.go
 	sp = s.gcWorker.calcSafePointByMinStartTS(ctx, now-oracle.EncodeTSO(10000))
 	c.Assert(sp, Equals, now-oracle.EncodeTSO(20000))
+=======
+	sp = s.gcWorker.calSafePointByMinStartTS(ctx, now.Add(-10*time.Second))
+	c.Assert(sp.Second(), Equals, now.Add(-20*time.Second).Second())
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker_test.go
 }
 
 func (s *testGCWorkerSuite) TestPrepareGC(c *C) {
@@ -497,8 +534,12 @@ func (s *testGCWorkerSuite) TestCheckScanLockMode(c *C) {
 	usePhysical, err := s.gcWorker.checkUsePhysicalScanLock()
 	c.Assert(err, IsNil)
 	c.Assert(usePhysical, Equals, false)
+<<<<<<< HEAD:store/gcworker/gc_worker_test.go
 	c.Assert(usePhysical, Equals, gcScanLockModeDefault == gcScanLockModePhysical)
 	// Now the row must be set to the default value.
+=======
+	// This is a hidden config, so default value will not be inserted to table.
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker_test.go
 	str, err := s.gcWorker.loadValueFromSysTable(gcScanLockModeKey)
 	c.Assert(err, IsNil)
 	c.Assert(str, Equals, gcScanLockModeDefault)
@@ -541,12 +582,20 @@ func (s *testGCWorkerSuite) TestNeedsGCOperationForStore(c *C) {
 		res, err = needsGCOperationForStore(newStore(state, true, ""))
 		c.Assert(err, IsNil)
 		c.Assert(res, Equals, needGC)
+<<<<<<< HEAD:store/gcworker/gc_worker_test.go
 		res, err = needsGCOperationForStore(newStore(state, true, placement.EngineLabelTiKV))
+=======
+		res, err = needsGCOperationForStore(newStore(state, true, engineLabelTiKV))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker_test.go
 		c.Assert(err, IsNil)
 		c.Assert(res, Equals, needGC)
 
 		// TiFlash does not need these operations.
+<<<<<<< HEAD:store/gcworker/gc_worker_test.go
 		res, err = needsGCOperationForStore(newStore(state, true, placement.EngineLabelTiFlash))
+=======
+		res, err = needsGCOperationForStore(newStore(state, true, engineLabelTiFlash))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker_test.go
 		c.Assert(err, IsNil)
 		c.Assert(res, IsFalse)
 	}
@@ -920,7 +969,11 @@ func (s *testGCWorkerSuite) TestResolveLockRangeMeetRegionEnlargeCausedByRegionM
 		if regionID.GetID() == s.initRegion.regionID && *firstAccessRef {
 			*firstAccessRef = false
 			// merge region2 into region1 and return EpochNotMatch error.
+<<<<<<< HEAD:store/gcworker/gc_worker_test.go
 			mCluster := s.cluster.(*mocktikv.Cluster)
+=======
+			mCluster := s.cluster
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker_test.go
 			mCluster.Merge(s.initRegion.regionID, region2)
 			regionMeta, _ := mCluster.GetRegion(s.initRegion.regionID)
 			s.store.GetRegionCache().OnRegionEpochNotMatch(
@@ -1199,7 +1252,13 @@ func (s *testGCWorkerSuite) TestMergeLockScanner(c *C) {
 
 	makeLockList := func(locks ...*tikv.Lock) []*tikv.Lock {
 		res := make([]*tikv.Lock, 0, len(locks))
+<<<<<<< HEAD:store/gcworker/gc_worker_test.go
 		res = append(res, locks...)
+=======
+		for _, lock := range locks {
+			res = append(res, lock)
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker_test.go
 		return res
 	}
 
@@ -1251,6 +1310,7 @@ func (s *testGCWorkerSuite) TestMergeLockScanner(c *C) {
 	c.Assert(scanner.GetSucceededStores(), DeepEquals, makeIDSet(storeIDs))
 
 	// Merge sort locks with different keys.
+<<<<<<< HEAD:store/gcworker/gc_worker_test.go
 	scanner, sendCh, storeIDs, resCh = makeMergedChannel(c, 2)
 	locks = sendLocksByKey(sendCh[0], "a", "c", "e")
 	time.Sleep(time.Millisecond * 100)
@@ -1270,6 +1330,27 @@ func (s *testGCWorkerSuite) TestMergeLockScanner(c *C) {
 	sendLocks(sendCh[1], makeLock("a", 1), makeLock("a", 2), makeLock("b", 0))
 	close(sendCh[0])
 	close(sendCh[1])
+=======
+	scanner, sendCh, storeIDs, resCh = makeMergedChannel(c, 2)
+	locks = sendLocksByKey(sendCh[0], "a", "c", "e")
+	time.Sleep(time.Millisecond * 100)
+	locks = append(locks, sendLocksByKey(sendCh[1], "b", "d", "f")...)
+	close(sendCh[0])
+	close(sendCh[1])
+	sort.Slice(locks, func(i, j int) bool {
+		return bytes.Compare(locks[i].Key, locks[j].Key) < 0
+	})
+	c.Assert(<-resCh, DeepEquals, locks)
+	c.Assert(scanner.GetSucceededStores(), DeepEquals, makeIDSet(storeIDs, 0, 1))
+
+	// Merge sort locks with different timestamps.
+	scanner, sendCh, storeIDs, resCh = makeMergedChannel(c, 2)
+	sendLocks(sendCh[0], makeLock("a", 0), makeLock("a", 1))
+	time.Sleep(time.Millisecond * 100)
+	sendLocks(sendCh[1], makeLock("a", 1), makeLock("a", 2), makeLock("b", 0))
+	close(sendCh[0])
+	close(sendCh[1])
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker_test.go
 	c.Assert(<-resCh, DeepEquals, makeLockList(makeLock("a", 0), makeLock("a", 1), makeLock("a", 2), makeLock("b", 0)))
 	c.Assert(scanner.GetSucceededStores(), DeepEquals, makeIDSet(storeIDs, 0, 1))
 
@@ -1308,10 +1389,28 @@ func (s *testGCWorkerSuite) TestMergeLockScanner(c *C) {
 		sendLocksByKey(sendCh[0], "a\x00", "a\x00\x00", "b", "b\x00")
 		sendLocksByKey(sendCh[1], "a", "a\x00\x00", "a\x00\x00\x00", "c")
 		sendLocksByKey(sendCh[2], "1", "a\x00", "a\x00\x00", "b")
+<<<<<<< HEAD:store/gcworker/gc_worker_test.go
 		close(sendCh[0])
 		close(sendCh[1])
 		close(sendCh[2])
 		c.Assert(<-resCh, DeepEquals, makeLockListByKey("1", "a", "a\x00", "a\x00\x00", "a\x00\x00\x00", "b", "b\x00", "c"))
+=======
+		close(sendCh[0])
+		close(sendCh[1])
+		close(sendCh[2])
+		c.Assert(<-resCh, DeepEquals, makeLockListByKey("1", "a", "a\x00", "a\x00\x00", "a\x00\x00\x00", "b", "b\x00", "c"))
+		c.Assert(scanner.GetSucceededStores(), DeepEquals, makeIDSet(storeIDs, 0, 1, 2))
+
+		scanner, sendCh, storeIDs, resCh = channel(c, 3)
+		sendLocks(sendCh[0], makeLock("a", 0), makeLock("d", 0), makeLock("g", 0), makeLock("h", 0))
+		sendLocks(sendCh[1], makeLock("a", 1), makeLock("b", 0), makeLock("c", 0), makeLock("d", 1))
+		sendLocks(sendCh[2], makeLock("e", 0), makeLock("g", 1), makeLock("g", 2), makeLock("h", 0))
+		close(sendCh[0])
+		close(sendCh[1])
+		close(sendCh[2])
+		c.Assert(<-resCh, DeepEquals, makeLockList(makeLock("a", 0), makeLock("a", 1), makeLock("b", 0), makeLock("c", 0),
+			makeLock("d", 0), makeLock("d", 1), makeLock("e", 0), makeLock("g", 0), makeLock("g", 1), makeLock("g", 2), makeLock("h", 0)))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:store/tikv/gcworker/gc_worker_test.go
 		c.Assert(scanner.GetSucceededStores(), DeepEquals, makeIDSet(storeIDs, 0, 1, 2))
 
 		scanner, sendCh, storeIDs, resCh = channel(c, 3)
@@ -1569,4 +1668,236 @@ func (s *testGCWorkerSuite) TestGCPlacementRules(c *C) {
 	pid, err := s.gcWorker.doGCPlacementRules(dr)
 	c.Assert(pid, Equals, int64(1))
 	c.Assert(err, IsNil)
+}
+
+func (s *testGCWorkerSuite) TestResolveLocksPhysical(c *C) {
+	alwaysSucceedHanlder := func(addr string, req *tikvrpc.Request) (*tikvrpc.Response, error) {
+		switch req.Type {
+		case tikvrpc.CmdPhysicalScanLock:
+			return &tikvrpc.Response{Resp: &kvrpcpb.PhysicalScanLockResponse{Locks: nil, Error: ""}}, nil
+		case tikvrpc.CmdRegisterLockObserver:
+			return &tikvrpc.Response{Resp: &kvrpcpb.RegisterLockObserverResponse{Error: ""}}, nil
+		case tikvrpc.CmdCheckLockObserver:
+			return &tikvrpc.Response{Resp: &kvrpcpb.CheckLockObserverResponse{Error: "", IsClean: true, Locks: nil}}, nil
+		case tikvrpc.CmdRemoveLockObserver:
+			return &tikvrpc.Response{Resp: &kvrpcpb.RemoveLockObserverResponse{Error: ""}}, nil
+		default:
+			panic("unreachable")
+		}
+	}
+	alwaysFailHandler := func(addr string, req *tikvrpc.Request) (*tikvrpc.Response, error) {
+		switch req.Type {
+		case tikvrpc.CmdPhysicalScanLock:
+			return &tikvrpc.Response{Resp: &kvrpcpb.PhysicalScanLockResponse{Locks: nil, Error: "error"}}, nil
+		case tikvrpc.CmdRegisterLockObserver:
+			return &tikvrpc.Response{Resp: &kvrpcpb.RegisterLockObserverResponse{Error: "error"}}, nil
+		case tikvrpc.CmdCheckLockObserver:
+			return &tikvrpc.Response{Resp: &kvrpcpb.CheckLockObserverResponse{Error: "error", IsClean: false, Locks: nil}}, nil
+		case tikvrpc.CmdRemoveLockObserver:
+			return &tikvrpc.Response{Resp: &kvrpcpb.RemoveLockObserverResponse{Error: "error"}}, nil
+		default:
+			panic("unreachable")
+		}
+	}
+	reset := func() {
+		s.client.physicalScanLockHandler = alwaysSucceedHanlder
+		s.client.registerLockObserverHandler = alwaysSucceedHanlder
+		s.client.checkLockObserverHandler = alwaysSucceedHanlder
+		s.client.removeLockObserverHandler = alwaysSucceedHanlder
+	}
+
+	ctx := context.Background()
+	var safePoint uint64 = 10000
+
+	// No lock
+	reset()
+	physicalUsed, err := s.gcWorker.resolveLocks(ctx, safePoint, 3, true)
+	c.Assert(physicalUsed, IsTrue)
+	c.Assert(err, IsNil)
+
+	// Should fall back on the legacy mode when fails to register lock observers.
+	reset()
+	s.client.registerLockObserverHandler = alwaysFailHandler
+	physicalUsed, err = s.gcWorker.resolveLocks(ctx, safePoint, 3, true)
+	c.Assert(physicalUsed, IsFalse)
+	c.Assert(err, IsNil)
+
+	// Should fall back when fails to resolve locks.
+	reset()
+	s.client.physicalScanLockHandler = func(addr string, req *tikvrpc.Request) (*tikvrpc.Response, error) {
+		locks := []*kvrpcpb.LockInfo{{Key: []byte{0}}}
+		return &tikvrpc.Response{Resp: &kvrpcpb.PhysicalScanLockResponse{Locks: locks, Error: ""}}, nil
+	}
+	c.Assert(failpoint.Enable("github.com/pingcap/tidb/store/tikv/gcworker/resolveLocksAcrossRegionsErr", "return(100)"), IsNil)
+	physicalUsed, err = s.gcWorker.resolveLocks(ctx, safePoint, 3, true)
+	c.Assert(physicalUsed, IsFalse)
+	c.Assert(err, IsNil)
+	c.Assert(failpoint.Disable("github.com/pingcap/tidb/store/tikv/gcworker/resolveLocksAcrossRegionsErr"), IsNil)
+
+	// Shouldn't fall back when fails to scan locks less than 3 times.
+	reset()
+	var returnError uint32 = 1
+	s.client.physicalScanLockHandler = func(addr string, req *tikvrpc.Request) (*tikvrpc.Response, error) {
+		if atomic.CompareAndSwapUint32(&returnError, 1, 0) {
+			return alwaysFailHandler(addr, req)
+		}
+		return alwaysSucceedHanlder(addr, req)
+	}
+	physicalUsed, err = s.gcWorker.resolveLocks(ctx, safePoint, 3, true)
+	c.Assert(physicalUsed, IsTrue)
+	c.Assert(err, IsNil)
+
+	// Should fall back if reaches retry limit
+	reset()
+	s.client.physicalScanLockHandler = alwaysFailHandler
+	physicalUsed, err = s.gcWorker.resolveLocks(ctx, safePoint, 3, true)
+	c.Assert(physicalUsed, IsFalse)
+	c.Assert(err, IsNil)
+
+	// Should fall back when one registered store is dirty.
+	reset()
+	s.client.checkLockObserverHandler = func(addr string, req *tikvrpc.Request) (*tikvrpc.Response, error) {
+		return &tikvrpc.Response{Resp: &kvrpcpb.CheckLockObserverResponse{Error: "", IsClean: false, Locks: nil}}, nil
+	}
+	physicalUsed, err = s.gcWorker.resolveLocks(ctx, safePoint, 3, true)
+	c.Assert(physicalUsed, IsFalse)
+	c.Assert(err, IsNil)
+
+	// When fails to check lock observer in a store, we assume the store is dirty.
+	// Should fall back when fails to check lock observers.
+	reset()
+	s.client.checkLockObserverHandler = alwaysFailHandler
+	physicalUsed, err = s.gcWorker.resolveLocks(ctx, safePoint, 3, true)
+	c.Assert(physicalUsed, IsFalse)
+	c.Assert(err, IsNil)
+
+	// Shouldn't fall back when the dirty store is newly added.
+	reset()
+	var wg sync.WaitGroup
+	wg.Add(1)
+	c.Assert(failpoint.Enable("github.com/pingcap/tidb/store/tikv/gcworker/beforeCheckLockObservers", "pause"), IsNil)
+	go func() {
+		defer wg.Done()
+		physicalUsed, err := s.gcWorker.resolveLocks(ctx, safePoint, 3, true)
+		c.Assert(physicalUsed, IsTrue)
+		c.Assert(err, IsNil)
+	}()
+	// Sleep to let the goroutine pause.
+	time.Sleep(500 * time.Millisecond)
+	s.cluster.AddStore(100, "store100")
+	once := true
+	s.client.checkLockObserverHandler = func(addr string, req *tikvrpc.Request) (*tikvrpc.Response, error) {
+		// The newly added store returns IsClean=false for the first time.
+		if addr == "store100" && once {
+			once = false
+			return &tikvrpc.Response{Resp: &kvrpcpb.CheckLockObserverResponse{Error: "", IsClean: false, Locks: nil}}, nil
+		}
+		return alwaysSucceedHanlder(addr, req)
+	}
+	c.Assert(failpoint.Disable("github.com/pingcap/tidb/store/tikv/gcworker/beforeCheckLockObservers"), IsNil)
+	wg.Wait()
+
+	// Shouldn't fall back when a store is removed.
+	reset()
+	wg.Add(1)
+	c.Assert(failpoint.Enable("github.com/pingcap/tidb/store/tikv/gcworker/beforeCheckLockObservers", "pause"), IsNil)
+	go func() {
+		defer wg.Done()
+		physicalUsed, err := s.gcWorker.resolveLocks(ctx, safePoint, 3, true)
+		c.Assert(physicalUsed, IsTrue)
+		c.Assert(err, IsNil)
+	}()
+	// Sleep to let the goroutine pause.
+	time.Sleep(500 * time.Millisecond)
+	s.cluster.RemoveStore(100)
+	c.Assert(failpoint.Disable("github.com/pingcap/tidb/store/tikv/gcworker/beforeCheckLockObservers"), IsNil)
+	wg.Wait()
+
+	// Should fall back when a cleaned store becomes dirty.
+	reset()
+	wg.Add(1)
+	c.Assert(failpoint.Enable("github.com/pingcap/tidb/store/tikv/gcworker/beforeCheckLockObservers", "pause"), IsNil)
+	go func() {
+		defer wg.Done()
+		physicalUsed, err := s.gcWorker.resolveLocks(ctx, safePoint, 3, true)
+		c.Assert(physicalUsed, IsFalse)
+		c.Assert(err, IsNil)
+	}()
+	// Sleep to let the goroutine pause.
+	time.Sleep(500 * time.Millisecond)
+	store := s.cluster.GetAllStores()[0]
+	var onceClean uint32 = 1
+	s.cluster.AddStore(100, "store100")
+	var onceDirty uint32 = 1
+	s.client.checkLockObserverHandler = func(addr string, req *tikvrpc.Request) (*tikvrpc.Response, error) {
+		switch addr {
+		case "store100":
+			// The newly added store returns IsClean=false for the first time.
+			if atomic.CompareAndSwapUint32(&onceDirty, 1, 0) {
+				return &tikvrpc.Response{Resp: &kvrpcpb.CheckLockObserverResponse{Error: "", IsClean: false, Locks: nil}}, nil
+			}
+			return alwaysSucceedHanlder(addr, req)
+		case store.Address:
+			// The store returns IsClean=true for the first time.
+			if atomic.CompareAndSwapUint32(&onceClean, 1, 0) {
+				return alwaysSucceedHanlder(addr, req)
+			}
+			return &tikvrpc.Response{Resp: &kvrpcpb.CheckLockObserverResponse{Error: "", IsClean: false, Locks: nil}}, nil
+		default:
+			return alwaysSucceedHanlder(addr, req)
+		}
+	}
+	c.Assert(failpoint.Disable("github.com/pingcap/tidb/store/tikv/gcworker/beforeCheckLockObservers"), IsNil)
+	wg.Wait()
+
+	// Shouldn't fall back when fails to remove lock observers.
+	reset()
+	s.client.removeLockObserverHandler = alwaysFailHandler
+	physicalUsed, err = s.gcWorker.resolveLocks(ctx, safePoint, 3, true)
+	c.Assert(physicalUsed, IsTrue)
+	c.Assert(err, IsNil)
+}
+
+func (s *testGCWorkerSuite) TestPhyscailScanLockDeadlock(c *C) {
+	ctx := context.Background()
+	stores := s.cluster.GetAllStores()
+	c.Assert(len(stores), Greater, 1)
+
+	s.client.physicalScanLockHandler = func(addr string, req *tikvrpc.Request) (*tikvrpc.Response, error) {
+		c.Assert(addr, Equals, stores[0].Address)
+		scanReq := req.PhysicalScanLock()
+		scanLockLimit := int(scanReq.Limit)
+		locks := make([]*kvrpcpb.LockInfo, 0, scanReq.Limit)
+		for i := 0; i < scanLockLimit; i++ {
+			// The order of keys doesn't matter.
+			locks = append(locks, &kvrpcpb.LockInfo{Key: []byte{byte(i)}})
+		}
+		return &tikvrpc.Response{
+			Resp: &kvrpcpb.PhysicalScanLockResponse{
+				Locks: locks,
+				Error: "",
+			},
+		}, nil
+	}
+
+	// Sleep 1000ms to let the main goroutine block on sending tasks.
+	// Inject error to the goroutine resolving locks so that the main goroutine will block forever if it doesn't handle channels properly.
+	c.Assert(failpoint.Enable("github.com/pingcap/tidb/store/tikv/gcworker/resolveLocksAcrossRegionsErr", "return(1000)"), IsNil)
+	defer func() {
+		c.Assert(failpoint.Disable("github.com/pingcap/tidb/store/tikv/gcworker/resolveLocksAcrossRegionsErr"), IsNil)
+	}()
+
+	done := make(chan interface{})
+	go func() {
+		defer close(done)
+		storesMap := map[uint64]*metapb.Store{stores[0].Id: stores[0]}
+		succeeded, err := s.gcWorker.physicalScanAndResolveLocks(ctx, 10000, storesMap)
+		c.Assert(succeeded, IsNil)
+		c.Assert(err, ErrorMatches, "injectedError")
+	}()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		c.Fatal("physicalScanAndResolveLocks blocks")
+	}
 }

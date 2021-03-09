@@ -30,8 +30,13 @@ func Cacheable(node ast.Node, is infoschema.InfoSchema) bool {
 	_, isUpdate := node.(*ast.UpdateStmt)
 	_, isInsert := node.(*ast.InsertStmt)
 	_, isDelete := node.(*ast.DeleteStmt)
+<<<<<<< HEAD
 	_, isSetOpr := node.(*ast.SetOprStmt)
 	if !(isSelect || isUpdate || isInsert || isDelete || isSetOpr) {
+=======
+	_, isUnion := node.(*ast.UnionStmt)
+	if !(isSelect || isUpdate || isInsert || isDelete || isUnion) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return false
 	}
 	checker := cacheableChecker{
@@ -117,11 +122,17 @@ func (checker *cacheableChecker) Enter(in ast.Node) (out ast.Node, skipChildren 
 			return in, true
 		}
 	case *ast.TableName:
+<<<<<<< HEAD
 		if checker.schema != nil {
 			if checker.isPartitionTable(node) {
 				checker.cacheable = false
 				return in, true
 			}
+=======
+		if checker.isPartitionTable(node) {
+			checker.cacheable = false
+			return in, true
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 	}
 	return in, false

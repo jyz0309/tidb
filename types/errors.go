@@ -75,6 +75,7 @@ var (
 	ErrTruncatedWrongVal = dbterror.ClassTypes.NewStd(mysql.ErrTruncatedWrongValue)
 	// ErrInvalidWeekModeFormat is returned when the week mode is wrong.
 	ErrInvalidWeekModeFormat = dbterror.ClassTypes.NewStd(mysql.ErrInvalidWeekModeFormat)
+<<<<<<< HEAD
 	// ErrWrongFieldSpec is returned when the column specifier incorrect.
 	ErrWrongFieldSpec = dbterror.ClassTypes.NewStd(mysql.ErrWrongFieldSpec)
 	// ErrSyntax is returned when the syntax is not allowed.
@@ -83,4 +84,8 @@ var (
 	ErrWrongValue = dbterror.ClassTypes.NewStdErr(mysql.ErrTruncatedWrongValue, mysql.MySQLErrName[mysql.ErrWrongValue])
 	// ErrWrongValueForType is returned when the input value is in wrong format for function.
 	ErrWrongValueForType = dbterror.ClassTypes.NewStdErr(mysql.ErrWrongValueForType, mysql.MySQLErrName[mysql.ErrWrongValueForType])
+=======
+	// ErrWrongValue is returned when the input value is in wrong format.
+	ErrWrongValue = dbterror.ClassTypes.NewStdErr(mysql.ErrTruncatedWrongValue, mysql.MySQLErrName[mysql.ErrWrongValue])
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )

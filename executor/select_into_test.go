@@ -266,6 +266,7 @@ func (s *testSuite1) TestEscapeType(c *C) {
 	cmpAndRm(`1,1,11,11,{"key": 11},11,11
 `, outfile, c)
 }
+<<<<<<< HEAD
 
 func (s *testSuite1) TestYearType(c *C) {
 	outfile := randomSelectFilePath("TestYearType")
@@ -279,3 +280,5 @@ func (s *testSuite1) TestYearType(c *C) {
 	tk.MustExec(fmt.Sprintf("select * from t into outfile '%v' fields terminated by ',' optionally enclosed by '\"' lines terminated by '\\n';", outfile))
 	cmpAndRm("2010\n2011\n2012\n2030\n", outfile, c)
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

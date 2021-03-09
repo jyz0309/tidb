@@ -16,6 +16,7 @@ package executor
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"math"
 	"math/rand"
 	"runtime"
@@ -419,6 +420,7 @@ func (e *AnalyzeIndexExec) buildStatsFromResult(result distsql.SelectResult, nee
 			}
 		}
 	}
+<<<<<<< HEAD
 	if needCMS && topn.TotalCount() > 0 {
 		hist.RemoveIdxVals(topn.TopN)
 	}
@@ -426,6 +428,13 @@ func (e *AnalyzeIndexExec) buildStatsFromResult(result distsql.SelectResult, nee
 		cms.CalcDefaultValForAnalyze(uint64(hist.NDV))
 	}
 	return hist, cms, topn, nil
+=======
+	err := hist.ExtractTopN(cms, len(e.idxInfo.Columns), uint32(e.opts[ast.AnalyzeOptNumTopN]))
+	if needCMS && cms != nil {
+		cms.CalcDefaultValForAnalyze(uint64(hist.NDV))
+	}
+	return hist, cms, err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (e *AnalyzeIndexExec) buildStats(ranges []*ranger.Range, considerNull bool) (hist *statistics.Histogram, cms *statistics.CMSketch, topN *statistics.TopN, err error) {
@@ -638,6 +647,7 @@ func (e *AnalyzeColumnsExec) buildStats(ranges []*ranger.Range, needExtStats boo
 		fms = append(fms, nil)
 	}
 	for i, col := range e.colsInfo {
+<<<<<<< HEAD
 		if e.analyzeVer < 2 {
 			// In analyze version 2, we don't collect TopN this way. We will collect TopN from samples in `BuildColumnHistAndTopN()` below.
 			err := collectors[i].ExtractTopN(uint32(e.opts[ast.AnalyzeOptNumTopN]), e.ctx.GetSessionVars().StmtCtx, &col.FieldType, timeZone)
@@ -645,6 +655,11 @@ func (e *AnalyzeColumnsExec) buildStats(ranges []*ranger.Range, needExtStats boo
 				return nil, nil, nil, nil, nil, err
 			}
 			topNs = append(topNs, collectors[i].TopN)
+=======
+		err := collectors[i].ExtractTopN(uint32(e.opts[ast.AnalyzeOptNumTopN]), e.ctx.GetSessionVars().StmtCtx, &col.FieldType, timeZone)
+		if err != nil {
+			return nil, nil, err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		for j, s := range collectors[i].Samples {
 			collectors[i].Samples[j].Ordinal = j
@@ -796,9 +811,35 @@ func (e *AnalyzeFastExec) calculateEstimateSampleStep() (err error) {
 			err = errors.Errorf("database not found for table '%s'", e.tblInfo.Name)
 			return
 		}
+<<<<<<< HEAD
 		var rollbackFn func() error
 		rollbackFn, err = e.activateTxnForRowCount()
 		if err != nil {
+=======
+		req := tikvrpc.NewRequest(tikvrpc.CmdDebugGetRegionProperties, &debugpb.GetRegionPropertiesRequest{
+			RegionId: loc.Region.GetID(),
+		})
+		var resp *tikvrpc.Response
+		var rpcCtx *tikv.RPCContext
+		// we always use the first follower when follower read is enabled
+		rpcCtx, *err = e.cache.GetTiKVRPCContext(bo, loc.Region, e.ctx.GetSessionVars().GetReplicaRead(), 0)
+		if *err != nil {
+			return
+		}
+		if rpcCtx == nil {
+			logutil.Logger(context.TODO()).Warn(
+				fmt.Sprintf("region %d is invalid in region cache during fast analyze, ignore the samples in it",
+					loc.Region.GetID()))
+			continue
+		}
+		ctx := context.Background()
+		resp, *err = client.SendRequest(ctx, rpcCtx.Addr, req, tikv.ReadTimeoutMedium)
+		if *err != nil {
+			return
+		}
+		if resp.Resp == nil || len(resp.Resp.(*debugpb.GetRegionPropertiesResponse).Props) == 0 {
+			*needRebuild = true
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			return
 		}
 		defer func() {
@@ -841,6 +882,7 @@ func (e *AnalyzeFastExec) calculateEstimateSampleStep() (err error) {
 	return
 }
 
+<<<<<<< HEAD
 func (e *AnalyzeFastExec) activateTxnForRowCount() (rollbackFn func() error, err error) {
 	txn, err := e.ctx.Txn(true)
 	if err != nil {
@@ -852,6 +894,31 @@ func (e *AnalyzeFastExec) activateTxnForRowCount() (rollbackFn func() error, err
 			rollbackFn = func() error {
 				_, err := e.ctx.(sqlexec.SQLExecutor).ExecuteInternal(context.TODO(), "rollback")
 				return err
+=======
+// buildSampTask returns two variables, the first bool is whether the task meets region error
+// and need to rebuild.
+func (e *AnalyzeFastExec) buildSampTask() (needRebuild bool, err error) {
+	// Do get regions row count.
+	bo := tikv.NewBackofferWithVars(context.Background(), 500, nil)
+	needRebuildForRoutine := make([]bool, e.concurrency)
+	errs := make([]error, e.concurrency)
+	sampTasksForRoutine := make([][]*AnalyzeFastTask, e.concurrency)
+	e.sampLocs = make(chan *tikv.KeyLocation, e.concurrency)
+	e.wg.Add(e.concurrency)
+	for i := 0; i < e.concurrency; i++ {
+		go e.getSampRegionsRowCount(bo, &needRebuildForRoutine[i], &errs[i], &sampTasksForRoutine[i])
+	}
+
+	defer func() {
+		close(e.sampLocs)
+		e.wg.Wait()
+		if err != nil {
+			return
+		}
+		for i := 0; i < e.concurrency; i++ {
+			if errs[i] != nil {
+				err = errs[i]
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 		} else {
 			return nil, errors.Trace(err)
@@ -989,11 +1056,24 @@ func (e *AnalyzeFastExec) updateCollectorSamples(sValue []byte, sKey kv.Key, sam
 	// Update the indexes' collectors.
 	for j, idxInfo := range e.idxsInfo {
 		idxVals := make([]types.Datum, 0, len(idxInfo.Columns))
+<<<<<<< HEAD
 		cols := index2Cols[j]
 		for _, colInfo := range cols {
 			v, err := e.getValueByInfo(colInfo, values)
 			if err != nil {
 				return err
+=======
+		for _, idxCol := range idxInfo.Columns {
+			for _, colInfo := range e.tblInfo.Columns {
+				if colInfo.Name == idxCol.Name {
+					v, err := e.getValueByInfo(colInfo, values)
+					if err != nil {
+						return err
+					}
+					idxVals = append(idxVals, v)
+					break
+				}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 			idxVals = append(idxVals, v)
 		}
@@ -1324,10 +1404,13 @@ func analyzeIndexIncremental(idxExec *analyzeIndexIncrementalExec) analyzeResult
 			return analyzeResult{Err: err, job: idxExec.job}
 		}
 		cms.CalcDefaultValForAnalyze(uint64(hist.NDV))
+<<<<<<< HEAD
 	}
 	if statsVer == statistics.Version2 {
 		poped := statistics.MergeTopNAndUpdateCMSketch(topN, idxExec.oldTopN, cms, uint32(idxExec.opts[ast.AnalyzeOptNumTopN]))
 		hist.AddIdxVals(poped)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	result := analyzeResult{
 		TableID:  idxExec.tableID,

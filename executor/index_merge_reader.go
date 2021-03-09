@@ -16,7 +16,10 @@ package executor
 import (
 	"bytes"
 	"context"
+<<<<<<< HEAD
 	"fmt"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"runtime/trace"
 	"sync"
 	"sync/atomic"
@@ -42,6 +45,10 @@ import (
 	"github.com/pingcap/tidb/util/logutil"
 	"github.com/pingcap/tidb/util/memory"
 	"github.com/pingcap/tidb/util/ranger"
+<<<<<<< HEAD
+=======
+	"github.com/pingcap/tidb/util/set"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tipb/go-tipb"
 	"go.uber.org/zap"
 )
@@ -207,7 +214,10 @@ func (e *IndexMergeReaderExecutor) startPartialIndexWorker(ctx context.Context, 
 		SetStreaming(e.partialStreamings[workID]).
 		SetFromSessionVars(e.ctx.GetSessionVars()).
 		SetMemTracker(e.memTracker).
+<<<<<<< HEAD
 		SetFromInfoSchema(infoschema.GetInfoSchema(e.ctx)).
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		Build()
 	if err != nil {
 		return err
@@ -261,7 +271,11 @@ func (e *IndexMergeReaderExecutor) startPartialIndexWorker(ctx context.Context, 
 
 func (e *IndexMergeReaderExecutor) buildPartialTableReader(ctx context.Context, workID int) Executor {
 	tableReaderExec := &TableReaderExecutor{
+<<<<<<< HEAD
 		baseExecutor: newBaseExecutor(e.ctx, e.schema, e.getPartitalPlanID(workID)),
+=======
+		baseExecutor: newBaseExecutor(e.ctx, e.schema, 0),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		table:        e.table,
 		dagPB:        e.dagPBs[workID],
 		startTS:      e.startTS,
@@ -457,7 +471,11 @@ func (e *IndexMergeReaderExecutor) startIndexMergeTableScanWorker(ctx context.Co
 
 func (e *IndexMergeReaderExecutor) buildFinalTableReader(ctx context.Context, handles []kv.Handle) (Executor, error) {
 	tableReaderExec := &TableReaderExecutor{
+<<<<<<< HEAD
 		baseExecutor: newBaseExecutor(e.ctx, e.schema, e.getTablePlanRootID()),
+=======
+		baseExecutor: newBaseExecutor(e.ctx, e.schema, 0),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		table:        e.table,
 		dagPB:        e.tableRequest,
 		startTS:      e.startTS,
@@ -467,7 +485,11 @@ func (e *IndexMergeReaderExecutor) buildFinalTableReader(ctx context.Context, ha
 		plans:        e.tblPlans,
 	}
 	tableReaderExec.buildVirtualColumnInfo()
+<<<<<<< HEAD
 	tableReader, err := e.dataReaderBuilder.buildTableReaderFromHandles(ctx, tableReaderExec, handles, false)
+=======
+	tableReader, err := e.dataReaderBuilder.buildTableReaderFromHandles(ctx, tableReaderExec, handles, true)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		logutil.Logger(ctx).Error("build table reader from handles failed", zap.Error(err))
 		return nil, err

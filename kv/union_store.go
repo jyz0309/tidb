@@ -15,6 +15,10 @@ package kv
 
 import (
 	"context"
+<<<<<<< HEAD
+=======
+)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	"github.com/pingcap/parser/model"
 )
@@ -22,6 +26,7 @@ import (
 // UnionStore is a store that wraps a snapshot for read and a MemBuffer for buffered write.
 // Also, it provides some transaction related utilities.
 type UnionStore interface {
+<<<<<<< HEAD
 	Retriever
 
 	// HasPresumeKeyNotExists returns whether the key presumed key not exists error for the lazy check.
@@ -35,6 +40,19 @@ type UnionStore interface {
 	// If there is no such index already inserted through CacheIndexName, it will return UNKNOWN.
 	GetTableInfo(id int64) *model.TableInfo
 
+=======
+	MemBuffer
+	// GetKeyExistErrInfo gets the key exist error info for the lazy check.
+	GetKeyExistErrInfo(k Key) *existErrInfo
+	// DeleteKeyExistErrInfo deletes the key exist error info for the lazy check.
+	DeleteKeyExistErrInfo(k Key)
+	// ResetStmtKeyExistErrs deletes all the key exist error infos for the current statement.
+	ResetStmtKeyExistErrs()
+	// MergeStmtKeyExistErrs merges all the key exist error infos for the current statement.
+	MergeStmtKeyExistErrs()
+	// WalkBuffer iterates all buffered kv pairs.
+	WalkBuffer(f func(k Key, v []byte) error) error
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// SetOption sets an option with a value, when val is nil, uses the default
 	// value of this option.
 	SetOption(opt Option, val interface{})
@@ -68,15 +86,23 @@ type Options interface {
 // unionStore is an in-memory Store which contains a buffer for write and a
 // snapshot for read.
 type unionStore struct {
+<<<<<<< HEAD
 	memBuffer    *memdb
 	snapshot     Snapshot
 	idxNameCache map[int64]*model.TableInfo
 	opts         options
+=======
+	*BufferStore
+	keyExistErrs     map[string]*existErrInfo // for the lazy check
+	stmtKeyExistErrs map[string]*existErrInfo
+	opts             options
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // NewUnionStore builds a new unionStore.
 func NewUnionStore(snapshot Snapshot) UnionStore {
 	return &unionStore{
+<<<<<<< HEAD
 		snapshot:     snapshot,
 		memBuffer:    newMemDB(),
 		idxNameCache: make(map[int64]*model.TableInfo),
@@ -153,6 +179,57 @@ func (us *unionStore) CacheTableInfo(id int64, info *model.TableInfo) {
 }
 
 // SetOption implements the unionStore SetOption interface.
+=======
+		BufferStore:      NewBufferStore(snapshot),
+		keyExistErrs:     make(map[string]*existErrInfo),
+		stmtKeyExistErrs: make(map[string]*existErrInfo),
+		opts:             make(map[Option]interface{}),
+	}
+}
+
+// Get implements the Retriever interface.
+func (us *unionStore) Get(ctx context.Context, k Key) ([]byte, error) {
+	v, err := us.MemBuffer.Get(ctx, k)
+	if IsErrNotFound(err) {
+		if _, ok := us.opts.Get(PresumeKeyNotExists); ok {
+			e, ok := us.opts.Get(PresumeKeyNotExistsError)
+			if ok {
+				us.stmtKeyExistErrs[string(k)] = e.(*existErrInfo)
+				if val, ok := us.opts.Get(CheckExists); ok {
+					checkExistMap := val.(map[string]struct{})
+					checkExistMap[string(k)] = struct{}{}
+				}
+			}
+			return nil, ErrNotExist
+		}
+		v, err = us.BufferStore.r.Get(ctx, k)
+	}
+	if err != nil {
+		return v, err
+	}
+	if len(v) == 0 {
+		return nil, ErrNotExist
+	}
+	return v, nil
+}
+
+func (us *unionStore) GetKeyExistErrInfo(k Key) *existErrInfo {
+	if c, ok := us.stmtKeyExistErrs[string(k)]; ok {
+		return c
+	}
+	if c, ok := us.keyExistErrs[string(k)]; ok {
+		return c
+	}
+	return nil
+}
+
+func (us *unionStore) DeleteKeyExistErrInfo(k Key) {
+	delete(us.stmtKeyExistErrs, string(k))
+	delete(us.keyExistErrs, string(k))
+}
+
+// SetOption implements the UnionStore SetOption interface.
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (us *unionStore) SetOption(opt Option, val interface{}) {
 	us.opts[opt] = val
 }
@@ -167,6 +244,37 @@ func (us *unionStore) GetOption(opt Option) interface{} {
 	return us.opts[opt]
 }
 
+<<<<<<< HEAD
+=======
+// GetMemBuffer return the MemBuffer binding to this UnionStore.
+func (us *unionStore) GetMemBuffer() MemBuffer {
+	return us.BufferStore.MemBuffer
+}
+
+func (us *unionStore) NewStagingBuffer() MemBuffer {
+	return us.BufferStore.NewStagingBuffer()
+}
+
+func (us *unionStore) Flush() (int, error) {
+	return us.BufferStore.Flush()
+}
+
+func (us *unionStore) Discard() {
+	us.BufferStore.Discard()
+}
+
+func (us *unionStore) ResetStmtKeyExistErrs() {
+	us.stmtKeyExistErrs = make(map[string]*existErrInfo)
+}
+
+func (us *unionStore) MergeStmtKeyExistErrs() {
+	for k, v := range us.stmtKeyExistErrs {
+		us.keyExistErrs[k] = v
+	}
+	us.stmtKeyExistErrs = make(map[string]*existErrInfo)
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 type options map[Option]interface{}
 
 func (opts options) Get(opt Option) (interface{}, bool) {

@@ -20,6 +20,18 @@ import (
 type generalCICollator struct {
 }
 
+<<<<<<< HEAD
+=======
+func sign(i int) int {
+	if i < 0 {
+		return -1
+	} else if i > 0 {
+		return 1
+	}
+	return 0
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // Compare implements Collator interface.
 func (gc *generalCICollator) Compare(a, b string) int {
 	a = truncateTailingSpace(a)

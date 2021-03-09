@@ -39,6 +39,7 @@ import (
 )
 
 var _ = Suite(&testSuite{})
+var _ = SerialSuites(&testSerialSuite{})
 
 func TestT(t *testing.T) {
 	CustomVerboseFlag = true
@@ -47,7 +48,7 @@ func TestT(t *testing.T) {
 	TestingT(t)
 }
 
-var _ = Suite(&testSuite{})
+type testSerialSuite struct{ testSuite }
 
 type testSuite struct {
 	sctx sessionctx.Context
@@ -618,7 +619,11 @@ func (s *testSuite) TestRequestBuilder8(c *C) {
 		Tp:             0,
 		StartTs:        0x0,
 		Data:           []uint8(nil),
+<<<<<<< HEAD
 		Concurrency:    variable.DefDistSQLScanConcurrency,
+=======
+		Concurrency:    15,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		IsolationLevel: 0,
 		Priority:       0,
 		MemTracker:     (*memory.Tracker)(nil),

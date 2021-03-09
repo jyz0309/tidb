@@ -887,9 +887,12 @@ func (s *testPlanSuite) TestExplainJoinHints(c *C) {
 	tk.MustExec("use test")
 	tk.MustExec("drop table if exists t")
 	tk.MustExec("create table t(a int, b int, c int, key(b), key(c))")
+<<<<<<< HEAD
 	tk.MustQuery("explain format='hint' select /*+ inl_merge_join(t2) */ * from t t1 inner join t t2 on t1.b = t2.b and t1.c = 1").Check(testkit.Rows(
 		"use_index(@`sel_1` `test`.`t1` `c`), use_index(@`sel_1` `test`.`t2` `b`), inl_merge_join(@`sel_1` `test`.`t2`), inl_merge_join(`t2`)",
 	))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustQuery("explain format='hint' select /*+ inl_hash_join(t2) */ * from t t1 inner join t t2 on t1.b = t2.b and t1.c = 1").Check(testkit.Rows(
 		"use_index(@`sel_1` `test`.`t1` `c`), use_index(@`sel_1` `test`.`t2` `b`), inl_hash_join(@`sel_1` `test`.`t2`), inl_hash_join(`t2`)",
 	))
@@ -983,9 +986,15 @@ func (s *testPlanSuite) TestLimitToCopHint(c *C) {
 	for i, ts := range input {
 		s.testData.OnRecord(func() {
 			output[i].SQL = ts
+<<<<<<< HEAD
 			output[i].Plan = s.testData.ConvertRowsToStrings(tk.MustQuery("explain format = 'brief' " + ts).Rows())
 		})
 		tk.MustQuery("explain format = 'brief' " + ts).Check(testkit.Rows(output[i].Plan...))
+=======
+			output[i].Plan = s.testData.ConvertRowsToStrings(tk.MustQuery("explain " + ts).Rows())
+		})
+		tk.MustQuery("explain " + ts).Check(testkit.Rows(output[i].Plan...))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 		comment := Commentf("case:%v sql:%s", i, ts)
 		warnings := tk.Se.GetSessionVars().StmtCtx.GetWarnings()
@@ -1037,7 +1046,10 @@ func (s *testPlanSuite) TestPushdownDistinctDisable(c *C) {
 			Result []string
 		}
 	)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	s.testData.GetTestCases(c, &input, &output)
 	vars := []string{
 		fmt.Sprintf("set @@session.%s = 0", variable.TiDBOptDistinctAggPushDown),
@@ -1087,9 +1099,12 @@ func (s *testPlanSuite) doTestPushdownDistinct(c *C, vars, input []string, outpu
 		PARTITION p1 VALUES LESS THAN (100)
 	);`)
 
+<<<<<<< HEAD
 	tk.MustExec("drop table if exists tc;")
 	tk.MustExec("CREATE TABLE `tc`(`timestamp` timestamp NULL DEFAULT NULL, KEY `idx_timestamp` (`timestamp`)) PARTITION BY RANGE ( UNIX_TIMESTAMP(`timestamp`) ) (PARTITION `p2020072312` VALUES LESS THAN (1595480400),PARTITION `p2020072313` VALUES LESS THAN (1595484000));")
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("drop table if exists ta")
 	tk.MustExec("create table ta(a int);")
 	tk.MustExec("insert into ta values(1), (1);")
@@ -1101,8 +1116,11 @@ func (s *testPlanSuite) doTestPushdownDistinct(c *C, vars, input []string, outpu
 	tk.MustExec(fmt.Sprintf("set session %s=1", variable.TiDBHashAggPartialConcurrency))
 	tk.MustExec(fmt.Sprintf("set session %s=1", variable.TiDBHashAggFinalConcurrency))
 
+<<<<<<< HEAD
 	tk.MustExec(`set @@tidb_partition_prune_mode='` + string(variable.StaticOnly) + `'`)
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	for _, v := range vars {
 		tk.MustExec(v)
 	}
@@ -1110,10 +1128,17 @@ func (s *testPlanSuite) doTestPushdownDistinct(c *C, vars, input []string, outpu
 	for i, ts := range input {
 		s.testData.OnRecord(func() {
 			output[i].SQL = ts
+<<<<<<< HEAD
 			output[i].Plan = s.testData.ConvertRowsToStrings(tk.MustQuery("explain format = 'brief' " + ts).Rows())
 			output[i].Result = s.testData.ConvertRowsToStrings(tk.MustQuery(ts).Sort().Rows())
 		})
 		tk.MustQuery("explain format = 'brief' " + ts).Check(testkit.Rows(output[i].Plan...))
+=======
+			output[i].Plan = s.testData.ConvertRowsToStrings(tk.MustQuery("explain " + ts).Rows())
+			output[i].Result = s.testData.ConvertRowsToStrings(tk.MustQuery(ts).Sort().Rows())
+		})
+		tk.MustQuery("explain " + ts).Check(testkit.Rows(output[i].Plan...))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		tk.MustQuery(ts).Sort().Check(testkit.Rows(output[i].Result...))
 	}
 }
@@ -1155,10 +1180,17 @@ func (s *testPlanSuite) TestGroupConcatOrderby(c *C) {
 	for i, ts := range input {
 		s.testData.OnRecord(func() {
 			output[i].SQL = ts
+<<<<<<< HEAD
 			output[i].Plan = s.testData.ConvertRowsToStrings(tk.MustQuery("explain format = 'brief' " + ts).Rows())
 			output[i].Result = s.testData.ConvertRowsToStrings(tk.MustQuery(ts).Sort().Rows())
 		})
 		tk.MustQuery("explain format = 'brief' " + ts).Check(testkit.Rows(output[i].Plan...))
+=======
+			output[i].Plan = s.testData.ConvertRowsToStrings(tk.MustQuery("explain " + ts).Rows())
+			output[i].Result = s.testData.ConvertRowsToStrings(tk.MustQuery(ts).Sort().Rows())
+		})
+		tk.MustQuery("explain " + ts).Check(testkit.Rows(output[i].Plan...))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		tk.MustQuery(ts).Check(testkit.Rows(output[i].Result...))
 	}
 }

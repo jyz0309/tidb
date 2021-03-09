@@ -173,6 +173,10 @@ func (s *testTimeSuite) TestDateTime(c *C) {
 		"170118-12",
 		"1710-10",
 		"1710-1000",
+<<<<<<< HEAD
+=======
+		"2020-10-22 10:31-10:12", // YYYY-MM-DD HH:MM-SS:HH (invalid)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	for _, test := range errTable {
@@ -1075,7 +1079,11 @@ func (s *testTimeSuite) TestParseDateFormat(c *C) {
 		{"2011-11-11  10:10:10", []string{"2011", "11", "11", "10", "10", "10"}},
 		{"xx2011-11-11 10:10:10", nil},
 		{"T10:10:10", nil},
+<<<<<<< HEAD
 		{"2011-11-11x", []string{"2011", "11", "11x"}},
+=======
+		{"2011-11-11x", nil},
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		{"xxx 10:10:10", nil},
 	}
 

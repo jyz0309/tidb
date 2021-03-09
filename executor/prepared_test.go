@@ -28,6 +28,7 @@ import (
 	"github.com/pingcap/tidb/session"
 	"github.com/pingcap/tidb/util"
 	"github.com/pingcap/tidb/util/testkit"
+	"github.com/pingcap/tidb/util/testleak"
 )
 
 func (s *testSuite1) TestPreparedNameResolver(c *C) {
@@ -76,6 +77,7 @@ func (s *testSuite1) TestIgnorePlanCache(c *C) {
 	c.Assert(tk.Se.GetSessionVars().StmtCtx.UseCache, IsFalse)
 }
 
+<<<<<<< HEAD
 func (s *testSerialSuite) TestPrepareStmtAfterIsolationReadChange(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.store)
 	tk.Se.Auth(&auth.UserIdentity{Username: "root", Hostname: "localhost", CurrentUser: true, AuthUsername: "root", AuthHostname: "%"}, nil, []byte("012345678901234567890"))
@@ -86,6 +88,12 @@ func (s *testSerialSuite) TestPrepareStmtAfterIsolationReadChange(c *C) {
 	}()
 	plannercore.SetPreparedPlanCache(false) // requires plan cache disabled
 
+=======
+func (s *testSuite9) TestPrepareStmtAfterIsolationReadChange(c *C) {
+	tk := testkit.NewTestKitWithInit(c, s.store)
+	tk.Se.Auth(&auth.UserIdentity{Username: "root", Hostname: "localhost", CurrentUser: true, AuthUsername: "root", AuthHostname: "%"}, nil, []byte("012345678901234567890"))
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("drop table if exists t")
 	tk.MustExec("create table t(a int)")
 	// create virtual tiflash replica.
@@ -149,11 +157,15 @@ func (sm *mockSessionManager2) Kill(connectionID uint64, query bool) {
 	sm.killed = true
 	atomic.StoreUint32(&sm.se.GetSessionVars().Killed, 1)
 }
+<<<<<<< HEAD
 func (sm *mockSessionManager2) KillAllConnections()             {}
 func (sm *mockSessionManager2) UpdateTLSConfig(cfg *tls.Config) {}
 func (sm *mockSessionManager2) ServerID() uint64 {
 	return 1
 }
+=======
+func (sm *mockSessionManager2) UpdateTLSConfig(cfg *tls.Config) {}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 var _ = SerialSuites(&testSuite12{&baseTestSuite{}})
 
@@ -185,7 +197,12 @@ func (s *testSuite12) TestPreparedStmtWithHint(c *C) {
 	c.Check(sm.killed, Equals, true)
 }
 
+<<<<<<< HEAD
 func (s *testSerialSuite) TestPlanCacheClusterIndex(c *C) {
+=======
+func (s *testSuite9) TestPlanCacheOnPointGet(c *C) {
+	defer testleak.AfterTest(c)()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	store, dom, err := newStoreWithBootstrap()
 	c.Assert(err, IsNil)
 	tk := testkit.NewTestKit(c, store)
@@ -199,6 +216,7 @@ func (s *testSerialSuite) TestPlanCacheClusterIndex(c *C) {
 	}()
 	plannercore.SetPreparedPlanCache(true)
 	tk.MustExec("use test")
+<<<<<<< HEAD
 	tk.MustExec("drop table if exists t1")
 	tk.Se.GetSessionVars().EnableClusteredIndex = true
 	tk.MustExec("set @@tidb_enable_collect_execution_info=0;")
@@ -225,6 +243,14 @@ func (s *testSerialSuite) TestPlanCacheClusterIndex(c *C) {
 	c.Assert(strings.Index(rows[len(rows)-1][4].(string), `range:("3" "2","3" +inf]`), Equals, 0)
 
 	// For point get
+=======
+
+	// For point get
+	tk.MustExec("drop table if exists t1")
+	tk.MustExec("set @@tidb_enable_collect_execution_info=0;")
+	tk.MustExec("create table t1(a varchar(20), b varchar(20), c varchar(20), primary key(a, b))")
+	tk.MustExec("insert into t1 values('1','1','111'),('2','2','222'),('3','3','333')")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec(`prepare stmt2 from "select * from t1 where t1.a = ? and t1.b = ?"`)
 	tk.MustExec("set @v1 = '1'")
 	tk.MustExec("set @v2 = '1'")
@@ -237,15 +263,23 @@ func (s *testSerialSuite) TestPlanCacheClusterIndex(c *C) {
 	tk.MustExec("set @v1 = '3'")
 	tk.MustExec("set @v2 = '3'")
 	tk.MustQuery("execute stmt2 using @v1,@v2").Check(testkit.Rows("3 3 333"))
+<<<<<<< HEAD
 	tkProcess = tk.Se.ShowProcess()
 	ps = []*util.ProcessInfo{tkProcess}
 	tk.Se.SetSessionManager(&mockSessionManager1{PS: ps})
 	rows = tk.MustQuery(fmt.Sprintf("explain for connection %d", tkProcess.ID)).Rows()
+=======
+	tkProcess := tk.Se.ShowProcess()
+	ps := []*util.ProcessInfo{tkProcess}
+	tk.Se.SetSessionManager(&mockSessionManager1{PS: ps})
+	rows := tk.MustQuery(fmt.Sprintf("explain for connection %d", tkProcess.ID)).Rows()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(strings.Index(rows[len(rows)-1][0].(string), `Point_Get`), Equals, 0)
 
 	// For CBO point get and batch point get
 	// case 1:
 	tk.MustExec(`drop table if exists ta, tb`)
+<<<<<<< HEAD
 	tk.MustExec(`create table ta (a varchar(8) primary key, b int)`)
 	tk.MustExec(`insert ta values ('a', 1), ('b', 2)`)
 	tk.MustExec(`create table tb (a varchar(8) primary key, b int)`)
@@ -254,6 +288,16 @@ func (s *testSerialSuite) TestPlanCacheClusterIndex(c *C) {
 	tk.MustExec(`set @v1 = 'a', @v2 = 'b'`)
 	tk.MustQuery(`execute stmt1 using @v1`).Check(testkit.Rows("a 1 a 1"))
 	tk.MustQuery(`execute stmt1 using @v2`).Check(testkit.Rows("b 2 b 2"))
+=======
+	tk.MustExec(`create table ta (a int primary key, b int)`)
+	tk.MustExec(`insert ta values (1, 1), (2, 2)`)
+	tk.MustExec(`create table tb (a int primary key, b int)`)
+	tk.MustExec(`insert tb values (1, 1), (2, 2)`)
+	tk.MustExec(`prepare stmt1 from "select * from ta, tb where ta.a = tb.a and ta.a = ?"`)
+	tk.MustExec(`set @v1 = 1, @v2 = 2`)
+	tk.MustQuery(`execute stmt1 using @v1`).Check(testkit.Rows("1 1 1 1"))
+	tk.MustQuery(`execute stmt1 using @v2`).Check(testkit.Rows("2 2 2 2"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustQuery("select @@last_plan_from_cache").Check(testkit.Rows("1"))
 
 	// case 2:
@@ -287,6 +331,7 @@ func (s *testSerialSuite) TestPlanCacheClusterIndex(c *C) {
 	tk.MustExec(`prepare stmt2 from "select * from ta, tb where ta.c = tb.b and (ta.a, ta.b) in ((?, ?), (?, ?))"`)
 	tk.MustQuery(`execute stmt2 using @v1, @v1, @v2, @v2`).Check(testkit.Rows("a a 1 1 1", "b b 2 2 2"))
 	tk.MustQuery(`execute stmt2 using @v2, @v2, @v3, @v3`).Check(testkit.Rows("b b 2 2 2", "c c 3 3 3"))
+<<<<<<< HEAD
 
 	// For issue 19002
 	tk.Se.GetSessionVars().EnableClusteredIndex = true
@@ -307,6 +352,8 @@ func (s *testSerialSuite) TestPlanCacheClusterIndex(c *C) {
 	tk.MustExec(`set @v1=2, @v2=2, @v3=3, @v4=3`)
 	tk.MustQuery(`execute stmt2 using @v1,@v2,@v3,@v4`).Check(testkit.Rows("2 2 222", "3 3 333"))
 	tk.MustQuery(`select @@last_plan_from_cache`).Check(testkit.Rows("1"))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testPrepareSuite) TestPlanCacheWithDifferentVariableTypes(c *C) {

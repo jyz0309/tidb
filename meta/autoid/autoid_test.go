@@ -839,11 +839,19 @@ func (*testSuite) TestAllocComputationIssue(c *C) {
 		c.Assert(failpoint.Disable("github.com/pingcap/tidb/meta/autoid/mockAutoIDCustomize"), IsNil)
 	}()
 
+<<<<<<< HEAD
 	store, err := mockstore.NewMockStore()
 	c.Assert(err, IsNil)
 	defer store.Close()
 
 	err = kv.RunInNewTxn(context.Background(), store, false, func(ctx context.Context, txn kv.Transaction) error {
+=======
+	store, err := mockstore.NewMockTikvStore()
+	c.Assert(err, IsNil)
+	defer store.Close()
+
+	err = kv.RunInNewTxn(store, false, func(txn kv.Transaction) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		m := meta.NewMeta(txn)
 		err = m.CreateDatabase(&model.DBInfo{ID: 1, Name: model.NewCIStr("a")})
 		c.Assert(err, IsNil)
@@ -872,6 +880,7 @@ func (*testSuite) TestAllocComputationIssue(c *C) {
 	// Simulate the rest cache is not enough for next batch, assuming 10 & 13, batch size = 4.
 	autoid.TestModifyBaseAndEndInjection(signedAlloc, 4, 6)
 
+<<<<<<< HEAD
 	ctx := context.Background()
 	// Here will recompute the new allocator batch size base on new base = 10, which will get 6.
 	min, max, err := unsignedAlloc.Alloc(ctx, 1, 2, 3, 1)
@@ -879,6 +888,14 @@ func (*testSuite) TestAllocComputationIssue(c *C) {
 	c.Assert(min, Equals, int64(10))
 	c.Assert(max, Equals, int64(16))
 	min, max, err = signedAlloc.Alloc(ctx, 2, 2, 3, 1)
+=======
+	// Here will recompute the new allocator batch size base on new base = 10, which will get 6.
+	min, max, err := unsignedAlloc.Alloc(1, 2, 3, 1)
+	c.Assert(err, IsNil)
+	c.Assert(min, Equals, int64(10))
+	c.Assert(max, Equals, int64(16))
+	min, max, err = signedAlloc.Alloc(2, 2, 3, 1)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	c.Assert(min, Equals, int64(7))
 	c.Assert(max, Equals, int64(13))

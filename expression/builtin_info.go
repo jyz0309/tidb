@@ -669,7 +669,10 @@ func (c *collationFunctionClass) getFunction(ctx sessionctx.Context, args []Expr
 		return nil, err
 	}
 	bf.tp.Charset, bf.tp.Collate = ctx.GetSessionVars().GetCharsetInfo()
+<<<<<<< HEAD
 	bf.tp.Flen = 64
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	sig := &builtinCollationSig{bf}
 	return sig, nil
 }
@@ -990,7 +993,11 @@ func (c *formatBytesFunctionClass) getFunction(ctx sessionctx.Context, args []Ex
 	if err != nil {
 		return nil, err
 	}
+<<<<<<< HEAD
 	bf.tp.Charset, bf.tp.Collate = ctx.GetSessionVars().GetCharsetInfo()
+=======
+	bf.tp.Flag |= mysql.UnsignedFlag
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	sig := &builtinFormatBytesSig{bf}
 	return sig, nil
 }
@@ -1027,7 +1034,11 @@ func (c *formatNanoTimeFunctionClass) getFunction(ctx sessionctx.Context, args [
 	if err != nil {
 		return nil, err
 	}
+<<<<<<< HEAD
 	bf.tp.Charset, bf.tp.Collate = ctx.GetSessionVars().GetCharsetInfo()
+=======
+	bf.tp.Flag |= mysql.UnsignedFlag
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	sig := &builtinFormatNanoTimeSig{bf}
 	return sig, nil
 }

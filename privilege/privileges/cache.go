@@ -58,10 +58,17 @@ const (
 	// list of privileges from mysql.Priv2UserCol
 	sqlLoadUserTable = `SELECT HIGH_PRIORITY Host,User,authentication_string,
 	Create_priv, Select_priv, Insert_priv, Update_priv, Delete_priv, Show_db_priv, Super_priv,
+<<<<<<< HEAD
 	Create_user_priv,Create_tablespace_priv,Trigger_priv,Drop_priv,Process_priv,Grant_priv,
 	References_priv,Alter_priv,Execute_priv,Index_priv,Create_view_priv,Show_view_priv,
 	Create_role_priv,Drop_role_priv,Create_tmp_table_priv,Lock_tables_priv,Create_routine_priv,
 	Alter_routine_priv,Event_priv,Shutdown_priv,Reload_priv,File_priv,Config_priv,Repl_client_priv,Repl_slave_priv,
+=======
+	Create_user_priv,Trigger_priv,Drop_priv,Process_priv,Grant_priv,
+	References_priv,Alter_priv,Execute_priv,Index_priv,Create_view_priv,Show_view_priv,
+	Create_role_priv,Drop_role_priv,Create_tmp_table_priv,Lock_tables_priv,Create_routine_priv,
+	Alter_routine_priv,Event_priv,Shutdown_priv,Reload_priv,File_priv,Config_priv,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	account_locked FROM mysql.user`
 )
 

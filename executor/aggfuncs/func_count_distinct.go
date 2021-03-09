@@ -32,6 +32,7 @@ import (
 	"github.com/pingcap/tidb/util/stringutil"
 )
 
+<<<<<<< HEAD
 const (
 	// DefPartialResult4CountDistinctIntSize is the size of partialResult4CountDistinctInt
 	DefPartialResult4CountDistinctIntSize = int64(unsafe.Sizeof(partialResult4CountDistinctInt{}))
@@ -49,6 +50,8 @@ const (
 	DefPartialResult4ApproxCountDistinctSize = int64(unsafe.Sizeof(partialResult4ApproxCountDistinct{}))
 )
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 type partialResult4CountDistinctInt struct {
 	valSet set.Int64Set
 }
@@ -57,10 +60,17 @@ type countOriginalWithDistinct4Int struct {
 	baseCount
 }
 
+<<<<<<< HEAD
 func (e *countOriginalWithDistinct4Int) AllocPartialResult() (pr PartialResult, memDelta int64) {
 	return PartialResult(&partialResult4CountDistinctInt{
 		valSet: set.NewInt64Set(),
 	}), DefPartialResult4CountDistinctIntSize
+=======
+func (e *countOriginalWithDistinct4Int) AllocPartialResult() PartialResult {
+	return PartialResult(&partialResult4CountDistinctInt{
+		valSet: set.NewInt64Set(),
+	})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (e *countOriginalWithDistinct4Int) ResetPartialResult(pr PartialResult) {
@@ -74,13 +84,21 @@ func (e *countOriginalWithDistinct4Int) AppendFinalResult2Chunk(sctx sessionctx.
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *countOriginalWithDistinct4Int) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) (memDelta int64, err error) {
+=======
+func (e *countOriginalWithDistinct4Int) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	p := (*partialResult4CountDistinctInt)(pr)
 
 	for _, row := range rowsInGroup {
 		input, isNull, err := e.args[0].EvalInt(sctx, row)
 		if err != nil {
+<<<<<<< HEAD
 			return memDelta, err
+=======
+			return err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		if isNull {
 			continue
@@ -89,10 +107,16 @@ func (e *countOriginalWithDistinct4Int) UpdatePartialResult(sctx sessionctx.Cont
 			continue
 		}
 		p.valSet.Insert(input)
+<<<<<<< HEAD
 		memDelta += DefInt64Size
 	}
 
 	return memDelta, nil
+=======
+	}
+
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 type partialResult4CountDistinctReal struct {
@@ -103,10 +127,17 @@ type countOriginalWithDistinct4Real struct {
 	baseCount
 }
 
+<<<<<<< HEAD
 func (e *countOriginalWithDistinct4Real) AllocPartialResult() (pr PartialResult, memDelta int64) {
 	return PartialResult(&partialResult4CountDistinctReal{
 		valSet: set.NewFloat64Set(),
 	}), DefPartialResult4CountDistinctRealSize
+=======
+func (e *countOriginalWithDistinct4Real) AllocPartialResult() PartialResult {
+	return PartialResult(&partialResult4CountDistinctReal{
+		valSet: set.NewFloat64Set(),
+	})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (e *countOriginalWithDistinct4Real) ResetPartialResult(pr PartialResult) {
@@ -120,13 +151,21 @@ func (e *countOriginalWithDistinct4Real) AppendFinalResult2Chunk(sctx sessionctx
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *countOriginalWithDistinct4Real) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) (memDelta int64, err error) {
+=======
+func (e *countOriginalWithDistinct4Real) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	p := (*partialResult4CountDistinctReal)(pr)
 
 	for _, row := range rowsInGroup {
 		input, isNull, err := e.args[0].EvalReal(sctx, row)
 		if err != nil {
+<<<<<<< HEAD
 			return memDelta, err
+=======
+			return err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		if isNull {
 			continue
@@ -135,10 +174,16 @@ func (e *countOriginalWithDistinct4Real) UpdatePartialResult(sctx sessionctx.Con
 			continue
 		}
 		p.valSet.Insert(input)
+<<<<<<< HEAD
 		memDelta += DefFloat64Size
 	}
 
 	return memDelta, nil
+=======
+	}
+
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 type partialResult4CountDistinctDecimal struct {
@@ -149,10 +194,17 @@ type countOriginalWithDistinct4Decimal struct {
 	baseCount
 }
 
+<<<<<<< HEAD
 func (e *countOriginalWithDistinct4Decimal) AllocPartialResult() (pr PartialResult, memDelta int64) {
 	return PartialResult(&partialResult4CountDistinctDecimal{
 		valSet: set.NewStringSet(),
 	}), DefPartialResult4CountDistinctDecimalSize
+=======
+func (e *countOriginalWithDistinct4Decimal) AllocPartialResult() PartialResult {
+	return PartialResult(&partialResult4CountDistinctDecimal{
+		valSet: set.NewStringSet(),
+	})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (e *countOriginalWithDistinct4Decimal) ResetPartialResult(pr PartialResult) {
@@ -166,30 +218,48 @@ func (e *countOriginalWithDistinct4Decimal) AppendFinalResult2Chunk(sctx session
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *countOriginalWithDistinct4Decimal) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) (memDelta int64, err error) {
+=======
+func (e *countOriginalWithDistinct4Decimal) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	p := (*partialResult4CountDistinctDecimal)(pr)
 
 	for _, row := range rowsInGroup {
 		input, isNull, err := e.args[0].EvalDecimal(sctx, row)
 		if err != nil {
+<<<<<<< HEAD
 			return memDelta, err
+=======
+			return err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		if isNull {
 			continue
 		}
 		hash, err := input.ToHashKey()
 		if err != nil {
+<<<<<<< HEAD
 			return memDelta, err
+=======
+			return err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		decStr := string(hack.String(hash))
 		if p.valSet.Exist(decStr) {
 			continue
 		}
 		p.valSet.Insert(decStr)
+<<<<<<< HEAD
 		memDelta += int64(len(decStr))
 	}
 
 	return memDelta, nil
+=======
+	}
+
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 type partialResult4CountDistinctDuration struct {
@@ -200,10 +270,17 @@ type countOriginalWithDistinct4Duration struct {
 	baseCount
 }
 
+<<<<<<< HEAD
 func (e *countOriginalWithDistinct4Duration) AllocPartialResult() (pr PartialResult, memDelta int64) {
 	return PartialResult(&partialResult4CountDistinctDuration{
 		valSet: set.NewInt64Set(),
 	}), DefPartialResult4CountDistinctDurationSize
+=======
+func (e *countOriginalWithDistinct4Duration) AllocPartialResult() PartialResult {
+	return PartialResult(&partialResult4CountDistinctDuration{
+		valSet: set.NewInt64Set(),
+	})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (e *countOriginalWithDistinct4Duration) ResetPartialResult(pr PartialResult) {
@@ -217,13 +294,21 @@ func (e *countOriginalWithDistinct4Duration) AppendFinalResult2Chunk(sctx sessio
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *countOriginalWithDistinct4Duration) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) (memDelta int64, err error) {
+=======
+func (e *countOriginalWithDistinct4Duration) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	p := (*partialResult4CountDistinctDuration)(pr)
 
 	for _, row := range rowsInGroup {
 		input, isNull, err := e.args[0].EvalDuration(sctx, row)
 		if err != nil {
+<<<<<<< HEAD
 			return memDelta, err
+=======
+			return err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		if isNull {
 			continue
@@ -233,10 +318,16 @@ func (e *countOriginalWithDistinct4Duration) UpdatePartialResult(sctx sessionctx
 			continue
 		}
 		p.valSet.Insert(int64(input.Duration))
+<<<<<<< HEAD
 		memDelta += DefInt64Size
 	}
 
 	return memDelta, nil
+=======
+	}
+
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 type partialResult4CountDistinctString struct {
@@ -247,10 +338,17 @@ type countOriginalWithDistinct4String struct {
 	baseCount
 }
 
+<<<<<<< HEAD
 func (e *countOriginalWithDistinct4String) AllocPartialResult() (pr PartialResult, memDelta int64) {
 	return PartialResult(&partialResult4CountDistinctString{
 		valSet: set.NewStringSet(),
 	}), DefPartialResult4CountDistinctStringSize
+=======
+func (e *countOriginalWithDistinct4String) AllocPartialResult() PartialResult {
+	return PartialResult(&partialResult4CountDistinctString{
+		valSet: set.NewStringSet(),
+	})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (e *countOriginalWithDistinct4String) ResetPartialResult(pr PartialResult) {
@@ -264,14 +362,22 @@ func (e *countOriginalWithDistinct4String) AppendFinalResult2Chunk(sctx sessionc
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *countOriginalWithDistinct4String) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) (memDelta int64, err error) {
+=======
+func (e *countOriginalWithDistinct4String) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	p := (*partialResult4CountDistinctString)(pr)
 	collator := collate.GetCollator(e.args[0].GetType().Collate)
 
 	for _, row := range rowsInGroup {
 		input, isNull, err := e.args[0].EvalString(sctx, row)
 		if err != nil {
+<<<<<<< HEAD
 			return memDelta, err
+=======
+			return err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		if isNull {
 			continue
@@ -283,10 +389,16 @@ func (e *countOriginalWithDistinct4String) UpdatePartialResult(sctx sessionctx.C
 		}
 		input = stringutil.Copy(input)
 		p.valSet.Insert(input)
+<<<<<<< HEAD
 		memDelta += int64(len(input))
 	}
 
 	return memDelta, nil
+=======
+	}
+
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 type countOriginalWithDistinct struct {
@@ -297,10 +409,17 @@ type partialResult4CountWithDistinct struct {
 	valSet set.StringSet
 }
 
+<<<<<<< HEAD
 func (e *countOriginalWithDistinct) AllocPartialResult() (pr PartialResult, memDelta int64) {
 	return PartialResult(&partialResult4CountWithDistinct{
 		valSet: set.NewStringSet(),
 	}), DefPartialResult4CountWithDistinctSize
+=======
+func (e *countOriginalWithDistinct) AllocPartialResult() PartialResult {
+	return PartialResult(&partialResult4CountWithDistinct{
+		valSet: set.NewStringSet(),
+	})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (e *countOriginalWithDistinct) ResetPartialResult(pr PartialResult) {
@@ -314,7 +433,11 @@ func (e *countOriginalWithDistinct) AppendFinalResult2Chunk(sctx sessionctx.Cont
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *countOriginalWithDistinct) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) (memDelta int64, err error) {
+=======
+func (e *countOriginalWithDistinct) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) (err error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	p := (*partialResult4CountWithDistinct)(pr)
 
 	encodedBytes := make([]byte, 0)
@@ -322,14 +445,21 @@ func (e *countOriginalWithDistinct) UpdatePartialResult(sctx sessionctx.Context,
 	buf := make([]byte, types.MyDecimalStructSize)
 
 	for _, row := range rowsInGroup {
+<<<<<<< HEAD
 		var err error
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		var hasNull, isNull bool
 		encodedBytes = encodedBytes[:0]
 
 		for i := 0; i < len(e.args) && !hasNull; i++ {
 			encodedBytes, isNull, err = evalAndEncode(sctx, e.args[i], row, buf, encodedBytes)
 			if err != nil {
+<<<<<<< HEAD
 				return memDelta, err
+=======
+				return
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 			if isNull {
 				hasNull = true
@@ -341,10 +471,16 @@ func (e *countOriginalWithDistinct) UpdatePartialResult(sctx sessionctx.Context,
 			continue
 		}
 		p.valSet.Insert(encodedString)
+<<<<<<< HEAD
 		memDelta += int64(len(encodedString))
 	}
 
 	return memDelta, nil
+=======
+	}
+
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // evalAndEncode eval one row with an expression and encode value to bytes.
@@ -500,10 +636,17 @@ type approxCountDistinctHashValue uint32
 // This algorithm is also very accurate for data sets with small cardinality and very efficient on CPU. If number of
 // distinct element is more than 2^32, relative error may be high.
 type partialResult4ApproxCountDistinct struct {
+<<<<<<< HEAD
 	size       uint32 // Number of elements.
 	sizeDegree uint8  // The size of the table as a power of 2.
 	skipDegree uint8  // Skip elements not divisible by 2 ^ skipDegree.
 	hasZero    bool   // The hash table contains an element with a hash value of 0.
+=======
+	size       uint32 /// Number of elements.
+	sizeDegree uint8  /// The size of the table as a power of 2.
+	skipDegree uint8  /// Skip elements not divisible by 2 ^ skipDegree.
+	hasZero    bool   /// The hash table contains an element with a hash value of 0.
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	buf        []approxCountDistinctHashValue
 }
 
@@ -519,10 +662,13 @@ func (p *partialResult4ApproxCountDistinct) InsertHash64(x uint64) {
 	p.insertHash(approxCountDistinctHashValue(x))
 }
 
+<<<<<<< HEAD
 func (p *partialResult4ApproxCountDistinct) MemUsage() int64 {
 	return int64(len(p.buf)) * DefUint32Size
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (p *partialResult4ApproxCountDistinct) alloc(newSizeDegree uint8) {
 	p.size = 0
 	p.skipDegree = 0
@@ -760,8 +906,13 @@ func (e *baseApproxCountDistinct) AppendFinalResult2Chunk(sctx sessionctx.Contex
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *baseApproxCountDistinct) AllocPartialResult() (pr PartialResult, memDelta int64) {
 	return (PartialResult)(NewPartialResult4ApproxCountDistinct()), DefPartialResult4ApproxCountDistinctSize
+=======
+func (e *baseApproxCountDistinct) AllocPartialResult() PartialResult {
+	return (PartialResult)(NewPartialResult4ApproxCountDistinct())
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (e *baseApproxCountDistinct) ResetPartialResult(pr PartialResult) {
@@ -769,31 +920,49 @@ func (e *baseApproxCountDistinct) ResetPartialResult(pr PartialResult) {
 	p.reset()
 }
 
+<<<<<<< HEAD
 func (e *baseApproxCountDistinct) MergePartialResult(sctx sessionctx.Context, src, dst PartialResult) (memDelta int64, err error) {
 	p1, p2 := (*partialResult4ApproxCountDistinct)(src), (*partialResult4ApproxCountDistinct)(dst)
 	p2.merge(p1)
 	return 0, nil
+=======
+func (e *baseApproxCountDistinct) MergePartialResult(sctx sessionctx.Context, src PartialResult, dst PartialResult) error {
+	p1, p2 := (*partialResult4ApproxCountDistinct)(src), (*partialResult4ApproxCountDistinct)(dst)
+	p2.merge(p1)
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 type approxCountDistinctOriginal struct {
 	baseApproxCountDistinct
 }
 
+<<<<<<< HEAD
 func (e *approxCountDistinctOriginal) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) (memDelta int64, err error) {
+=======
+func (e *approxCountDistinctOriginal) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) (err error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	p := (*partialResult4ApproxCountDistinct)(pr)
 	encodedBytes := make([]byte, 0)
 	// Decimal struct is the biggest type we will use.
 	buf := make([]byte, types.MyDecimalStructSize)
 
 	for _, row := range rowsInGroup {
+<<<<<<< HEAD
 		var err error
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		var hasNull, isNull bool
 		encodedBytes = encodedBytes[:0]
 
 		for i := 0; i < len(e.args) && !hasNull; i++ {
 			encodedBytes, isNull, err = evalAndEncode(sctx, e.args[i], row, buf, encodedBytes)
 			if err != nil {
+<<<<<<< HEAD
 				return memDelta, err
+=======
+				return
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 			if isNull {
 				hasNull = true
@@ -803,6 +972,7 @@ func (e *approxCountDistinctOriginal) UpdatePartialResult(sctx sessionctx.Contex
 		if hasNull {
 			continue
 		}
+<<<<<<< HEAD
 		oldMemUsage := p.MemUsage()
 		x := farm.Hash64(encodedBytes)
 		p.InsertHash64(x)
@@ -811,6 +981,14 @@ func (e *approxCountDistinctOriginal) UpdatePartialResult(sctx sessionctx.Contex
 	}
 
 	return memDelta, nil
+=======
+
+		x := farm.Hash64(encodedBytes)
+		p.InsertHash64(x)
+	}
+
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 type approxCountDistinctPartial1 struct {
@@ -827,18 +1005,27 @@ type approxCountDistinctPartial2 struct {
 	approxCountDistinctPartial1
 }
 
+<<<<<<< HEAD
 func (e *approxCountDistinctPartial2) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) (memDelta int64, err error) {
+=======
+func (e *approxCountDistinctPartial2) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	p := (*partialResult4ApproxCountDistinct)(pr)
 	for _, row := range rowsInGroup {
 		input, isNull, err := e.args[0].EvalString(sctx, row)
 		if err != nil {
+<<<<<<< HEAD
 			return memDelta, err
+=======
+			return err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 
 		if isNull {
 			continue
 		}
 
+<<<<<<< HEAD
 		oldMemUsage := p.MemUsage()
 		err = p.readAndMerge(hack.Slice(input))
 		if err != nil {
@@ -848,6 +1035,14 @@ func (e *approxCountDistinctPartial2) UpdatePartialResult(sctx sessionctx.Contex
 		memDelta += newMemUsage - oldMemUsage
 	}
 	return memDelta, nil
+=======
+		err = p.readAndMerge(hack.Slice(input))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 type approxCountDistinctFinal struct {

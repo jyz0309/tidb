@@ -56,6 +56,7 @@ type UpdateExec struct {
 	memTracker                *memory.Tracker
 
 	stats *runtimeStatsWithSnapshot
+<<<<<<< HEAD
 
 	handles    []kv.Handle
 	updatable  []bool
@@ -67,6 +68,13 @@ type UpdateExec struct {
 // prepare `handles`, `updatable`, `changed` and `assignFlag` to avoid re-computations.
 func (e *UpdateExec) prepare(ctx context.Context, schema *expression.Schema, row []types.Datum) (err error) {
 	e.assignFlag, err = plannercore.GetUpdateColumns(e.ctx, e.OrderedList, schema.Len())
+=======
+}
+
+func (e *UpdateExec) exec(ctx context.Context, schema *expression.Schema, row, newData []types.Datum) error {
+	defer trace.StartRegion(ctx, "UpdateExec").End()
+	assignFlag, err := plannercore.GetUpdateColumns(e.ctx, e.OrderedList, schema.Len())
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return err
 	}

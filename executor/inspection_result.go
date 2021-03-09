@@ -141,12 +141,17 @@ func (e *inspectionResultRetriever) retrieve(ctx context.Context, sctx sessionct
 		// Get cluster info.
 		e.instanceToStatusAddress = make(map[string]string)
 		e.statusToInstanceAddress = make(map[string]string)
+<<<<<<< HEAD
 		var rows []chunk.Row
 		exec := sctx.(sqlexec.RestrictedSQLExecutor)
 		stmt, err := exec.ParseWithParams(ctx, "select instance,status_address from information_schema.cluster_info;")
 		if err == nil {
 			rows, _, err = exec.ExecRestrictedStmt(ctx, stmt)
 		}
+=======
+		sql := "select instance,status_address from information_schema.cluster_info;"
+		rows, _, err := sctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQLWithContext(ctx, sql)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			sctx.GetSessionVars().StmtCtx.AppendWarning(fmt.Errorf("get cluster info failed: %v", err))
 		}
@@ -251,6 +256,7 @@ func (configInspection) inspectDiffConfig(ctx context.Context, sctx sessionctx.C
 		"raftstore.raftdb-path",
 		"storage.data-dir",
 		"storage.block-cache.capacity",
+<<<<<<< HEAD
 	}
 	var rows []chunk.Row
 	exec := sctx.(sqlexec.RestrictedSQLExecutor)
@@ -258,16 +264,27 @@ func (configInspection) inspectDiffConfig(ctx context.Context, sctx sessionctx.C
 	if err == nil {
 		rows, _, err = exec.ExecRestrictedStmt(ctx, stmt)
 	}
+=======
+	}
+	sql := fmt.Sprintf("select type, `key`, count(distinct value) as c from information_schema.cluster_config where `key` not in ('%s') group by type, `key` having c > 1",
+		strings.Join(ignoreConfigKey, "','"))
+	rows, _, err := sctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQLWithContext(ctx, sql)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		sctx.GetSessionVars().StmtCtx.AppendWarning(fmt.Errorf("check configuration consistency failed: %v", err))
 	}
 
 	generateDetail := func(tp, item string) string {
+<<<<<<< HEAD
 		var rows []chunk.Row
 		stmt, err := exec.ParseWithParams(ctx, "select value, instance from information_schema.cluster_config where type=%? and `key`=%?;", tp, item)
 		if err == nil {
 			rows, _, err = exec.ExecRestrictedStmt(ctx, stmt)
 		}
+=======
+		query := fmt.Sprintf("select value, instance from information_schema.cluster_config where type='%s' and `key`='%s';", tp, item)
+		rows, _, err := sctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQLWithContext(ctx, query)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			sctx.GetSessionVars().StmtCtx.AppendWarning(fmt.Errorf("check configuration consistency failed: %v", err))
 			return fmt.Sprintf("the cluster has different config value of %[2]s, execute the sql to see more detail: select * from information_schema.cluster_config where type='%[1]s' and `key`='%[2]s'",
@@ -348,12 +365,18 @@ func (c configInspection) inspectCheckConfig(ctx context.Context, sctx sessionct
 		if !filter.enable(cas.key) {
 			continue
 		}
+<<<<<<< HEAD
 		sql.Reset()
 		fmt.Fprintf(sql, "select type,instance,value from information_schema.%s where %s", cas.table, cas.cond)
 		stmt, err := exec.ParseWithParams(ctx, sql.String())
 		if err == nil {
 			rows, _, err = exec.ExecRestrictedStmt(ctx, stmt)
 		}
+=======
+		sql := fmt.Sprintf("select instance from information_schema.cluster_config where type = '%s' and `key` = '%s' and value = '%s'",
+			cas.tp, cas.key, cas.value)
+		rows, _, err := sctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQLWithContext(ctx, sql)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			sctx.GetSessionVars().StmtCtx.AppendWarning(fmt.Errorf("check configuration in reason failed: %v", err))
 		}
@@ -371,6 +394,7 @@ func (c configInspection) inspectCheckConfig(ctx context.Context, sctx sessionct
 		}
 	}
 	results = append(results, c.checkTiKVBlockCacheSizeConfig(ctx, sctx, filter)...)
+<<<<<<< HEAD
 	return results
 }
 
@@ -443,6 +467,74 @@ func (c configInspection) checkTiKVBlockCacheSizeConfig(ctx context.Context, sct
 	return results
 }
 
+=======
+	return results
+}
+
+func (c configInspection) checkTiKVBlockCacheSizeConfig(ctx context.Context, sctx sessionctx.Context, filter inspectionFilter) []inspectionResult {
+	item := "storage.block-cache.capacity"
+	if !filter.enable(item) {
+		return nil
+	}
+	sql := "select instance,value from information_schema.cluster_config where type='tikv' and `key` = 'storage.block-cache.capacity'"
+	rows, _, err := sctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQLWithContext(ctx, sql)
+	if err != nil {
+		sctx.GetSessionVars().StmtCtx.AppendWarning(fmt.Errorf("check configuration in reason failed: %v", err))
+	}
+	extractIP := func(addr string) string {
+		if idx := strings.Index(addr, ":"); idx > -1 {
+			return addr[0:idx]
+		}
+		return addr
+	}
+
+	ipToBlockSize := make(map[string]uint64)
+	ipToCount := make(map[string]int)
+	for _, row := range rows {
+		ip := extractIP(row.GetString(0))
+		size, err := c.convertReadableSizeToByteSize(row.GetString(1))
+		if err != nil {
+			sctx.GetSessionVars().StmtCtx.AppendWarning(fmt.Errorf("check TiKV block-cache configuration in reason failed: %v", err))
+			return nil
+		}
+		ipToBlockSize[ip] += size
+		ipToCount[ip]++
+	}
+
+	sql = "select instance, value from metrics_schema.node_total_memory where time=now()"
+	rows, _, err = sctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQLWithContext(ctx, sql)
+	if err != nil {
+		sctx.GetSessionVars().StmtCtx.AppendWarning(fmt.Errorf("check configuration in reason failed: %v", err))
+	}
+	ipToMemorySize := make(map[string]float64)
+	for _, row := range rows {
+		ip := extractIP(row.GetString(0))
+		size := row.GetFloat64(1)
+		ipToMemorySize[ip] += size
+	}
+
+	var results []inspectionResult
+	for ip, blockSize := range ipToBlockSize {
+		if memorySize, ok := ipToMemorySize[ip]; ok {
+			if float64(blockSize) > memorySize*0.45 {
+				detail := fmt.Sprintf("There are %v TiKV server in %v node, the total 'storage.block-cache.capacity' of TiKV is more than (0.45 * total node memory)",
+					ipToCount[ip], ip)
+				results = append(results, inspectionResult{
+					tp:       "tikv",
+					instance: ip,
+					item:     item,
+					actual:   fmt.Sprintf("%v", blockSize),
+					expected: fmt.Sprintf("< %.0f", memorySize*0.45),
+					severity: "warning",
+					detail:   detail,
+				})
+			}
+		}
+	}
+	return results
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (configInspection) convertReadableSizeToByteSize(sizeStr string) (uint64, error) {
 	const KB = uint64(1024)
 	const MB = KB * 1024
@@ -473,6 +565,7 @@ func (configInspection) convertReadableSizeToByteSize(sizeStr string) (uint64, e
 }
 
 func (versionInspection) inspect(ctx context.Context, sctx sessionctx.Context, filter inspectionFilter) []inspectionResult {
+<<<<<<< HEAD
 	exec := sctx.(sqlexec.RestrictedSQLExecutor)
 	var rows []chunk.Row
 	// check the configuration consistent
@@ -480,6 +573,11 @@ func (versionInspection) inspect(ctx context.Context, sctx sessionctx.Context, f
 	if err == nil {
 		rows, _, err = exec.ExecRestrictedStmt(ctx, stmt)
 	}
+=======
+	// check the configuration consistent
+	sql := "select type, count(distinct git_hash) as c from information_schema.cluster_info group by type having c > 1;"
+	rows, _, err := sctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQLWithContext(ctx, sql)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		sctx.GetSessionVars().StmtCtx.AppendWarning(fmt.Errorf("check version consistency failed: %v", err))
 	}
@@ -856,11 +954,19 @@ func (thresholdCheckInspection) inspectThreshold1(ctx context.Context, sctx sess
 
 		sql.Reset()
 		if len(rule.configKey) > 0 {
+<<<<<<< HEAD
 			fmt.Fprintf(sql, `select t1.status_address, t1.cpu, (t2.value * %[2]f) as threshold, t2.value from 
 				(select status_address, max(sum_value) as cpu from (select instance as status_address, sum(value) as sum_value from metrics_schema.tikv_thread_cpu %[4]s and name like '%[1]s' group by instance, time) as tmp group by tmp.status_address) as t1 join 
 				(select instance, value from information_schema.cluster_config where type='tikv' and %[5]s = '%[3]s') as t2 join 
 				(select instance,status_address from information_schema.cluster_info where type='tikv') as t3
 				on t1.status_address=t3.status_address and t2.instance=t3.instance where t1.cpu > (t2.value * %[2]f)`, rule.component, rule.threshold, rule.configKey, condition, "`key`")
+=======
+			sql = fmt.Sprintf("select t1.status_address, t1.cpu, (t2.value * %[2]f) as threshold, t2.value from "+
+				"(select status_address, max(sum_value) as cpu from (select instance as status_address, sum(value) as sum_value from metrics_schema.tikv_thread_cpu %[4]s and name like '%[1]s' group by instance, time) as tmp group by tmp.status_address) as t1 join "+
+				"(select instance, value from information_schema.cluster_config where type='tikv' and `key` = '%[3]s') as t2 join "+
+				"(select instance,status_address from information_schema.cluster_info where type='tikv') as t3 "+
+				"on t1.status_address=t3.status_address and t2.instance=t3.instance where t1.cpu > (t2.value * %[2]f)", rule.component, rule.threshold, rule.configKey, condition)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		} else {
 			fmt.Fprintf(sql, `select t1.instance, t1.cpu, %[2]f from 
 				(select instance, max(value) as cpu from metrics_schema.tikv_thread_cpu %[3]s and name like '%[1]s' group by instance) as t1 

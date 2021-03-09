@@ -699,7 +699,11 @@ func (h *rpcHandler) handleBatchCopRequest(ctx context.Context, req *coprocessor
 			StartTs: req.StartTs,
 			Ranges:  ri.Ranges,
 		}
+<<<<<<< HEAD
 		_, exec, dagReq, err := h.buildDAGExecutor(&cop)
+=======
+		_, exec, dagReq, err := h.buildDAGExecutor(&cop, true)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
@@ -1071,7 +1075,10 @@ func (c *RPCClient) SendRequest(ctx context.Context, addr string, req *tikvrpc.R
 					OtherError: err.Message,
 				},
 			}
+<<<<<<< HEAD
 			return resp, nil
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		ctx1, cancel := context.WithCancel(ctx)
 		batchCopStream, err := handler.handleBatchCopRequest(ctx1, r)

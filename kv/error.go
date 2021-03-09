@@ -14,8 +14,11 @@
 package kv
 
 import (
+<<<<<<< HEAD
 	"strings"
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	pmysql "github.com/pingcap/parser/mysql"
 	mysql "github.com/pingcap/tidb/errno"
 	"github.com/pingcap/tidb/util/dbterror"

@@ -149,9 +149,15 @@ func (ts *TiDBStatement) Reset() {
 
 // Close implements PreparedStatement Close method.
 func (ts *TiDBStatement) Close() error {
+<<<<<<< HEAD
 	// TODO close at tidb level
 	if ts.ctx.GetSessionVars().TxnCtx != nil && ts.ctx.GetSessionVars().TxnCtx.CouldRetry {
 		err := ts.ctx.DropPreparedStmt(ts.id)
+=======
+	//TODO close at tidb level
+	if ts.ctx.GetSessionVars().TxnCtx != nil && ts.ctx.GetSessionVars().TxnCtx.CouldRetry {
+		err := ts.ctx.session.DropPreparedStmt(ts.id)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			return err
 		}
@@ -162,7 +168,11 @@ func (ts *TiDBStatement) Close() error {
 			if !ok {
 				return errors.Errorf("invalid CachedPrepareStmt type")
 			}
+<<<<<<< HEAD
 			ts.ctx.PreparedPlanCache().Delete(core.NewPSTMTPlanCacheKey(
+=======
+			ts.ctx.session.PreparedPlanCache().Delete(core.NewPSTMTPlanCacheKey(
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				ts.ctx.GetSessionVars(), ts.id, preparedObj.PreparedAst.SchemaVersion))
 		}
 		ts.ctx.GetSessionVars().RemovePreparedStmt(ts.id)
@@ -209,7 +219,11 @@ func (tc *TiDBContext) WarningCount() uint16 {
 
 // ExecuteStmt implements QueryCtx interface.
 func (tc *TiDBContext) ExecuteStmt(ctx context.Context, stmt ast.StmtNode) (ResultSet, error) {
+<<<<<<< HEAD
 	rs, err := tc.Session.ExecuteStmt(ctx, stmt)
+=======
+	rs, err := tc.session.ExecuteStmt(ctx, stmt)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return nil, err
 	}
@@ -219,6 +233,24 @@ func (tc *TiDBContext) ExecuteStmt(ctx context.Context, stmt ast.StmtNode) (Resu
 	return &tidbResultSet{
 		recordSet: rs,
 	}, nil
+<<<<<<< HEAD
+=======
+}
+
+// Parse implements QueryCtx interface.
+func (tc *TiDBContext) Parse(ctx context.Context, sql string) ([]ast.StmtNode, error) {
+	return tc.session.Parse(ctx, sql)
+}
+
+// SetSessionManager implements the QueryCtx interface.
+func (tc *TiDBContext) SetSessionManager(sm util.SessionManager) {
+	tc.session.SetSessionManager(sm)
+}
+
+// SetClientCapability implements QueryCtx SetClientCapability method.
+func (tc *TiDBContext) SetClientCapability(flags uint32) {
+	tc.session.SetClientCapability(flags)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // Close implements QueryCtx Close method.

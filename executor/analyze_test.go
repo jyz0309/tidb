@@ -30,7 +30,11 @@ import (
 	"github.com/pingcap/tidb/executor"
 	"github.com/pingcap/tidb/infoschema"
 	"github.com/pingcap/tidb/kv"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/planner/core"
+=======
+	plannercore "github.com/pingcap/tidb/planner/core"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/session"
 	"github.com/pingcap/tidb/sessionctx"
 	"github.com/pingcap/tidb/sessionctx/stmtctx"
@@ -197,6 +201,7 @@ func (s *testSuite1) TestAnalyzeParameters(c *C) {
 	c.Assert(width, Equals, int32(4))
 
 	// Test very large cmsketch
+<<<<<<< HEAD
 	tk.MustExec(fmt.Sprintf("analyze table t with %d cmsketch width, %d cmsketch depth", core.CMSketchSizeLimit, 1))
 	tbl = s.dom.StatsHandle().GetTableStats(tableInfo)
 	col = tbl.Columns[1]
@@ -205,13 +210,27 @@ func (s *testSuite1) TestAnalyzeParameters(c *C) {
 	width, depth = col.CMSketch.GetWidthAndDepth()
 	c.Assert(depth, Equals, int32(1))
 	c.Assert(width, Equals, int32(core.CMSketchSizeLimit))
+=======
+	tk.MustExec(fmt.Sprintf("analyze table t with %d cmsketch width, %d cmsketch depth", plannercore.CMSketchSizeLimit, 1))
+	tbl = s.dom.StatsHandle().GetTableStats(tableInfo)
+	col = tbl.Columns[1]
+	c.Assert(col.Len(), Equals, 20)
+	c.Assert(len(col.CMSketch.TopN()), Equals, 1)
+	width, depth = col.CMSketch.GetWidthAndDepth()
+	c.Assert(depth, Equals, int32(1))
+	c.Assert(width, Equals, int32(plannercore.CMSketchSizeLimit))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// Test very large cmsketch
 	tk.MustExec("analyze table t with 20480 cmsketch width, 50 cmsketch depth")
 	tbl = s.dom.StatsHandle().GetTableStats(tableInfo)
 	col = tbl.Columns[1]
 	c.Assert(col.Len(), Equals, 20)
+<<<<<<< HEAD
 	c.Assert(len(col.TopN.TopN), Equals, 1)
+=======
+	c.Assert(len(col.CMSketch.TopN()), Equals, 1)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	width, depth = col.CMSketch.GetWidthAndDepth()
 	c.Assert(depth, Equals, int32(50))
 	c.Assert(width, Equals, int32(20480))
@@ -521,6 +540,36 @@ func (s *testSuite1) TestAnalyzeIndex(c *C) {
 		tk.MustExec("analyze table t1 index k")
 		c.Assert(len(tk.MustQuery("show stats_buckets where table_name = 't1' and column_name = 'k' and is_index = 1").Rows()), Greater, 1)
 	}()
+}
+
+func (s *testSuite1) TestIssue15993(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t0")
+	tk.MustExec("CREATE TABLE t0(c0 INT PRIMARY KEY);")
+	tk.MustExec("set @@tidb_enable_fast_analyze=1;")
+	tk.MustExec("ANALYZE TABLE t0 INDEX PRIMARY;")
+}
+
+func (s *testSuite1) TestIssue15751(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t0")
+	tk.MustExec("CREATE TABLE t0(c0 INT, c1 INT, PRIMARY KEY(c0, c1))")
+	tk.MustExec("INSERT INTO t0 VALUES (0, 0)")
+	tk.MustExec("set @@tidb_enable_fast_analyze=1")
+	tk.MustExec("ANALYZE TABLE t0")
+}
+
+func (s *testSuite1) TestIssue15752(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t0")
+	tk.MustExec("CREATE TABLE t0(c0 INT)")
+	tk.MustExec("INSERT INTO t0 VALUES (0)")
+	tk.MustExec("CREATE INDEX i0 ON t0(c0)")
+	tk.MustExec("set @@tidb_enable_fast_analyze=1")
+	tk.MustExec("ANALYZE TABLE t0 INDEX i0")
 }
 
 func (s *testSuite1) TestAnalyzeIncremental(c *C) {
@@ -858,4 +907,75 @@ func (s *testSerialSuite2) TestIssue20874(c *C) {
 		"test t  idxb 1 0 1 1 \x00A \x00A 0",
 		"test t  idxb 1 1 3 2 \x00C \x00C 0",
 	))
+}
+
+func (s *testSuite1) TestHashInTopN(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t")
+	tk.MustExec("create table t(a int, b float, c decimal(30, 10), d varchar(20))")
+	tk.MustExec(`insert into t values
+				(1, 1.1, 11.1, "0110"),
+				(2, 2.2, 22.2, "0110"),
+				(3, 3.3, 33.3, "0110"),
+				(4, 4.4, 44.4, "0440")`)
+	for i := 0; i < 3; i++ {
+		tk.MustExec("insert into t select * from t")
+	}
+	// get stats of normal analyze
+	tk.MustExec("analyze table t")
+	is := s.dom.InfoSchema()
+	tbl, err := is.TableByName(model.NewCIStr("test"), model.NewCIStr("t"))
+	c.Assert(err, IsNil)
+	tblInfo := tbl.Meta()
+	tblStats1 := s.dom.StatsHandle().GetTableStats(tblInfo).Copy()
+	// get stats of fast analyze
+	tk.MustExec("set @@tidb_enable_fast_analyze = 1")
+	tk.MustExec("analyze table t")
+	tblStats2 := s.dom.StatsHandle().GetTableStats(tblInfo).Copy()
+	// check the hash for topn
+	for _, col := range tblInfo.Columns {
+		topn1 := tblStats1.Columns[col.ID].CMSketch.TopNMap()
+		cm2 := tblStats2.Columns[col.ID].CMSketch
+		for h1, topnMetas := range topn1 {
+			for _, topnMeta1 := range topnMetas {
+				count2, exists := cm2.QueryTopN(h1, topnMeta1.GetH2(), topnMeta1.Data)
+				c.Assert(exists, Equals, true)
+				c.Assert(count2, Equals, topnMeta1.Count)
+			}
+		}
+	}
+}
+
+func (s *testSuite1) TestDefaultValForAnalyze(c *C) {
+	c.Skip("skip race test")
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("drop database if exists test_default_val_for_analyze;")
+	tk.MustExec("create database test_default_val_for_analyze;")
+	tk.MustExec("use test_default_val_for_analyze")
+
+	tk.MustExec("create table t (a int, key(a));")
+	for i := 0; i < 2048; i++ {
+		tk.MustExec("insert into t values (0)")
+	}
+	for i := 1; i < 4; i++ {
+		tk.MustExec("insert into t values (?)", i)
+	}
+	tk.MustExec("analyze table t with 0 topn;")
+	tk.MustQuery("explain select * from t where a = 1").Check(testkit.Rows("IndexReader_6 512.00 root  index:IndexRangeScan_5",
+		"└─IndexRangeScan_5 512.00 cop[tikv] table:t, index:a(a) range:[1,1], keep order:false"))
+	tk.MustQuery("explain select * from t where a = 999").Check(testkit.Rows("IndexReader_6 0.00 root  index:IndexRangeScan_5",
+		"└─IndexRangeScan_5 0.00 cop[tikv] table:t, index:a(a) range:[999,999], keep order:false"))
+
+	tk.MustExec("drop table t;")
+	tk.MustExec("create table t (a int, key(a));")
+	for i := 0; i < 2048; i++ {
+		tk.MustExec("insert into t values (0)")
+	}
+	for i := 1; i < 2049; i++ {
+		tk.MustExec("insert into t values (?)", i)
+	}
+	tk.MustExec("analyze table t with 0 topn;")
+	tk.MustQuery("explain select * from t where a = 1").Check(testkit.Rows("IndexReader_6 1.00 root  index:IndexRangeScan_5",
+		"└─IndexRangeScan_5 1.00 cop[tikv] table:t, index:a(a) range:[1,1], keep order:false"))
 }

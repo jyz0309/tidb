@@ -219,8 +219,13 @@ func getStmtDbLabel(stmtNode ast.StmtNode) map[string]struct{} {
 		}
 	case *ast.CreateBindingStmt:
 		var resNode ast.ResultSetNode
+<<<<<<< HEAD
 		if x.OriginNode != nil {
 			switch n := x.OriginNode.(type) {
+=======
+		if x.OriginSel != nil {
+			switch n := x.OriginSel.(type) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			case *ast.SelectStmt:
 				resNode = n.From.TableRefs
 			case *ast.DeleteStmt:
@@ -236,8 +241,13 @@ func getStmtDbLabel(stmtNode ast.StmtNode) map[string]struct{} {
 			}
 		}
 
+<<<<<<< HEAD
 		if len(dbLabelSet) == 0 && x.HintedNode != nil {
 			switch n := x.HintedNode.(type) {
+=======
+		if len(dbLabelSet) == 0 && x.HintedSel != nil {
+			switch n := x.HintedSel.(type) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			case *ast.SelectStmt:
 				resNode = n.From.TableRefs
 			case *ast.DeleteStmt:

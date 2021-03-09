@@ -19,7 +19,10 @@ import (
 	"math"
 	"math/rand"
 	"sort"
+<<<<<<< HEAD
 	"time"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	. "github.com/pingcap/check"
 	"github.com/pingcap/parser/model"

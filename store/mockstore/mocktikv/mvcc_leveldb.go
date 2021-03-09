@@ -1151,6 +1151,7 @@ func (mvcc *MVCCLevelDB) CheckTxnStatus(primaryKey []byte, lockTS, callerStartTS
 
 			// If the lock has already outdated, clean up it.
 			if uint64(oracle.ExtractPhysical(lock.startTS))+lock.ttl < uint64(oracle.ExtractPhysical(currentTS)) {
+<<<<<<< HEAD
 				if resolvingPessimisticLock && lock.op == kvrpcpb.Op_PessimisticLock {
 					action = kvrpcpb.Action_TTLExpirePessimisticRollback
 					if err = pessimisticRollbackKey(mvcc.db, batch, primaryKey, lock.startTS, lock.forUpdateTS); err != nil {
@@ -1163,6 +1164,15 @@ func (mvcc *MVCCLevelDB) CheckTxnStatus(primaryKey []byte, lockTS, callerStartTS
 						err = errors.Trace(err)
 						return
 					}
+=======
+				logutil.BgLogger().Info("rollback expired lock and write rollback record",
+					zap.Stringer("primary key", kv.Key(primaryKey)),
+					zap.Uint64("lock startTS", dec.lock.startTS),
+					zap.Stringer("lock op", dec.lock.op))
+				if err = rollbackLock(batch, primaryKey, lockTS); err != nil {
+					err = errors.Trace(err)
+					return
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				}
 				if err = mvcc.db.Write(batch, nil); err != nil {
 					err = errors.Trace(err)
@@ -1345,6 +1355,12 @@ func (mvcc *MVCCLevelDB) ResolveLock(startKey, endKey []byte, startTS, commitTS 
 	mvcc.mu.Lock()
 	defer mvcc.mu.Unlock()
 
+	if len(startKey) > 0 {
+		startKey = []byte{}
+	}
+	if len(endKey) > 0 {
+		endKey = []byte{}
+	}
 	iter, currKey, err := newScanIterator(mvcc.db, startKey, endKey)
 	defer iter.Release()
 	if err != nil {

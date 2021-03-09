@@ -223,11 +223,21 @@ func (e *RecoverIndexExec) Open(ctx context.Context) error {
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *RecoverIndexExec) constructTableScanPB(tblInfo *model.TableInfo, colInfos []*model.ColumnInfo) (*tipb.Executor, error) {
 	tblScan := tables.BuildTableScanFromInfos(tblInfo, colInfos)
 	tblScan.TableId = e.physicalID
 	err := plannercore.SetPBColumnsDefaultValue(e.ctx, tblScan.Columns, colInfos)
 	return &tipb.Executor{Tp: tipb.ExecType_TypeTableScan, TblScan: tblScan}, err
+=======
+func (e *RecoverIndexExec) constructTableScanPB(pbColumnInfos []*tipb.ColumnInfo) *tipb.Executor {
+	tblScan := &tipb.TableScan{
+		TableId: e.physicalID,
+		Columns: pbColumnInfos,
+	}
+
+	return &tipb.Executor{Tp: tipb.ExecType_TypeTableScan, TblScan: tblScan}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (e *RecoverIndexExec) constructLimitPB(count uint64) *tipb.Executor {
@@ -258,17 +268,27 @@ func (e *RecoverIndexExec) buildDAGPB(txn kv.Transaction, limitCnt uint64) (*tip
 	return dagReq, nil
 }
 
+<<<<<<< HEAD
 func (e *RecoverIndexExec) buildTableScan(ctx context.Context, txn kv.Transaction, startHandle kv.Handle, limitCnt uint64) (distsql.SelectResult, error) {
+=======
+func (e *RecoverIndexExec) buildTableScan(ctx context.Context, txn kv.Transaction, startHandle int64, limitCnt uint64) (distsql.SelectResult, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	dagPB, err := e.buildDAGPB(txn, limitCnt)
 	if err != nil {
 		return nil, err
 	}
+<<<<<<< HEAD
 	var builder distsql.RequestBuilder
 	builder.KeyRanges, err = buildRecoverIndexKeyRanges(e.ctx.GetSessionVars().StmtCtx, e.physicalID, startHandle)
 	if err != nil {
 		return nil, err
 	}
 	kvReq, err := builder.
+=======
+	ranges := []*ranger.Range{{LowVal: []types.Datum{types.NewIntDatum(startHandle)}, HighVal: []types.Datum{types.NewIntDatum(math.MaxInt64)}}}
+	var builder distsql.RequestBuilder
+	kvReq, err := builder.SetTableRanges(e.physicalID, ranges, nil).
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		SetDAGRequest(dagPB).
 		SetStartTS(txn.StartTS()).
 		SetKeepOrder(true).
@@ -416,7 +436,11 @@ func (e *RecoverIndexExec) batchMarkDup(txn kv.Transaction, rows []recoverRows) 
 	for i, key := range e.batchKeys {
 		if val, found := values[string(key)]; found {
 			if distinctFlags[i] {
+<<<<<<< HEAD
 				handle, err1 := tablecodec.DecodeHandleInUniqueIndexValue(val, isCommonHandle)
+=======
+				handle, err1 := tablecodec.DecodeHandle(val)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				if err1 != nil {
 					return err1
 				}
@@ -433,8 +457,14 @@ func (e *RecoverIndexExec) batchMarkDup(txn kv.Transaction, rows []recoverRows) 
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *RecoverIndexExec) backfillIndexInTxn(ctx context.Context, txn kv.Transaction, currentHandle kv.Handle) (result backfillResult, err error) {
 	srcResult, err := e.buildTableScan(ctx, txn, currentHandle, uint64(e.batchSize))
+=======
+func (e *RecoverIndexExec) backfillIndexInTxn(ctx context.Context, txn kv.Transaction, startHandle int64) (result backfillResult, err error) {
+	result.nextHandle = startHandle
+	srcResult, err := e.buildTableScan(ctx, txn, startHandle, uint64(e.batchSize))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return result, err
 	}
@@ -479,6 +509,7 @@ func (e *RecoverIndexExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		return nil
 	}
 
+<<<<<<< HEAD
 	recoveringClusteredIndex := e.index.Meta().Primary && e.table.Meta().IsCommonHandle
 	if recoveringClusteredIndex {
 		req.AppendInt64(0, 0)
@@ -486,6 +517,8 @@ func (e *RecoverIndexExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		e.done = true
 		return nil
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	var totalAddedCnt, totalScanCnt int64
 	var err error
 	if tbl, ok := e.table.(table.PartitionedTable); ok {
@@ -655,6 +688,7 @@ func (e *CleanupIndexExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	if e.done {
 		return nil
 	}
+<<<<<<< HEAD
 	cleaningClusteredPrimaryKey := e.table.Meta().IsCommonHandle && e.index.Meta().Primary
 	if cleaningClusteredPrimaryKey {
 		e.done = true
@@ -662,6 +696,8 @@ func (e *CleanupIndexExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		return nil
 	}
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	var err error
 	if tbl, ok := e.table.(table.PartitionedTable); ok {
 		pi := e.table.Meta().GetPartitionInfo()
@@ -796,10 +832,16 @@ func (e *CleanupIndexExec) buildIdxDAGPB(txn kv.Transaction) (*tipb.DAGRequest, 
 
 func (e *CleanupIndexExec) constructIndexScanPB() *tipb.Executor {
 	idxExec := &tipb.IndexScan{
+<<<<<<< HEAD
 		TableId:          e.physicalID,
 		IndexId:          e.index.Meta().ID,
 		Columns:          util.ColumnsToProto(e.columns, e.table.Meta().PKIsHandle),
 		PrimaryColumnIds: tables.TryGetCommonPkColumnIds(e.table.Meta()),
+=======
+		TableId: e.physicalID,
+		IndexId: e.index.Meta().ID,
+		Columns: util.ColumnsToProto(e.idxCols, e.table.Meta().PKIsHandle),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	return &tipb.Executor{Tp: tipb.ExecType_TypeIndexScan, IdxScan: idxExec}
 }

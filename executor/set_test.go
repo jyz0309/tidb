@@ -444,6 +444,7 @@ func (s *testSerialSuite1) TestSetVar(c *C) {
 	tk.MustQuery(`select @@session.tidb_slow_log_masking;`).Check(testkit.Rows("0"))
 	tk.MustExec("set session tidb_slow_log_masking = 1")
 	tk.MustQuery(`select @@session.tidb_slow_log_masking;`).Check(testkit.Rows("1"))
+<<<<<<< HEAD
 
 	tk.MustQuery("select @@tidb_dml_batch_size;").Check(testkit.Rows("0"))
 	tk.MustExec("set @@session.tidb_dml_batch_size = 120")
@@ -531,6 +532,8 @@ func (s *testSerialSuite1) TestSetVar(c *C) {
 	// Test issue #22145
 	tk.MustExec(`set global sync_relay_log = "'"`)
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testSuite5) TestTruncateIncorrectIntSessionVar(c *C) {
@@ -1307,3 +1310,39 @@ func (s *testSuite5) TestSetClusterConfigJSONData(c *C) {
 		}
 	}
 }
+<<<<<<< HEAD
+=======
+
+func (s *testSerialSuite1) TestVariableRollbackIssue20124(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+
+	cases := []struct {
+		name         string
+		defaultValue int
+	}{
+		{variable.TiDBIndexLookupConcurrency, variable.DefIndexLookupConcurrency},
+		{variable.TiDBIndexLookupJoinConcurrency, variable.DefIndexLookupJoinConcurrency},
+		{variable.TiDBHashJoinConcurrency, variable.DefTiDBHashJoinConcurrency},
+		{variable.TiDBHashAggPartialConcurrency, variable.DefTiDBHashAggPartialConcurrency},
+		{variable.TiDBHashAggFinalConcurrency, variable.DefTiDBHashAggFinalConcurrency},
+		{variable.TiDBProjectionConcurrency, variable.DefTiDBProjectionConcurrency},
+		{variable.TiDBWindowConcurrency, variable.DefTiDBWindowConcurrency},
+	}
+
+	for _, cs := range cases {
+		tk.MustExec(fmt.Sprintf("set @@global.%v=-1", cs.name))
+	}
+
+	tk2 := testkit.NewTestKit(c, s.store)
+	tk2.MustExec("use test")
+	for _, cs := range cases {
+		tk2.MustQuery(fmt.Sprintf("select @@%v", cs.name)).Check(testkit.Rows(fmt.Sprint(cs.defaultValue)))
+		tk2.MustExec(fmt.Sprintf("set @@%v=1", cs.name))
+		tk2.MustQuery(fmt.Sprintf("select @@%v", cs.name)).Check(testkit.Rows("1"))
+		tk2.MustExec(fmt.Sprintf("set @@%v=-1", cs.name))
+		tk2.MustQuery(fmt.Sprintf("select @@%v", cs.name)).Check(testkit.Rows(fmt.Sprint(cs.defaultValue)))
+	}
+
+}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

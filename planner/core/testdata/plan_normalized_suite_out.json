@@ -70,9 +70,15 @@
       {
         "SQL": "SELECT * from t1 where a!=1 order by c limit 1",
         "Plan": [
+<<<<<<< HEAD
           " TopN                 root test.t1.c",
           " └─TableReader        root ",
           "   └─TopN             cop  test.t1.c",
+=======
+          " TopN                 root test.t1.c:asc",
+          " └─TableReader        root ",
+          "   └─TopN             cop  test.t1.c:asc",
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
           "     └─TableRangeScan cop  table:t1, range:[?,?], keep order:false"
         ]
       },
@@ -235,6 +241,7 @@
     ]
   },
   {
+<<<<<<< HEAD
     "Name": "TestPreferRangeScan",
     "Cases": [
       {
@@ -256,6 +263,8 @@
     ]
   },
   {
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
     "Name": "TestNormalizedPlanForDiffStore",
     "Cases": [
       {

@@ -237,7 +237,11 @@ func (s *testCommitterSuite) TestPrewriteRollback(c *C) {
 	}
 	committer.commitTS, err = s.store.oracle.GetTimestamp(ctx, &oracle.Option{TxnScope: oracle.GlobalTxnScope})
 	c.Assert(err, IsNil)
+<<<<<<< HEAD
 	err = committer.commitMutations(NewBackofferWithVars(ctx, int(atomic.LoadUint64(&CommitMaxBackoff)), nil), &PlainMutations{keys: [][]byte{[]byte("a")}})
+=======
+	err = committer.commitMutations(NewBackofferWithVars(ctx, CommitMaxBackoff, nil), CommitterMutations{keys: [][]byte{[]byte("a")}})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 
 	txn3 := s.begin(c)
@@ -445,7 +449,11 @@ func (s *testCommitterSuite) TestCommitBeforePrewrite(c *C) {
 	c.Assert(err, IsNil)
 	err = committer.prewriteMutations(NewBackofferWithVars(ctx, PrewriteMaxBackoff, nil), committer.mutations)
 	c.Assert(err, NotNil)
+<<<<<<< HEAD
 	errMsgMustContain(c, err, "already rolled back")
+=======
+	errMsgMustContain(c, err, "already rollbacked")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testCommitterSuite) TestPrewritePrimaryKeyFailed(c *C) {
@@ -691,7 +699,11 @@ func (s *testCommitterSuite) TestPessimisticTTL(c *C) {
 
 	lr := newLockResolver(s.store)
 	bo := NewBackofferWithVars(context.Background(), getMaxBackoff, nil)
+<<<<<<< HEAD
 	status, err := lr.getTxnStatus(bo, txn.startTS, key2, 0, txn.startTS, true, false, nil)
+=======
+	status, err := lr.getTxnStatus(bo, txn.startTS, key2, 0, txn.startTS, true, nil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	c.Assert(status.ttl, GreaterEqual, lockInfo.LockTtl)
 
@@ -750,7 +762,11 @@ func (s *testCommitterSuite) TestElapsedTTL(c *C) {
 }
 
 func (s *testCommitterSuite) TestDeleteYourWriteCauseGhostPrimary(c *C) {
+<<<<<<< HEAD
 	s.cluster.SplitKeys(kv.Key("d"), kv.Key("a"), 4)
+=======
+	s.cluster.SplitKeys(s.mvccStore, kv.Key("d"), kv.Key("a"), 4)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	k1 := kv.Key("a") // insert but deleted key at first pos in txn1
 	k2 := kv.Key("b") // insert key at second pos in txn1
 	k3 := kv.Key("c") // insert key in txn1 and will be conflict read by txn2
@@ -758,9 +774,17 @@ func (s *testCommitterSuite) TestDeleteYourWriteCauseGhostPrimary(c *C) {
 	// insert k1, k2, k3 and delete k1
 	txn1 := s.begin(c)
 	txn1.DelOption(kv.Pessimistic)
+<<<<<<< HEAD
 	txn1.store.txnLatches = nil
 	txn1.Get(context.Background(), k1)
 	txn1.GetMemBuffer().SetWithFlags(k1, []byte{0}, kv.SetPresumeKeyNotExists)
+=======
+	txn1.SetOption(kv.PresumeKeyNotExists, nil)
+	txn1.SetOption(kv.PresumeKeyNotExistsError, kv.NewExistErrInfo("name", "value"))
+	txn1.store.txnLatches = nil
+	txn1.Get(context.Background(), k1)
+	txn1.Set(k1, []byte{0})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	txn1.Set(k2, []byte{1})
 	txn1.Set(k3, []byte{2})
 	txn1.Delete(k1)
@@ -792,7 +816,11 @@ func (s *testCommitterSuite) TestDeleteYourWriteCauseGhostPrimary(c *C) {
 }
 
 func (s *testCommitterSuite) TestDeleteAllYourWrites(c *C) {
+<<<<<<< HEAD
 	s.cluster.SplitKeys(kv.Key("d"), kv.Key("a"), 4)
+=======
+	s.cluster.SplitKeys(s.mvccStore, kv.Key("d"), kv.Key("a"), 4)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	k1 := kv.Key("a")
 	k2 := kv.Key("b")
 	k3 := kv.Key("c")
@@ -800,19 +828,37 @@ func (s *testCommitterSuite) TestDeleteAllYourWrites(c *C) {
 	// insert k1, k2, k3 and delete k1, k2, k3
 	txn1 := s.begin(c)
 	txn1.DelOption(kv.Pessimistic)
+<<<<<<< HEAD
 	txn1.store.txnLatches = nil
 	txn1.GetMemBuffer().SetWithFlags(k1, []byte{0}, kv.SetPresumeKeyNotExists)
 	txn1.Delete(k1)
 	txn1.GetMemBuffer().SetWithFlags(k2, []byte{1}, kv.SetPresumeKeyNotExists)
 	txn1.Delete(k2)
 	txn1.GetMemBuffer().SetWithFlags(k3, []byte{2}, kv.SetPresumeKeyNotExists)
+=======
+	txn1.SetOption(kv.PresumeKeyNotExists, nil)
+	txn1.SetOption(kv.PresumeKeyNotExistsError, kv.NewExistErrInfo("name", "value"))
+	txn1.store.txnLatches = nil
+	txn1.Get(context.Background(), k1)
+	txn1.Set(k1, []byte{0})
+	txn1.Delete(k1)
+	txn1.Get(context.Background(), k2)
+	txn1.Set(k2, []byte{1})
+	txn1.Delete(k2)
+	txn1.Get(context.Background(), k3)
+	txn1.Set(k3, []byte{2})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	txn1.Delete(k3)
 	err1 := txn1.Commit(context.Background())
 	c.Assert(err1, IsNil)
 }
 
 func (s *testCommitterSuite) TestDeleteAllYourWritesWithSFU(c *C) {
+<<<<<<< HEAD
 	s.cluster.SplitKeys(kv.Key("d"), kv.Key("a"), 4)
+=======
+	s.cluster.SplitKeys(s.mvccStore, kv.Key("d"), kv.Key("a"), 4)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	k1 := kv.Key("a")
 	k2 := kv.Key("b")
 	k3 := kv.Key("c")
@@ -820,8 +866,16 @@ func (s *testCommitterSuite) TestDeleteAllYourWritesWithSFU(c *C) {
 	// insert k1, k2, k2 and delete k1
 	txn1 := s.begin(c)
 	txn1.DelOption(kv.Pessimistic)
+<<<<<<< HEAD
 	txn1.store.txnLatches = nil
 	txn1.GetMemBuffer().SetWithFlags(k1, []byte{0}, kv.SetPresumeKeyNotExists)
+=======
+	txn1.SetOption(kv.PresumeKeyNotExists, nil)
+	txn1.SetOption(kv.PresumeKeyNotExistsError, kv.NewExistErrInfo("name", "value"))
+	txn1.store.txnLatches = nil
+	txn1.Get(context.Background(), k1)
+	txn1.Set(k1, []byte{0})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	txn1.Delete(k1)
 	err := txn1.LockKeys(context.Background(), &kv.LockCtx{}, k2, k3) // select * from t where x in (k2, k3) for update
 	c.Assert(err, IsNil)
@@ -942,6 +996,7 @@ func (s *testCommitterSuite) TestPkNotFound(c *C) {
 	err = txn1.LockKeys(ctx, lockCtx, k2, k3)
 	c.Assert(err, IsNil)
 	// Stop txn ttl manager and remove primary key, like tidb server crashes and the priamry key lock does not exists actually,
+<<<<<<< HEAD
 	// while the secondary lock operation succeeded.
 	txn1.committer.ttlManager.close()
 
@@ -957,6 +1012,12 @@ func (s *testCommitterSuite) TestPkNotFound(c *C) {
 		LockForUpdateTS: txn1.startTS,
 	}
 	status, err = s.store.lockResolver.getTxnStatusFromLock(bo, lockKey2, oracle.GoTimeToTS(time.Now().Add(200*time.Millisecond)), false)
+=======
+	// while the secondary lock operation succeeded
+	bo := NewBackofferWithVars(context.Background(), pessimisticLockMaxBackoff, nil)
+	txn1.committer.ttlManager.close()
+	err = txn1.committer.pessimisticRollbackMutations(bo, CommitterMutations{keys: [][]byte{k1}})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	c.Assert(status.Action(), Equals, kvrpcpb.Action_TTLExpirePessimisticRollback)
 
@@ -1039,11 +1100,19 @@ func (s *testCommitterSuite) TestPessimisticLockPrimary(c *C) {
 }
 
 func (c *twoPhaseCommitter) mutationsOfKeys(keys [][]byte) CommitterMutations {
+<<<<<<< HEAD
 	var res PlainMutations
 	for i := 0; i < c.mutations.Len(); i++ {
 		for _, key := range keys {
 			if bytes.Equal(c.mutations.GetKey(i), key) {
 				res.Push(c.mutations.GetOp(i), c.mutations.GetKey(i), c.mutations.GetValue(i), c.mutations.IsPessimisticLock(i))
+=======
+	var res CommitterMutations
+	for i := range c.mutations.keys {
+		for _, key := range keys {
+			if bytes.Equal(c.mutations.keys[i], key) {
+				res.Push(c.mutations.ops[i], c.mutations.keys[i], c.mutations.values[i], c.mutations.isPessimisticLock[i])
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				break
 			}
 		}
@@ -1072,6 +1141,29 @@ func (s *testCommitterSuite) TestResolvePessimisticLock(c *C) {
 	c.Assert(mutation.GetOp(1), Equals, pb.Op_Lock)
 	c.Assert(mutation.GetKey(1), BytesEquals, []byte(noValueIndexKey))
 	c.Assert(mutation.GetValue(1), BytesEquals, []byte{})
+}
+
+func (s *testCommitterSuite) TestResolvePessimisticLock(c *C) {
+	untouchedIndexKey := kv.Key("t00000001_i000000001")
+	untouchedIndexValue := []byte{0, 0, 0, 0, 0, 0, 0, 1, 49}
+	noValueIndexKey := kv.Key("t00000001_i000000002")
+	c.Assert(tablecodec.IsUntouchedIndexKValue(untouchedIndexKey, untouchedIndexValue), IsTrue)
+	txn := s.begin(c)
+	err := txn.Set(untouchedIndexKey, untouchedIndexValue)
+	c.Assert(err, IsNil)
+	lockCtx := &kv.LockCtx{ForUpdateTS: txn.startTS, WaitStartTime: time.Now(), LockWaitTime: kv.LockNoWait}
+	err = txn.LockKeys(context.Background(), lockCtx, untouchedIndexKey, noValueIndexKey)
+	c.Assert(err, IsNil)
+	commit, err := newTwoPhaseCommitterWithInit(txn, 1)
+	c.Assert(err, IsNil)
+	mutation := commit.mutationsOfKeys([][]byte{untouchedIndexKey, noValueIndexKey})
+	c.Assert(mutation.len(), Equals, 2)
+	c.Assert(mutation.GetOps()[0], Equals, kvrpcpb.Op_Lock)
+	c.Assert(mutation.GetKeys()[0], BytesEquals, []byte(untouchedIndexKey))
+	c.Assert(mutation.GetValues()[0], BytesEquals, untouchedIndexValue)
+	c.Assert(mutation.GetOps()[1], Equals, kvrpcpb.Op_Lock)
+	c.Assert(mutation.GetKeys()[1], BytesEquals, []byte(noValueIndexKey))
+	c.Assert(mutation.GetValues()[1], BytesEquals, []byte{})
 }
 
 func (s *testCommitterSuite) TestCommitDeadLock(c *C) {
@@ -1143,7 +1235,11 @@ func (s *testCommitterSuite) TestPushPessimisticLock(c *C) {
 	err = txn1.committer.initKeysAndMutations()
 	c.Assert(err, IsNil)
 	// Strip the prewrite of the primary key.
+<<<<<<< HEAD
 	txn1.committer.mutations.handles = txn1.committer.mutations.handles[1:2]
+=======
+	txn1.committer.mutations = txn1.committer.mutations.subRange(1, 2)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	err = txn1.committer.prewriteMutations(NewBackofferWithVars(ctx, PrewriteMaxBackoff, nil), txn1.committer.mutations)
 	c.Assert(err, IsNil)
@@ -1212,7 +1308,11 @@ func (s *testCommitterSuite) TestResolveMixed(c *C) {
 	// stop txn ttl manager and remove primary key, make the other keys left behind
 	bo := NewBackofferWithVars(context.Background(), pessimisticLockMaxBackoff, nil)
 	txn1.committer.ttlManager.close()
+<<<<<<< HEAD
 	err = txn1.committer.pessimisticRollbackMutations(bo, &PlainMutations{keys: [][]byte{pk}})
+=======
+	err = txn1.committer.pessimisticRollbackMutations(bo, CommitterMutations{keys: [][]byte{pk}})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 
 	// try to resolve the left optimistic locks, use clean whole region
@@ -1235,6 +1335,7 @@ func (s *testCommitterSuite) TestResolveMixed(c *C) {
 	err = txn2.Rollback()
 	c.Assert(err, IsNil)
 }
+<<<<<<< HEAD
 
 // TestSecondaryKeys tests that when async commit is enabled, each prewrite message includes an
 // accurate list of secondary keys.
@@ -1415,3 +1516,5 @@ func allKeysNoDups(req *kvrpcpb.PrewriteRequest) bool {
 	}
 	return true
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

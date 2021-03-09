@@ -159,6 +159,7 @@ func onDropSchema(d *ddlCtx, t *meta.Meta, job *model.Job) (ver int64, _ error) 
 		if err != nil {
 			return ver, errors.Trace(err)
 		}
+<<<<<<< HEAD
 		var tables []*model.TableInfo
 		tables, err = t.ListTables(job.SchemaID)
 		if err != nil {
@@ -176,6 +177,8 @@ func onDropSchema(d *ddlCtx, t *meta.Meta, job *model.Job) (ver int64, _ error) 
 		if err != nil {
 			return ver, errors.Trace(err)
 		}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		// Update the job state when all affairs done.
 		job.SchemaState = model.StateWriteOnly
 	case model.StateWriteOnly:

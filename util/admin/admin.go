@@ -110,7 +110,12 @@ func IsJobRollbackable(job *model.Job) bool {
 		}
 	case model.ActionAddTablePartition:
 		return job.SchemaState == model.StateNone || job.SchemaState == model.StateReplicaOnly
+<<<<<<< HEAD
 	case model.ActionDropColumn, model.ActionDropColumns, model.ActionDropTablePartition,
+=======
+	case model.ActionDropColumn, model.ActionModifyColumn,
+		model.ActionDropTablePartition,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		model.ActionRebaseAutoID, model.ActionShardRowID,
 		model.ActionTruncateTable, model.ActionAddForeignKey,
 		model.ActionDropForeignKey, model.ActionRenameTable,
@@ -413,6 +418,7 @@ func CheckRecordAndIndex(sessCtx sessionctx.Context, txn kv.Transaction, t table
 	return nil
 }
 
+<<<<<<< HEAD
 func makeRowDecoder(t table.Table, sctx sessionctx.Context) (*decoder.RowDecoder, error) {
 	dbName := model.NewCIStr(sctx.GetSessionVars().CurrentDB)
 	exprCols, _, err := expression.ColumnInfos2ColumnsAndNames(sctx, dbName, t.Meta().Name, t.Meta().Cols(), t.Meta())
@@ -423,6 +429,15 @@ func makeRowDecoder(t table.Table, sctx sessionctx.Context) (*decoder.RowDecoder
 	decodeColsMap := decoder.BuildFullDecodeColMap(t.Cols(), mockSchema)
 
 	return decoder.NewRowDecoder(t, t.Cols(), decodeColsMap), nil
+=======
+func makeRowDecoder(t table.Table, sctx sessionctx.Context) *decoder.RowDecoder {
+	dbName := model.NewCIStr(sctx.GetSessionVars().CurrentDB)
+	exprCols, _ := expression.ColumnInfos2ColumnsAndNames(sctx, dbName, t.Meta().Name, t.Meta().Columns, t.Meta())
+	mockSchema := expression.NewSchema(exprCols...)
+	decodeColsMap := decoder.BuildFullDecodeColMap(t, mockSchema)
+
+	return decoder.NewRowDecoder(t, decodeColsMap)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func iterRecords(sessCtx sessionctx.Context, retriever kv.Retriever, t table.Table, startKey kv.Key, cols []*table.Column, fn table.RecordIterFunc) error {
@@ -443,10 +458,14 @@ func iterRecords(sessCtx sessionctx.Context, retriever kv.Retriever, t table.Tab
 		zap.Stringer("startKey", startKey),
 		zap.Stringer("key", it.Key()),
 		zap.Binary("value", it.Value()))
+<<<<<<< HEAD
 	rowDecoder, err := makeRowDecoder(t, sessCtx)
 	if err != nil {
 		return err
 	}
+=======
+	rowDecoder := makeRowDecoder(t, sessCtx)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	for it.Valid() && it.Key().HasPrefix(prefix) {
 		// first kv pair is row lock information.
 		// TODO: check valid lock
@@ -488,6 +507,9 @@ var (
 	ErrCancelFinishedDDLJob = dbterror.ClassAdmin.NewStd(errno.ErrCancelFinishedDDLJob)
 	// ErrCannotCancelDDLJob returns when cancel a almost finished ddl job, because cancel in now may cause data inconsistency.
 	ErrCannotCancelDDLJob = dbterror.ClassAdmin.NewStd(errno.ErrCannotCancelDDLJob)
+<<<<<<< HEAD
 	// ErrAdminCheckTable returns when the table records is inconsistent with the index values.
 	ErrAdminCheckTable = dbterror.ClassAdmin.NewStd(errno.ErrAdminCheckTable)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )

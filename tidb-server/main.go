@@ -30,7 +30,10 @@ import (
 	"github.com/pingcap/log"
 	"github.com/pingcap/parser/mysql"
 	"github.com/pingcap/parser/terror"
+<<<<<<< HEAD
 	parsertypes "github.com/pingcap/parser/types"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	pumpcli "github.com/pingcap/tidb-tools/tidb-binlog/pump_client"
 	"github.com/pingcap/tidb/bindinfo"
 	"github.com/pingcap/tidb/config"
@@ -237,12 +240,15 @@ func setCPUAffinity() {
 	}
 	runtime.GOMAXPROCS(len(cpu))
 	metrics.MaxProcs.Set(float64(runtime.GOMAXPROCS(0)))
+<<<<<<< HEAD
 }
 
 func setHeapProfileTracker() {
 	c := config.GetGlobalConfig()
 	d := parseDuration(c.Performance.MemProfileInterval)
 	go profile.HeapProfileForGlobalMemTracker(d)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func registerStores() {
@@ -557,6 +563,7 @@ func setGlobalVars() {
 
 	priority := mysql.Str2Priority(cfg.Performance.ForcePriority)
 	variable.ForcePriority = int32(priority)
+<<<<<<< HEAD
 
 	variable.SetSysVar(variable.TiDBForcePriority, mysql.Priority2Str[priority])
 	variable.SetSysVar(variable.TiDBOptDistinctAggPushDown, variable.BoolToOnOff(cfg.Performance.DistinctAggPushDown))
@@ -568,6 +575,20 @@ func setGlobalVars() {
 	variable.SetSysVar(variable.DataDir, cfg.Path)
 	variable.SetSysVar(variable.TiDBSlowQueryFile, cfg.Log.SlowQueryFile)
 	variable.SetSysVar(variable.TiDBIsolationReadEngines, strings.Join(cfg.IsolationRead.Engines, ", "))
+=======
+	variable.SysVars[variable.TiDBForcePriority].Value = mysql.Priority2Str[priority]
+	variable.SysVars[variable.TiDBOptDistinctAggPushDown].Value = variable.BoolToIntStr(cfg.Performance.DistinctAggPushDown)
+
+	variable.SysVars[variable.TIDBMemQuotaQuery].Value = strconv.FormatInt(cfg.MemQuotaQuery, 10)
+	variable.SysVars["lower_case_table_names"].Value = strconv.Itoa(cfg.LowerCaseTableNames)
+	variable.SysVars[variable.LogBin].Value = variable.BoolToIntStr(config.GetGlobalConfig().Binlog.Enable)
+
+	variable.SysVars[variable.Port].Value = fmt.Sprintf("%d", cfg.Port)
+	variable.SysVars[variable.Socket].Value = cfg.Socket
+	variable.SysVars[variable.DataDir].Value = cfg.Path
+	variable.SysVars[variable.TiDBSlowQueryFile].Value = cfg.Log.SlowQueryFile
+	variable.SysVars[variable.TiDBIsolationReadEngines].Value = strings.Join(cfg.IsolationRead.Engines, ", ")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	variable.MemoryUsageAlarmRatio.Store(cfg.Performance.MemoryUsageAlarmRatio)
 
 	// For CI environment we default enable prepare-plan-cache.
@@ -590,6 +611,7 @@ func setGlobalVars() {
 	tikv.RegionCacheTTLSec = int64(cfg.TiKVClient.RegionCacheTTL)
 	domainutil.RepairInfo.SetRepairMode(cfg.RepairMode)
 	domainutil.RepairInfo.SetRepairTableList(cfg.RepairTableList)
+<<<<<<< HEAD
 	c := config.GetGlobalConfig()
 	executor.GlobalDiskUsageTracker.SetBytesLimit(c.TempStorageQuota)
 	if c.Performance.ServerMemoryQuota < 1 {
@@ -599,6 +621,9 @@ func setGlobalVars() {
 		executor.GlobalMemoryUsageTracker.SetBytesLimit(int64(c.Performance.ServerMemoryQuota))
 	}
 	kvcache.GlobalLRUMemUsageTracker.AttachToGlobalTracker(executor.GlobalMemoryUsageTracker)
+=======
+	executor.GlobalDiskUsageTracker.SetBytesLimit(config.GetGlobalConfig().TempStorageQuota)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	t, err := time.ParseDuration(cfg.TiKVClient.StoreLivenessTimeout)
 	if err != nil {
@@ -606,7 +631,10 @@ func setGlobalVars() {
 			zap.String("currentValue", config.GetGlobalConfig().TiKVClient.StoreLivenessTimeout))
 	}
 	tikv.StoreLivenessTimeout = t
+<<<<<<< HEAD
 	parsertypes.TiDBStrictIntegerDisplayWidth = config.GetGlobalConfig().DeprecateIntegerDisplayWidth
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func setupLog() {

@@ -439,12 +439,21 @@ func (ds *DataSource) generateIndexMergeOrPaths() {
 			possiblePath := ds.buildIndexMergeOrPath(partialPaths, i)
 			if possiblePath == nil {
 				return
+<<<<<<< HEAD
 			}
 
 			accessConds := make([]expression.Expression, 0, len(partialPaths))
 			for _, p := range partialPaths {
 				accessConds = append(accessConds, p.AccessConds...)
 			}
+=======
+			}
+
+			accessConds := make([]expression.Expression, 0, len(partialPaths))
+			for _, p := range partialPaths {
+				accessConds = append(accessConds, p.AccessConds...)
+			}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			accessDNF := expression.ComposeDNFCondition(ds.ctx, accessConds...)
 			sel, _, err := ds.tableStats.HistColl.Selectivity(ds.ctx, []expression.Expression{accessDNF}, nil)
 			if err != nil {
@@ -568,6 +577,7 @@ func (ds *DataSource) buildIndexMergeOrPath(partialPaths []*util.AccessPath, cur
 	indexMergePath := &util.AccessPath{PartialIndexPaths: partialPaths}
 	indexMergePath.TableFilters = append(indexMergePath.TableFilters, ds.pushedDownConds[:current]...)
 	indexMergePath.TableFilters = append(indexMergePath.TableFilters, ds.pushedDownConds[current+1:]...)
+<<<<<<< HEAD
 	tableFilterCnt := 0
 	for _, path := range partialPaths {
 		// IndexMerge should not be used when the SQL is like 'select x from t WHERE (key1=1 AND key2=2) OR (key1=4 AND key3=6);'.
@@ -578,6 +588,13 @@ func (ds *DataSource) buildIndexMergeOrPath(partialPaths []*util.AccessPath, cur
 				return nil
 			}
 			indexMergePath.TableFilters = append(indexMergePath.TableFilters, path.TableFilters...)
+=======
+	for _, path := range partialPaths {
+		// If any partial path contains table filters, we need to keep the whole DNF filter in the Selection.
+		if len(path.TableFilters) > 0 {
+			indexMergePath.TableFilters = append(indexMergePath.TableFilters, ds.pushedDownConds[current])
+			break
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 	}
 	return indexMergePath

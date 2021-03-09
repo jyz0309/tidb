@@ -60,6 +60,7 @@ func (s *testVarsutilSuite) TestNewSessionVars(c *C) {
 
 	c.Assert(vars.IndexJoinBatchSize, Equals, DefIndexJoinBatchSize)
 	c.Assert(vars.IndexLookupSize, Equals, DefIndexLookupSize)
+<<<<<<< HEAD
 	c.Assert(vars.indexLookupConcurrency, Equals, ConcurrencyUnset)
 	c.Assert(vars.indexSerialScanConcurrency, Equals, DefIndexSerialScanConcurrency)
 	c.Assert(vars.indexLookupJoinConcurrency, Equals, ConcurrencyUnset)
@@ -85,6 +86,20 @@ func (s *testVarsutilSuite) TestNewSessionVars(c *C) {
 	c.Assert(vars.StreamAggConcurrency(), Equals, DefTiDBStreamAggConcurrency)
 	c.Assert(vars.DistSQLScanConcurrency(), Equals, DefDistSQLScanConcurrency)
 	c.Assert(vars.ExecutorConcurrency, Equals, DefExecutorConcurrency)
+=======
+	c.Assert(vars.IndexLookupConcurrency, Equals, DefIndexLookupConcurrency)
+	c.Assert(vars.IndexSerialScanConcurrency, Equals, DefIndexSerialScanConcurrency)
+	c.Assert(vars.IndexLookupJoinConcurrency, Equals, DefIndexLookupJoinConcurrency)
+	c.Assert(vars.HashJoinConcurrency, Equals, DefTiDBHashJoinConcurrency)
+	c.Assert(vars.AllowBatchCop, Equals, DefTiDBAllowBatchCop)
+	c.Assert(vars.AllowBCJ, Equals, DefOptBCJ)
+	c.Assert(vars.ProjectionConcurrency, Equals, int64(DefTiDBProjectionConcurrency))
+	c.Assert(vars.HashAggPartialConcurrency, Equals, DefTiDBHashAggPartialConcurrency)
+	c.Assert(vars.HashAggFinalConcurrency, Equals, DefTiDBHashAggFinalConcurrency)
+	c.Assert(vars.WindowConcurrency, Equals, DefTiDBWindowConcurrency)
+	c.Assert(vars.UnionConcurrency, Equals, DefTiDBUnionConcurrency)
+	c.Assert(vars.DistSQLScanConcurrency, Equals, DefDistSQLScanConcurrency)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(vars.MaxChunkSize, Equals, DefMaxChunkSize)
 	c.Assert(vars.DMLBatchSize, Equals, DefDMLBatchSize)
 	c.Assert(vars.MemQuotaQuery, Equals, config.GetGlobalConfig().MemQuotaQuery)
@@ -100,12 +115,16 @@ func (s *testVarsutilSuite) TestNewSessionVars(c *C) {
 	c.Assert(vars.TiDBOptJoinReorderThreshold, Equals, DefTiDBOptJoinReorderThreshold)
 	c.Assert(vars.EnableFastAnalyze, Equals, DefTiDBUseFastAnalyze)
 	c.Assert(vars.FoundInPlanCache, Equals, DefTiDBFoundInPlanCache)
+<<<<<<< HEAD
 	c.Assert(vars.FoundInBinding, Equals, DefTiDBFoundInBinding)
 	c.Assert(vars.AllowAutoRandExplicitInsert, Equals, DefTiDBAllowAutoRandExplicitInsert)
 	c.Assert(vars.ShardAllocateStep, Equals, int64(DefTiDBShardAllocateStep))
 	c.Assert(vars.EnableChangeColumnType, Equals, DefTiDBChangeColumnType)
 	c.Assert(vars.AnalyzeVersion, Equals, DefTiDBAnalyzeVersion)
 	c.Assert(vars.EnableTiFlashFallbackTiKV, Equals, DefTiDBEnableTiFlashFallbackTiKV)
+=======
+	c.Assert(vars.AllowAutoRandExplicitInsert, Equals, DefTiDBAllowAutoRandExplicitInsert)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	assertFieldsGreaterThanZero(c, reflect.ValueOf(vars.MemQuota))
 	assertFieldsGreaterThanZero(c, reflect.ValueOf(vars.BatchSize))
@@ -302,13 +321,21 @@ func (s *testVarsutilSuite) TestVarsutil(c *C) {
 	c.Assert(err, IsNil)
 	val, err = GetSessionSystemVar(v, TiDBCheckMb4ValueInUTF8)
 	c.Assert(err, IsNil)
+<<<<<<< HEAD
 	c.Assert(val, Equals, "ON")
+=======
+	c.Assert(val, Equals, "1")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(config.GetGlobalConfig().CheckMb4ValueInUTF8, Equals, true)
 	err = SetSessionSystemVar(v, TiDBCheckMb4ValueInUTF8, types.NewStringDatum("0"))
 	c.Assert(err, IsNil)
 	val, err = GetSessionSystemVar(v, TiDBCheckMb4ValueInUTF8)
 	c.Assert(err, IsNil)
+<<<<<<< HEAD
 	c.Assert(val, Equals, "OFF")
+=======
+	c.Assert(val, Equals, "0")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(config.GetGlobalConfig().CheckMb4ValueInUTF8, Equals, false)
 
 	SetSessionSystemVar(v, TiDBLowResolutionTSO, types.NewStringDatum("1"))
@@ -426,7 +453,11 @@ func (s *testVarsutilSuite) TestVarsutil(c *C) {
 	c.Assert(val, Equals, "leader-and-follower")
 	c.Assert(v.GetReplicaRead(), Equals, kv.ReplicaReadMixed)
 
+<<<<<<< HEAD
 	err = SetSessionSystemVar(v, TiDBEnableStmtSummary, types.NewStringDatum("ON"))
+=======
+	err = SetSessionSystemVar(v, TiDBEnableStmtSummary, types.NewStringDatum("on"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	val, err = GetSessionSystemVar(v, TiDBEnableStmtSummary)
 	c.Assert(err, IsNil)
@@ -467,6 +498,7 @@ func (s *testVarsutilSuite) TestVarsutil(c *C) {
 	c.Assert(err, ErrorMatches, ".*Incorrect argument type to variable 'tidb_stmt_summary_max_sql_length'")
 
 	err = SetSessionSystemVar(v, TiDBFoundInPlanCache, types.NewStringDatum("1"))
+<<<<<<< HEAD
 	c.Assert(err, ErrorMatches, ".*]Variable 'last_plan_from_cache' is a read only variable")
 
 	err = SetSessionSystemVar(v, TiDBFoundInBinding, types.NewStringDatum("1"))
@@ -484,6 +516,16 @@ func (s *testVarsutilSuite) TestVarsutil(c *C) {
 
 	err = SetSessionSystemVar(v, TiDBAnalyzeVersion, types.NewStringDatum("3"))
 	c.Assert(err, ErrorMatches, ".*Variable 'tidb_analyze_version' can't be set to the value of '3'")
+=======
+	c.Assert(err, IsNil)
+	val, err = GetSessionSystemVar(v, TiDBFoundInPlanCache)
+	c.Assert(err, IsNil)
+	c.Assert(val, Equals, "0")
+	c.Assert(v.systems[TiDBFoundInPlanCache], Equals, "1")
+
+	err = SetSessionSystemVar(v, "UnknownVariable", types.NewStringDatum("on"))
+	c.Assert(err, ErrorMatches, ".*]Unknown system variable 'UnknownVariable'")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testVarsutilSuite) TestSetOverflowBehave(c *C) {
@@ -580,9 +622,12 @@ func (s *testVarsutilSuite) TestValidate(c *C) {
 		{TiDBIsolationReadEngines, "tikv", false},
 		{TiDBIsolationReadEngines, "TiKV,tiflash", false},
 		{TiDBIsolationReadEngines, "   tikv,   tiflash  ", false},
+<<<<<<< HEAD
 		{TiDBShardAllocateStep, "ad", true},
 		{TiDBShardAllocateStep, "-123", false},
 		{TiDBShardAllocateStep, "128", false},
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		{TiDBEnableAmendPessimisticTxn, "0", false},
 		{TiDBEnableAmendPessimisticTxn, "1", false},
 		{TiDBEnableAmendPessimisticTxn, "256", true},
@@ -651,6 +696,7 @@ func (s *testVarsutilSuite) TestValidateStmtSummary(c *C) {
 		}
 	}
 }
+<<<<<<< HEAD
 
 func (s *testVarsutilSuite) TestConcurrencyVariables(c *C) {
 	defer testleak.AfterTest(c)()
@@ -693,3 +739,5 @@ func (s *testVarsutilSuite) TestConcurrencyVariables(c *C) {
 	c.Assert(vars.StreamAggConcurrency(), Equals, saConcurrency)
 
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

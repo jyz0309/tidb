@@ -17,13 +17,17 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"time"
 
 	. "github.com/pingcap/check"
 	"github.com/pingcap/parser/model"
 	"github.com/pingcap/tidb/domain"
 	"github.com/pingcap/tidb/kv"
 	"github.com/pingcap/tidb/planner/core"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/sessionctx/variable"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/util/israce"
 	"github.com/pingcap/tidb/util/plancodec"
 	"github.com/pingcap/tidb/util/testkit"
@@ -109,7 +113,10 @@ func (s *testPlanNormalize) TestPreferRangeScan(c *C) {
 func (s *testPlanNormalize) TestNormalizedPlan(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
+<<<<<<< HEAD
 	tk.MustExec("set @@tidb_partition_prune_mode='static-only';")
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("drop table if exists t1,t2,t3,t4")
 	tk.MustExec("create table t1 (a int key,b int,c int, index (b));")
 	tk.MustExec("create table t2 (a int key,b int,c int, index (b));")
@@ -433,6 +440,7 @@ func (s *testPlanNormalize) TestExplainFormatHint(c *C) {
 		"use_index(@`sel_2` `test`.`t2` `idx_c2`), hash_agg(@`sel_2`), use_index(@`sel_1` `test`.`t1` `idx_c2`), hash_agg(@`sel_1`)"))
 }
 
+<<<<<<< HEAD
 func (s *testPlanNormalize) TestNthPlanHint(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -492,6 +500,9 @@ func (s *testPlanNormalize) TestNthPlanHint(c *C) {
 }
 
 func (s *testPlanNormalize) BenchmarkDecodePlan(c *C) {
+=======
+func (s *testPlanNormalize) TestDecodePlanPerformance(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
 	tk.MustExec("drop table if exists t")
@@ -516,6 +527,7 @@ func (s *testPlanNormalize) BenchmarkDecodePlan(c *C) {
 	// TODO: optimize the encode plan performance when encode plan with runtimeStats
 	tk.Se.GetSessionVars().StmtCtx.RuntimeStatsColl = nil
 	encodedPlanStr := core.EncodePlan(p)
+<<<<<<< HEAD
 	c.ResetTimer()
 	for i := 0; i < c.N; i++ {
 		_, err := plancodec.DecodePlan(encodedPlanStr)
@@ -524,12 +536,25 @@ func (s *testPlanNormalize) BenchmarkDecodePlan(c *C) {
 }
 
 func (s *testPlanNormalize) BenchmarkEncodePlan(c *C) {
+=======
+	start := time.Now()
+	_, err := plancodec.DecodePlan(encodedPlanStr)
+	c.Assert(err, IsNil)
+	c.Assert(time.Since(start).Seconds(), Less, 3.0)
+}
+
+func (s *testPlanNormalize) TestEncodePlanPerformance(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
 	tk.MustExec("drop table if exists th")
 	tk.MustExec("set @@session.tidb_enable_table_partition = 1")
+<<<<<<< HEAD
 	tk.MustExec(`set @@tidb_partition_prune_mode='` + string(variable.StaticOnly) + `'`)
 	tk.MustExec("create table th (i int, a int,b int, c int, index (a)) partition by hash (a) partitions 8192;")
+=======
+	tk.MustExec("create table th (i int, a int,b int, c int, index (a)) partition by hash (a) partitions 1024;")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("set @@tidb_slow_log_threshold=200000")
 
 	query := "select count(*) from th t1 join th t2 join th t3 join th t4 join th t5 join th t6 where t1.i=t2.a and t1.i=t3.i and t3.i=t4.i and t4.i=t5.i and t5.i=t6.i"
@@ -540,8 +565,16 @@ func (s *testPlanNormalize) BenchmarkEncodePlan(c *C) {
 	p, ok := info.Plan.(core.PhysicalPlan)
 	c.Assert(ok, IsTrue)
 	tk.Se.GetSessionVars().StmtCtx.RuntimeStatsColl = nil
+<<<<<<< HEAD
 	c.ResetTimer()
 	for i := 0; i < c.N; i++ {
 		core.EncodePlan(p)
 	}
+=======
+	start := time.Now()
+	encodedPlanStr := core.EncodePlan(p)
+	c.Assert(time.Since(start).Seconds(), Less, 10.0)
+	_, err := plancodec.DecodePlan(encodedPlanStr)
+	c.Assert(err, IsNil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

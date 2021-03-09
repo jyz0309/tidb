@@ -613,7 +613,11 @@ func (s *testPlanSuite) TestAllocID(c *C) {
 
 func (s *testPlanSuite) checkDataSourceCols(p LogicalPlan, c *C, ans map[int][]string, comment CommentInterface) {
 	switch v := p.(type) {
+<<<<<<< HEAD
 	case *DataSource, *LogicalUnionAll, *LogicalLimit:
+=======
+	case *DataSource, *LogicalUnionAll:
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		s.testData.OnRecord(func() {
 			ans[p.ID()] = make([]string, p.Schema().Len())
 		})
@@ -1123,7 +1127,11 @@ func (s *testPlanSuite) TestVisitInfo(c *C) {
 		c.Assert(err, IsNil, comment)
 		Preprocess(s.ctx, stmt, s.is)
 		builder, _ := NewPlanBuilder(MockContext(), s.is, &hint.BlockHintProcessor{})
+<<<<<<< HEAD
 		builder.ctx.GetSessionVars().SetHashJoinConcurrency(1)
+=======
+		builder.ctx.GetSessionVars().HashJoinConcurrency = 1
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		_, err = builder.Build(context.TODO(), stmt)
 		c.Assert(err, IsNil, comment)
 

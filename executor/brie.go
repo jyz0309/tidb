@@ -39,7 +39,11 @@ import (
 	"github.com/pingcap/tidb/kv"
 	"github.com/pingcap/tidb/sessionctx"
 	"github.com/pingcap/tidb/sessionctx/stmtctx"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/store/tikv/oracle"
+=======
+	"github.com/pingcap/tidb/sessionctx/variable"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/types"
 	"github.com/pingcap/tidb/util/chunk"
 	"github.com/pingcap/tidb/util/printer"
@@ -165,7 +169,11 @@ func (b *executorBuilder) parseTSString(ts string) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+<<<<<<< HEAD
 	return oracle.GoTimeToTS(t1), nil
+=======
+	return variable.GoTimeToTS(t1), nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (b *executorBuilder) buildBRIE(s *ast.BRIEStmt, schema *expression.Schema) Executor {
@@ -404,7 +412,10 @@ func (gs *tidbGlueSession) CreateSession(store kv.Storage) (glue.Session, error)
 
 // Execute implements glue.Session
 func (gs *tidbGlueSession) Execute(ctx context.Context, sql string) error {
+<<<<<<< HEAD
 	// FIXME: br relies on a deprecated API, it may be unsafe
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	_, err := gs.se.(sqlexec.SQLExecutor).Execute(ctx, sql)
 	return err
 }

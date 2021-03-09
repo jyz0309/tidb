@@ -94,6 +94,10 @@ func newBaseBuiltinFunc(ctx sessionctx.Context, funcName string, args []Expressi
 		return baseBuiltinFunc{}, err
 	}
 	derivedCharset, derivedCollate := DeriveCollationFromExprs(ctx, args...)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	bf := baseBuiltinFunc{
 		bufAllocator:           newLocalSliceBuffer(len(args)),
 		childrenVectorizedOnce: new(sync.Once),

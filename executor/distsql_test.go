@@ -271,6 +271,7 @@ func (s *testSuite3) TestIndexLookUpStats(c *C) {
 	stats.Merge(stats.Clone())
 	c.Assert(stats.String(), Equals, "index_task: {total_time: 10s, fetch_handle: 4s, build: 2s, wait: 4s}, table_task: {total_time: 4s, num: 4, concurrency: 2}")
 }
+<<<<<<< HEAD
 
 func (s *testSuite3) TestIndexLookUpGetResultChunk(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
@@ -283,3 +284,5 @@ func (s *testSuite3) TestIndexLookUpGetResultChunk(c *C) {
 	tk.MustQuery("select * from tbl use index(idx_a) where a > 99 order by a asc limit 1").Check(testkit.Rows("100 100 100"))
 	tk.MustQuery("select * from tbl use index(idx_a) where a > 10 order by a asc limit 4,1").Check(testkit.Rows("15 15 15"))
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

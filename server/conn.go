@@ -138,10 +138,13 @@ var (
 	queryDurationHistogramSet      = metrics.QueryDurationHistogram.WithLabelValues("Set")
 	queryDurationHistogramGeneral  = metrics.QueryDurationHistogram.WithLabelValues(metrics.LblGeneral)
 
+<<<<<<< HEAD
 	disconnectNormal            = metrics.DisconnectionCounter.WithLabelValues(metrics.LblOK)
 	disconnectByClientWithError = metrics.DisconnectionCounter.WithLabelValues(metrics.LblError)
 	disconnectErrorUndetermined = metrics.DisconnectionCounter.WithLabelValues("undetermined")
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	connIdleDurationHistogramNotInTxn = metrics.ConnIdleDurationHistogram.WithLabelValues("0")
 	connIdleDurationHistogramInTxn    = metrics.ConnIdleDurationHistogram.WithLabelValues("1")
 )
@@ -200,10 +203,17 @@ func (cc *clientConn) String() string {
 // the client to switch, so lets ask for mysql_native_password
 // https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::AuthSwitchRequest
 func (cc *clientConn) authSwitchRequest(ctx context.Context) ([]byte, error) {
+<<<<<<< HEAD
 	enclen := 1 + len(mysql.AuthNativePassword) + 1 + len(cc.salt) + 1
 	data := cc.alloc.AllocWithLen(4, enclen)
 	data = append(data, mysql.AuthSwitchRequest) // switch request
 	data = append(data, []byte(mysql.AuthNativePassword)...)
+=======
+	enclen := 1 + len("mysql_native_password") + 1 + len(cc.salt) + 1
+	data := cc.alloc.AllocWithLen(4, enclen)
+	data = append(data, 0xfe) // switch request
+	data = append(data, []byte("mysql_native_password")...)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	data = append(data, byte(0x00)) // requires null
 	data = append(data, cc.salt...)
 	data = append(data, 0)
@@ -629,7 +639,11 @@ func (cc *clientConn) readOptionalSSLRequestAndHandshakeResponse(ctx context.Con
 	}
 
 	// switching from other methods should work, but not tested
+<<<<<<< HEAD
 	if resp.AuthPlugin == mysql.AuthCachingSha2Password {
+=======
+	if resp.AuthPlugin == "caching_sha2_password" {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		resp.Auth, err = cc.authSwitchRequest(ctx)
 		if err != nil {
 			logutil.Logger(ctx).Warn("attempt to send auth switch request packet failed", zap.Error(err))
@@ -855,7 +869,11 @@ func errStrForLog(err error, enableRedactLog bool) string {
 			return "fail to parse SQL and can't redact when enable log redaction"
 		}
 	}
+<<<<<<< HEAD
 	if kv.ErrKeyExists.Equal(err) || parser.ErrParse.Equal(err) || infoschema.ErrTableNotExists.Equal(err) {
+=======
+	if kv.ErrKeyExists.Equal(err) || parser.ErrParse.Equal(err) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		// Do not log stack for duplicated entry error.
 		return err.Error()
 	}
@@ -948,6 +966,15 @@ func (cc *clientConn) dispatch(ctx context.Context, data []byte) error {
 	cc.mu.cancelFunc = cancelFunc
 	cc.mu.Unlock()
 
+<<<<<<< HEAD
+=======
+	var cancelFunc context.CancelFunc
+	ctx, cancelFunc = context.WithCancel(ctx)
+	cc.mu.Lock()
+	cc.mu.cancelFunc = cancelFunc
+	cc.mu.Unlock()
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	cc.lastPacket = data
 	cmd := data[0]
 	data = data[1:]
@@ -1026,6 +1053,7 @@ func (cc *clientConn) dispatch(ctx context.Context, data []byte) error {
 			dataStr = string(hack.String(data))
 		}
 		return cc.handleQuery(ctx, dataStr)
+<<<<<<< HEAD
 	case mysql.ComFieldList:
 		return cc.handleFieldList(ctx, dataStr)
 	// ComCreateDB, ComDropDB
@@ -1045,6 +1073,17 @@ func (cc *clientConn) dispatch(ctx context.Context, data []byte) error {
 	case mysql.ComChangeUser:
 		return cc.handleChangeUser(ctx, data)
 	// ComBinlogDump, ComTableDump, ComConnectOut, ComRegisterSlave
+=======
+	case mysql.ComPing:
+		return cc.writeOK(ctx)
+	case mysql.ComInitDB:
+		if err := cc.useDB(ctx, dataStr); err != nil {
+			return err
+		}
+		return cc.writeOK(ctx)
+	case mysql.ComFieldList:
+		return cc.handleFieldList(ctx, dataStr)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case mysql.ComStmtPrepare:
 		return cc.handleStmtPrepare(ctx, dataStr)
 	case mysql.ComStmtExecute:
@@ -1057,6 +1096,7 @@ func (cc *clientConn) dispatch(ctx context.Context, data []byte) error {
 		return cc.handleStmtReset(ctx, data)
 	case mysql.ComSetOption:
 		return cc.handleSetOption(ctx, data)
+<<<<<<< HEAD
 	case mysql.ComStmtFetch:
 		return cc.handleStmtFetch(ctx, data)
 	// ComDaemon, ComBinlogDumpGtid
@@ -1076,6 +1116,12 @@ func (cc *clientConn) writeStats(ctx context.Context) error {
 	err := cc.writePacket(data)
 	if err != nil {
 		return err
+=======
+	case mysql.ComChangeUser:
+		return cc.handleChangeUser(ctx, data)
+	default:
+		return mysql.NewErrf(mysql.ErrUnknown, "command %d not supported now", nil, cmd)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	return cc.flush(ctx)
@@ -1303,7 +1349,11 @@ func (cc *clientConn) handleLoadData(ctx context.Context, loadDataInfo *executor
 	if loadDataInfo == nil {
 		return errors.New("load data info is empty")
 	}
+<<<<<<< HEAD
 	if !loadDataInfo.Table.Meta().IsBaseTable() {
+=======
+	if loadDataInfo.Table.Meta().IsView() || loadDataInfo.Table.Meta().IsSequence() {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return errors.New("can only load data into base tables")
 	}
 	err := cc.writeReq(ctx, loadDataInfo.Path)
@@ -1423,9 +1473,14 @@ func (cc *clientConn) handleIndexAdvise(ctx context.Context, indexAdviseInfo *ex
 // There is a special query `load data` that does not return result, which is handled differently.
 // Query `load stats` does not return result either.
 func (cc *clientConn) handleQuery(ctx context.Context, sql string) (err error) {
+<<<<<<< HEAD
 	defer trace.StartRegion(ctx, "handleQuery").End()
 	sc := cc.ctx.GetSessionVars().StmtCtx
 	prevWarns := sc.GetWarnings()
+=======
+	ctx = context.WithValue(ctx, execdetails.StmtExecDetailKey, &execdetails.StmtExecDetails{})
+	defer trace.StartRegion(ctx, "handleQuery").End()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	stmts, err := cc.ctx.Parse(ctx, sql)
 	if err != nil {
 		metrics.ExecuteErrorCounter.WithLabelValues(metrics.ExecuteErrorToLabel(err)).Inc()
@@ -1436,17 +1491,26 @@ func (cc *clientConn) handleQuery(ctx context.Context, sql string) (err error) {
 		return cc.writeOK(ctx)
 	}
 
+<<<<<<< HEAD
 	warns := sc.GetWarnings()
 	parserWarns := warns[len(prevWarns):]
 
 	var pointPlans []plannercore.Plan
 	if len(stmts) > 1 {
 
+=======
+	var appendMultiStmtWarning bool
+
+	if len(stmts) > 1 {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		// The client gets to choose if it allows multi-statements, and
 		// probably defaults OFF. This helps prevent against SQL injection attacks
 		// by early terminating the first statement, and then running an entirely
 		// new statement.
+<<<<<<< HEAD
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		capabilities := cc.ctx.GetSessionVars().ClientCapability
 		if capabilities&mysql.ClientMultiStatements < 1 {
 			// The client does not have multi-statement enabled. We now need to determine
@@ -1459,6 +1523,7 @@ func (cc *clientConn) handleQuery(ctx context.Context, sql string) (err error) {
 			case variable.OnInt:
 				// multi statement is fully permitted, do nothing
 			default:
+<<<<<<< HEAD
 				warn := stmtctx.SQLWarn{Level: stmtctx.WarnLevelWarning, Err: errMultiStatementDisabled}
 				parserWarns = append(parserWarns, warn)
 			}
@@ -1497,8 +1562,63 @@ func (cc *clientConn) handleQuery(ctx context.Context, sql string) (err error) {
 				}
 			} else {
 				break
+=======
+				appendMultiStmtWarning = true
 			}
 		}
+	}
+
+	for i, stmt := range stmts {
+		if err = cc.handleStmt(ctx, stmt, i == len(stmts)-1, appendMultiStmtWarning); err != nil {
+			break
+		}
+	}
+	if err != nil {
+		metrics.ExecuteErrorCounter.WithLabelValues(metrics.ExecuteErrorToLabel(err)).Inc()
+	}
+	return err
+}
+
+func (cc *clientConn) handleStmt(ctx context.Context, stmt ast.StmtNode, lastStmt bool, appendMultiStmtWarning bool) error {
+	rs, err := cc.ctx.ExecuteStmt(ctx, stmt)
+	if rs != nil {
+		defer terror.Call(rs.Close)
+	}
+	if err != nil {
+		return err
+	}
+
+	if lastStmt && appendMultiStmtWarning {
+		cc.ctx.GetSessionVars().StmtCtx.AppendWarning(errMultiStatementDisabled)
+	}
+
+	status := cc.ctx.Status()
+	if !lastStmt {
+		status |= mysql.ServerMoreResultsExists
+	}
+
+	if rs != nil {
+		connStatus := atomic.LoadInt32(&cc.status)
+		if connStatus == connStatusShutdown {
+			return executor.ErrQueryInterrupted
+		}
+
+		err = cc.writeResultset(ctx, rs, false, status, 0)
+		if err != nil {
+			return err
+		}
+	} else {
+		var handled bool
+		handled, err = cc.handleQuerySpecial(ctx, status)
+		if handled {
+			execStmt := cc.ctx.Value(session.ExecStmtVarKey)
+			if execStmt != nil {
+				execStmt.(*executor.ExecStmt).FinishExecuteStmt(0, err == nil, false)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
+			}
+
+		}
+<<<<<<< HEAD
 	}
 	if err != nil {
 		metrics.ExecuteErrorCounter.WithLabelValues(metrics.ExecuteErrorToLabel(err)).Inc()
@@ -1678,6 +1798,43 @@ func (cc *clientConn) handleQuerySpecial(ctx context.Context, status uint16) (bo
 			return handled, err
 		}
 	}
+=======
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (cc *clientConn) handleQuerySpecial(ctx context.Context, status uint16) (bool, error) {
+	handled := false
+	loadDataInfo := cc.ctx.Value(executor.LoadDataVarKey)
+	if loadDataInfo != nil {
+		handled = true
+		defer cc.ctx.SetValue(executor.LoadDataVarKey, nil)
+		if err := cc.handleLoadData(ctx, loadDataInfo.(*executor.LoadDataInfo)); err != nil {
+			return handled, err
+		}
+	}
+
+	loadStats := cc.ctx.Value(executor.LoadStatsVarKey)
+	if loadStats != nil {
+		handled = true
+		defer cc.ctx.SetValue(executor.LoadStatsVarKey, nil)
+		if err := cc.handleLoadStats(ctx, loadStats.(*executor.LoadStatsInfo)); err != nil {
+			return handled, err
+		}
+	}
+
+	indexAdvise := cc.ctx.Value(executor.IndexAdviseVarKey)
+	if indexAdvise != nil {
+		handled = true
+		defer cc.ctx.SetValue(executor.IndexAdviseVarKey, nil)
+		if err := cc.handleIndexAdvise(ctx, indexAdvise.(*executor.IndexAdviseInfo)); err != nil {
+			return handled, err
+		}
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return handled, cc.writeOkWith(ctx, cc.ctx.LastMessage(), cc.ctx.AffectedRows(), cc.ctx.LastInsertID(), status, cc.ctx.WarningCount())
 }
 
@@ -1713,10 +1870,14 @@ func (cc *clientConn) handleFieldList(ctx context.Context, sql string) (err erro
 // If binary is true, the data would be encoded in BINARY format.
 // serverStatus, a flag bit represents server information.
 // fetchSize, the desired number of rows to be fetched each time when client uses cursor.
+<<<<<<< HEAD
 // retryable indicates whether the call of writeResultset has no side effect and can be retried to correct error. The call
 // has side effect in cursor mode or once data has been sent to client. Currently retryable is used to fallback to TiKV when
 // TiFlash is down.
 func (cc *clientConn) writeResultset(ctx context.Context, rs ResultSet, binary bool, serverStatus uint16, fetchSize int) (retryable bool, runErr error) {
+=======
+func (cc *clientConn) writeResultset(ctx context.Context, rs ResultSet, binary bool, serverStatus uint16, fetchSize int) (runErr error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	defer func() {
 		// close ResultSet when cursor doesn't exist
 		r := recover()
@@ -1743,7 +1904,11 @@ func (cc *clientConn) writeResultset(ctx context.Context, rs ResultSet, binary b
 		return retryable, err
 	}
 
+<<<<<<< HEAD
 	return false, cc.flush(ctx)
+=======
+	return cc.flush(ctx)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (cc *clientConn) writeColumnInfo(columns []*ColumnInfo, serverStatus uint16) error {
@@ -1770,13 +1935,19 @@ func (cc *clientConn) writeChunks(ctx context.Context, rs ResultSet, binary bool
 	data := cc.alloc.AllocWithLen(4, 1024)
 	req := rs.NewChunk()
 	gotColumnInfo := false
+<<<<<<< HEAD
 	firstNext := true
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	var stmtDetail *execdetails.StmtExecDetails
 	stmtDetailRaw := ctx.Value(execdetails.StmtExecDetailKey)
 	if stmtDetailRaw != nil {
 		stmtDetail = stmtDetailRaw.(*execdetails.StmtExecDetails)
 	}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	for {
 		// Here server.tidbResultSet implements Next method.
 		err := rs.Next(ctx, req)
@@ -1798,8 +1969,13 @@ func (cc *clientConn) writeChunks(ctx context.Context, rs ResultSet, binary bool
 		if rowCount == 0 {
 			break
 		}
+<<<<<<< HEAD
 		reg := trace.StartRegion(ctx, "WriteClientConn")
 		start := time.Now()
+=======
+		start := time.Now()
+		reg := trace.StartRegion(ctx, "WriteClientConn")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		for i := 0; i < rowCount; i++ {
 			data = data[0:4]
 			if binary {
@@ -1816,10 +1992,17 @@ func (cc *clientConn) writeChunks(ctx context.Context, rs ResultSet, binary bool
 				return false, err
 			}
 		}
+<<<<<<< HEAD
 		reg.End()
 		if stmtDetail != nil {
 			stmtDetail.WriteSQLRespDuration += time.Since(start)
 		}
+=======
+		if stmtDetail != nil {
+			stmtDetail.WriteSQLRespDuration += time.Since(start)
+		}
+		reg.End()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	return false, cc.writeEOF(serverStatus)
 }
@@ -2020,6 +2203,7 @@ func (cc *clientConn) handleCommonConnectionReset(ctx context.Context) error {
 	return cc.writeOK(ctx)
 }
 
+<<<<<<< HEAD
 // safe to noop except 0x01 "FLUSH PRIVILEGES"
 func (cc *clientConn) handleRefresh(ctx context.Context, subCommand byte) error {
 	if subCommand == 0x01 {
@@ -2027,6 +2211,8 @@ func (cc *clientConn) handleRefresh(ctx context.Context, subCommand byte) error 
 			return err
 		}
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return cc.writeOK(ctx)
 }
 

@@ -245,6 +245,7 @@ func (ts *HTTPHandlerTestSuite) TestRegionsAPI(c *C) {
 	}
 }
 
+<<<<<<< HEAD
 func (ts *HTTPHandlerTestSuite) TestRegionsAPIForClusterIndex(c *C) {
 	ts.startServer(c)
 	defer ts.stopServer(c)
@@ -279,11 +280,17 @@ func (ts *HTTPHandlerTestSuite) TestRegionsAPIForClusterIndex(c *C) {
 	}
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (ts *HTTPHandlerTestSuite) TestRangesAPI(c *C) {
 	ts.startServer(c)
 	defer ts.stopServer(c)
 	ts.prepareData(c)
+<<<<<<< HEAD
 	resp, err := ts.fetchStatus("/tables/tidb/t/ranges")
+=======
+	resp, err := ts.fetchStatus("/tables/information_schema/SCHEMATA/ranges")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	c.Assert(resp.StatusCode, Equals, http.StatusOK)
 	defer resp.Body.Close()
@@ -292,10 +299,14 @@ func (ts *HTTPHandlerTestSuite) TestRangesAPI(c *C) {
 	var data TableRanges
 	err = decoder.Decode(&data)
 	c.Assert(err, IsNil)
+<<<<<<< HEAD
 	c.Assert(data.TableName, Equals, "t")
 	c.Assert(len(data.Indices), Equals, 1)
 	_, ok := data.Indices["PRIMARY"]
 	c.Assert(ok, IsTrue)
+=======
+	c.Assert(data.TableName, Equals, "SCHEMATA")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (ts *HTTPHandlerTestSuite) regionContainsTable(c *C, regionID uint64, tableID int64) bool {
@@ -465,6 +476,10 @@ func (ts *HTTPHandlerTestSuite) TestRegionsFromMeta(c *C) {
 }
 
 func (ts *basicHTTPHandlerTestSuite) startServer(c *C) {
+<<<<<<< HEAD
+=======
+	mvccStore := mocktikv.MustNewMVCCStore()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	var err error
 	ts.store, err = mockstore.NewMockStore()
 	c.Assert(err, IsNil)
@@ -479,18 +494,26 @@ func (ts *basicHTTPHandlerTestSuite) startServer(c *C) {
 	cfg.Status.ReportStatus = true
 
 	server, err := NewServer(cfg, ts.tidbdrv)
+<<<<<<< HEAD
 	c.Assert(err, IsNil)
 	ts.port = getPortFromTCPAddr(server.listener.Addr())
 	ts.statusPort = getPortFromTCPAddr(server.statusListener.Addr())
+=======
+	c.Assert(err, IsNil, Commentf("??? %v", fmt.Sprintf("%+v", err)))
+	ts.port, ts.statusPort = getPortFromTCPAddr(server.listener.Addr()), getPortFromTCPAddr(server.statusListener.Addr())
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	ts.server = server
 	go server.Run()
 	ts.waitUntilServerOnline()
 }
 
+<<<<<<< HEAD
 func getPortFromTCPAddr(addr net.Addr) uint {
 	return uint(addr.(*net.TCPAddr).Port)
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (ts *basicHTTPHandlerTestSuite) stopServer(c *C) {
 	if ts.domain != nil {
 		ts.domain.Close()

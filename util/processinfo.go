@@ -147,7 +147,11 @@ func serverStatus2Str(state uint16) string {
 		}
 		l = append(l, mapServerStatus2Str[s])
 	}
+<<<<<<< HEAD
 	return strings.Join(l, "; ")
+=======
+	return append(pi.ToRowForShow(true), pi.Digest, bytesConsumed, pi.txnStartTs(tz))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // SessionManager is an interface for session manage. Show processlist and

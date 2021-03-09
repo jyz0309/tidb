@@ -51,7 +51,11 @@ func (s *testEnumSuite) TestEnum(c *C) {
 	}
 
 	for _, t := range tbl {
+<<<<<<< HEAD
 		e, err := ParseEnum(t.Elems, t.Name, mysql.DefaultCollationName)
+=======
+		e, err := ParseEnumName(t.Elems, t.Name, mysql.DefaultCollationName)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if t.Expected == 0 {
 			c.Assert(err, NotNil)
 			c.Assert(e.ToNumber(), Equals, float64(0))
@@ -65,7 +69,11 @@ func (s *testEnumSuite) TestEnum(c *C) {
 	}
 
 	for _, t := range tbl {
+<<<<<<< HEAD
 		e, err := ParseEnum(t.Elems, t.Name, "utf8_unicode_ci")
+=======
+		e, err := ParseEnumName(t.Elems, t.Name, "utf8_unicode_ci")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if t.Expected == 0 {
 			c.Assert(err, NotNil)
 			c.Assert(e.ToNumber(), Equals, float64(0))
@@ -79,7 +87,11 @@ func (s *testEnumSuite) TestEnum(c *C) {
 	}
 
 	for _, t := range citbl {
+<<<<<<< HEAD
 		e, err := ParseEnum(t.Elems, t.Name, "utf8_general_ci")
+=======
+		e, err := ParseEnumName(t.Elems, t.Name, "utf8_general_ci")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if t.Expected == 0 {
 			c.Assert(err, NotNil)
 			c.Assert(e.ToNumber(), Equals, float64(0))

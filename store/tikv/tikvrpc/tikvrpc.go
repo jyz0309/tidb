@@ -71,8 +71,11 @@ const (
 	CmdCop CmdType = 512 + iota
 	CmdCopStream
 	CmdBatchCop
+<<<<<<< HEAD
 	CmdMPPTask
 	CmdMPPConn
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	CmdMvccGetByKey CmdType = 1024 + iota
 	CmdMvccGetByStartTs
@@ -143,10 +146,13 @@ func (t CmdType) String() string {
 		return "CopStream"
 	case CmdBatchCop:
 		return "BatchCop"
+<<<<<<< HEAD
 	case CmdMPPTask:
 		return "DispatchMPPTask"
 	case CmdMPPConn:
 		return "EstablishMPPConnection"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case CmdMvccGetByKey:
 		return "MvccGetByKey"
 	case CmdMvccGetByStartTs:
@@ -324,6 +330,7 @@ func (req *Request) Cop() *coprocessor.Request {
 	return req.Req.(*coprocessor.Request)
 }
 
+<<<<<<< HEAD
 // BatchCop returns BatchCop request in request.
 func (req *Request) BatchCop() *coprocessor.BatchRequest {
 	return req.Req.(*coprocessor.BatchRequest)
@@ -337,6 +344,11 @@ func (req *Request) DispatchMPPTask() *mpp.DispatchTaskRequest {
 // EstablishMPPConn returns stablishMPPConnectionRequest in request.
 func (req *Request) EstablishMPPConn() *mpp.EstablishMPPConnectionRequest {
 	return req.Req.(*mpp.EstablishMPPConnectionRequest)
+=======
+// BatchCop returns coprocessor request in request.
+func (req *Request) BatchCop() *coprocessor.BatchRequest {
+	return req.Req.(*coprocessor.BatchRequest)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // MvccGetByKey returns MvccGetByKeyRequest in request.
@@ -377,11 +389,14 @@ func (req *Request) Empty() *tikvpb.BatchCommandsEmptyRequest {
 // CheckTxnStatus returns CheckTxnStatusRequest in request.
 func (req *Request) CheckTxnStatus() *kvrpcpb.CheckTxnStatusRequest {
 	return req.Req.(*kvrpcpb.CheckTxnStatusRequest)
+<<<<<<< HEAD
 }
 
 // CheckSecondaryLocks returns CheckSecondaryLocksRequest in request.
 func (req *Request) CheckSecondaryLocks() *kvrpcpb.CheckSecondaryLocksRequest {
 	return req.Req.(*kvrpcpb.CheckSecondaryLocksRequest)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // TxnHeartBeat returns TxnHeartBeatRequest in request.
@@ -542,6 +557,7 @@ type BatchCopStreamResponse struct {
 	Lease   // Shared by this object and a background goroutine.
 }
 
+<<<<<<< HEAD
 // MPPStreamResponse is indeed a wrapped client that can receive data packet from tiflash mpp server.
 type MPPStreamResponse struct {
 	tikvpb.Tikv_EstablishMPPConnectionClient
@@ -550,6 +566,8 @@ type MPPStreamResponse struct {
 	Lease
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // SetContext set the Context field for the given req to the specified ctx.
 func SetContext(req *Request, region *metapb.Region, peer *metapb.Peer) error {
 	ctx := &req.Context
@@ -618,8 +636,11 @@ func SetContext(req *Request, region *metapb.Region, peer *metapb.Peer) error {
 		req.Cop().Context = ctx
 	case CmdBatchCop:
 		req.BatchCop().Context = ctx
+<<<<<<< HEAD
 	case CmdMPPTask:
 		// Dispatching MPP tasks don't need a region context, because it's a request for store but not region.
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case CmdMvccGetByKey:
 		req.MvccGetByKey().Context = ctx
 	case CmdMvccGetByStartTs:
@@ -950,7 +971,11 @@ func (resp *BatchCopStreamResponse) Recv() (*coprocessor.BatchResponse, error) {
 	return ret, errors.Trace(err)
 }
 
+<<<<<<< HEAD
 // Close closes the BatchCopStreamResponse object.
+=======
+// Close closes the CopStreamResponse object.
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (resp *BatchCopStreamResponse) Close() {
 	atomic.StoreInt64(&resp.Lease.deadline, 1)
 	// We also call cancel here because CheckStreamTimeoutLoop
@@ -960,6 +985,7 @@ func (resp *BatchCopStreamResponse) Close() {
 	}
 }
 
+<<<<<<< HEAD
 // Recv overrides the stream client Recv() function.
 func (resp *MPPStreamResponse) Recv() (*mpp.MPPDataPacket, error) {
 	deadline := time.Now().Add(resp.Timeout).UnixNano()
@@ -981,6 +1007,8 @@ func (resp *MPPStreamResponse) Close() {
 	}
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // CheckStreamTimeoutLoop runs periodically to check is there any stream request timeouted.
 // Lease is an object to track stream requests, call this function with "go CheckStreamTimeoutLoop()"
 // It is not guaranteed to call every Lease.Cancel() putting into channel when exits.

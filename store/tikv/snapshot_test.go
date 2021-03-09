@@ -24,8 +24,13 @@ import (
 	"github.com/pingcap/failpoint"
 	pb "github.com/pingcap/kvproto/pkg/kvrpcpb"
 	"github.com/pingcap/tidb/kv"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/store/tikv/logutil"
 	"github.com/pingcap/tidb/store/tikv/tikvrpc"
+=======
+	"github.com/pingcap/tidb/store/tikv/tikvrpc"
+	"github.com/pingcap/tidb/util/logutil"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"go.uber.org/zap"
 )
 
@@ -304,19 +309,29 @@ func (s *testSnapshotSuite) TestSnapshotThreadSafe(c *C) {
 
 func (s *testSnapshotSuite) TestSnapshotRuntimeStats(c *C) {
 	reqStats := NewRegionRequestRuntimeStats()
+<<<<<<< HEAD
 	RecordRegionRequestRuntimeStats(reqStats.Stats, tikvrpc.CmdGet, time.Second)
 	RecordRegionRequestRuntimeStats(reqStats.Stats, tikvrpc.CmdGet, time.Millisecond)
+=======
+	recordRegionRequestRuntimeStats(reqStats.Stats, tikvrpc.CmdGet, time.Second)
+	recordRegionRequestRuntimeStats(reqStats.Stats, tikvrpc.CmdGet, time.Millisecond)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	snapshot := newTiKVSnapshot(s.store, kv.Version{Ver: 0}, 0)
 	snapshot.SetOption(kv.CollectRuntimeStats, &SnapshotRuntimeStats{})
 	snapshot.mergeRegionRequestStats(reqStats.Stats)
 	snapshot.mergeRegionRequestStats(reqStats.Stats)
 	bo := NewBackofferWithVars(context.Background(), 2000, nil)
+<<<<<<< HEAD
 	err := bo.BackoffWithMaxSleep(BoTxnLockFast, 30, errors.New("test"))
+=======
+	err := bo.BackoffWithMaxSleep(boTxnLockFast, 30, errors.New("test"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	snapshot.recordBackoffInfo(bo)
 	snapshot.recordBackoffInfo(bo)
 	expect := "Get:{num_rpc:4, total_time:2s},txnLockFast_backoff:{num:2, total_time:60ms}"
 	c.Assert(snapshot.mu.stats.String(), Equals, expect)
+<<<<<<< HEAD
 	detail := &pb.ExecDetailsV2{
 		TimeDetail: &pb.TimeDetail{
 			WaitWallTimeMs:    100,
@@ -350,4 +365,6 @@ func (s *testSnapshotSuite) TestSnapshotRuntimeStats(c *C) {
 		"key_skipped_count: 2, " +
 		"block: {cache_hit_count: 20, read_count: 40, read_byte: 30 Bytes}}}"
 	c.Assert(snapshot.mu.stats.String(), Equals, expect)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

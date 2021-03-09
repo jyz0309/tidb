@@ -646,7 +646,11 @@ func HashChunkSelected(sc *stmtctx.StatementContext, h []hash.Hash64, chk *chunk
 			if sel != nil && !sel[i] {
 				continue
 			}
+<<<<<<< HEAD
 			isNull[i] = !ignoreNull
+=======
+			isNull[i] = true
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			buf[0] = NilFlag
 			_, _ = h[i].Write(buf)
 		}

@@ -132,11 +132,24 @@ func (e *TraceExec) nextRowJSON(ctx context.Context, se sqlexec.SQLExecutor, req
 }
 
 func (e *TraceExec) executeChild(ctx context.Context, se sqlexec.SQLExecutor) {
+<<<<<<< HEAD
 	rs, err := se.ExecuteStmt(ctx, e.stmtNode)
 	if err != nil {
 		var errCode uint16
 		if te, ok := err.(*terror.Error); ok {
 			errCode = terror.ToSQLError(te).Code
+=======
+	recordSets, err := se.Execute(ctx, e.stmtNode.Text())
+	if len(recordSets) == 0 {
+		if err != nil {
+			var errCode uint16
+			if te, ok := err.(*terror.Error); ok {
+				errCode = terror.ToSQLError(te).Code
+			}
+			logutil.Eventf(ctx, "execute with error(%d): %s", errCode, err.Error())
+		} else {
+			logutil.Eventf(ctx, "execute done, modify row: %d", e.ctx.GetSessionVars().StmtCtx.AffectedRows())
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		logutil.Eventf(ctx, "execute with error(%d): %s", errCode, err.Error())
 	}

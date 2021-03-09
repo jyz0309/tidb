@@ -42,7 +42,10 @@ import (
 	"github.com/pingcap/tidb/sessionctx/variable"
 	"github.com/pingcap/tidb/store/mockstore"
 	"github.com/pingcap/tidb/util"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/util/collate"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/util/logutil"
 	"github.com/pingcap/tidb/util/testkit"
 )
@@ -155,6 +158,7 @@ func (ts *tidbTestSerialSuite) TestLoadData(c *C) {
 	ts.runTestLoadDataForSlowLog(c, ts.server)
 }
 
+<<<<<<< HEAD
 func (ts *tidbTestSerialSuite) TestLoadDataListPartition(c *C) {
 	ts.runTestLoadDataForListPartition(c)
 	ts.runTestLoadDataForListPartition2(c)
@@ -162,6 +166,8 @@ func (ts *tidbTestSerialSuite) TestLoadDataListPartition(c *C) {
 	ts.runTestLoadDataForListColumnPartition2(c)
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // Fix issue#22540. Change tidb_dml_batch_size,
 // then check if load data into table with auto random column works properly.
 func (ts *tidbTestSerialSuite) TestLoadDataAutoRandom(c *C) {
@@ -222,7 +228,11 @@ func (ts *tidbTestSuite) TestStatusPort(c *C) {
 	ts.domain, err = session.BootstrapSession(ts.store)
 	c.Assert(err, IsNil)
 	ts.tidbdrv = NewTiDBDriver(ts.store)
+<<<<<<< HEAD
 	cfg := newTestConfig()
+=======
+	cfg := config.NewConfig()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	cfg.Port = 0
 	cfg.Status.ReportStatus = true
 	cfg.Status.StatusPort = ts.statusPort
@@ -491,7 +501,11 @@ func registerTLSConfig(configName string, caCertPath string, clientCertPath stri
 
 func (ts *tidbTestSuite) TestSystemTimeZone(c *C) {
 	tk := testkit.NewTestKit(c, ts.store)
+<<<<<<< HEAD
 	cfg := newTestConfig()
+=======
+	cfg := config.NewConfig()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	cfg.Port, cfg.Status.StatusPort = 0, 0
 	cfg.Status.ReportStatus = false
 	server, err := NewServer(cfg, ts.tidbdrv)
@@ -827,7 +841,11 @@ func (ts *tidbTestSuite) TestCreateTableFlen(c *C) {
 	c.Assert(int(cols[1].ColumnLength), Equals, 22)
 }
 
+<<<<<<< HEAD
 func Execute(ctx context.Context, qc *TiDBContext, sql string) (ResultSet, error) {
+=======
+func Execute(ctx context.Context, qc QueryCtx, sql string) (ResultSet, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	stmts, err := qc.Parse(ctx, sql)
 	if err != nil {
 		return nil, err
@@ -986,14 +1004,22 @@ func (ts *tidbTestSuite) TestNO_DEFAULT_VALUEFlag(c *C) {
 
 func (ts *tidbTestSuite) TestGracefulShutdown(c *C) {
 	var err error
+<<<<<<< HEAD
 	ts.store, err = mockstore.NewMockStore()
+=======
+	ts.store, err = mockstore.NewMockTikvStore()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	session.DisableStats4Test()
 	c.Assert(err, IsNil)
 	ts.domain, err = session.BootstrapSession(ts.store)
 	c.Assert(err, IsNil)
 	ts.tidbdrv = NewTiDBDriver(ts.store)
 	cli := newTestServerClient()
+<<<<<<< HEAD
 	cfg := newTestConfig()
+=======
+	cfg := config.NewConfig()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	cfg.GracefulWaitBeforeShutdown = 2 // wait before shutdown
 	cfg.Port = 0
 	cfg.Status.StatusPort = 0
@@ -1022,6 +1048,7 @@ func (ts *tidbTestSuite) TestGracefulShutdown(c *C) {
 	c.Assert(err, ErrorMatches, ".*connect: connection refused")
 }
 
+<<<<<<< HEAD
 func (ts *tidbTestSerialSuite) TestDefaultCharacterAndCollation(c *C) {
 	// issue #21194
 	collate.SetNewCollationEnabledForTest(true)
@@ -1045,6 +1072,8 @@ func (ts *tidbTestSerialSuite) TestDefaultCharacterAndCollation(c *C) {
 	}
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (ts *tidbTestSuite) TestPessimisticInsertSelectForUpdate(c *C) {
 	qctx, err := ts.tidbdrv.OpenCtx(uint64(0), 0, uint8(tmysql.DefaultCollationID), "test", nil)
 	c.Assert(err, IsNil)

@@ -21,7 +21,10 @@ import (
 	"math/rand"
 	"runtime"
 	"strings"
+<<<<<<< HEAD
 	"sync/atomic"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"time"
 
 	. "github.com/pingcap/check"
@@ -75,7 +78,11 @@ func (s *testLockSuite) lockKey(c *C, key, value, primaryKey, primaryValue []byt
 	if commitPrimary {
 		tpc.commitTS, err = s.store.oracle.GetTimestamp(ctx, &oracle.Option{TxnScope: oracle.GlobalTxnScope})
 		c.Assert(err, IsNil)
+<<<<<<< HEAD
 		err = tpc.commitMutations(NewBackofferWithVars(ctx, int(atomic.LoadUint64(&CommitMaxBackoff)), nil), tpc.mutationsOfKeys([][]byte{primaryKey}))
+=======
+		err = tpc.commitMutations(NewBackofferWithVars(ctx, CommitMaxBackoff, nil), tpc.mutationsOfKeys([][]byte{primaryKey}))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		c.Assert(err, IsNil)
 	}
 	return txn.startTS, tpc.commitTS
@@ -288,7 +295,11 @@ func (s *testLockSuite) TestCheckTxnStatus(c *C) {
 	bo := NewBackofferWithVars(context.Background(), PrewriteMaxBackoff, nil)
 	resolver := newLockResolver(s.store)
 	// Call getTxnStatus to check the lock status.
+<<<<<<< HEAD
 	status, err := resolver.getTxnStatus(bo, txn.StartTS(), []byte("key"), currentTS, currentTS, true, false, nil)
+=======
+	status, err := resolver.getTxnStatus(bo, txn.StartTS(), []byte("key"), currentTS, currentTS, true, nil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	c.Assert(status.IsCommitted(), IsFalse)
 	c.Assert(status.ttl, Greater, uint64(0))
@@ -310,7 +321,11 @@ func (s *testLockSuite) TestCheckTxnStatus(c *C) {
 	// Then call getTxnStatus again and check the lock status.
 	currentTS, err = o.GetTimestamp(context.Background(), &oracle.Option{TxnScope: oracle.GlobalTxnScope})
 	c.Assert(err, IsNil)
+<<<<<<< HEAD
 	status, err = newLockResolver(s.store).getTxnStatus(bo, txn.StartTS(), []byte("key"), currentTS, 0, true, false, nil)
+=======
+	status, err = newLockResolver(s.store).getTxnStatus(bo, txn.StartTS(), []byte("key"), currentTS, 0, true, nil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	c.Assert(status.ttl, Equals, uint64(0))
 	c.Assert(status.commitTS, Equals, uint64(0))
@@ -318,7 +333,11 @@ func (s *testLockSuite) TestCheckTxnStatus(c *C) {
 
 	// Call getTxnStatus on a committed transaction.
 	startTS, commitTS := s.putKV(c, []byte("a"), []byte("a"))
+<<<<<<< HEAD
 	status, err = newLockResolver(s.store).getTxnStatus(bo, startTS, []byte("a"), currentTS, currentTS, true, false, nil)
+=======
+	status, err = newLockResolver(s.store).getTxnStatus(bo, startTS, []byte("a"), currentTS, currentTS, true, nil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	c.Assert(status.ttl, Equals, uint64(0))
 	c.Assert(status.commitTS, Equals, commitTS)
@@ -346,7 +365,11 @@ func (s *testLockSuite) TestCheckTxnStatusNoWait(c *C) {
 	resolver := newLockResolver(s.store)
 
 	// Call getTxnStatus for the TxnNotFound case.
+<<<<<<< HEAD
 	_, err = resolver.getTxnStatus(bo, txn.StartTS(), []byte("key"), currentTS, currentTS, false, false, nil)
+=======
+	_, err = resolver.getTxnStatus(bo, txn.StartTS(), []byte("key"), currentTS, currentTS, false, nil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, NotNil)
 	_, ok := errors.Cause(err).(txnNotFoundErr)
 	c.Assert(ok, IsTrue)
@@ -499,7 +522,11 @@ func (s *testLockSuite) TestBatchResolveLocks(c *C) {
 
 	lr := newLockResolver(s.store)
 	bo := NewBackofferWithVars(context.Background(), GcResolveLockMaxBackoff, nil)
+<<<<<<< HEAD
 	loc, err := lr.store.GetRegionCache().LocateKey(bo, locks[0].Primary)
+=======
+	loc, err := lr.store.GetRegionCache().LocateKey(bo, l.Primary)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	// Check BatchResolveLocks resolve the lock even the ttl is not expired.
 	success, err := lr.BatchResolveLocks(bo, locks, loc.Region)
@@ -585,6 +612,7 @@ func (s *testLockSuite) TestDeduplicateKeys(c *C) {
 		c.Assert(out, Equals, "a b c")
 	}
 }
+<<<<<<< HEAD
 
 func (s *testLockSuite) prepareTxnFallenBackFromAsyncCommit(c *C) {
 	txn, err := s.store.Begin()
@@ -671,3 +699,5 @@ func (s *testLockSuite) TestBatchResolveTxnFallenBackFromAsyncCommit(c *C) {
 	_, err = t3.Get(context.Background(), []byte("fb2"))
 	errMsgMustContain(c, err, "key not exist")
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

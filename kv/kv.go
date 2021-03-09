@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/pingcap/tidb/config"
+	"github.com/pingcap/tidb/kv/memdb"
 	"github.com/pingcap/tidb/store/tikv/oracle"
 	"github.com/pingcap/tidb/util/execdetails"
 	"github.com/pingcap/tidb/util/memory"
@@ -49,6 +50,7 @@ const (
 	ReplicaRead
 	// Set task ID
 	TaskID
+<<<<<<< HEAD
 	// InfoSchema is schema version used by txn startTS.
 	InfoSchema
 	// CollectRuntimeStats is used to enable collect runtime stats.
@@ -69,6 +71,18 @@ const (
 	TxnScope
 	// StalenessReadOnly indicates whether the transaction is staleness read only transaction
 	IsStalenessReadOnly
+=======
+	// CollectRuntimeStats is used to enable collect runtime stats.
+	CollectRuntimeStats
+	// CheckExist map for key existence check.
+	CheckExists
+	// InfoSchema is schema version used by txn startTS.
+	InfoSchema
+	// SchemaAmender is used to amend mutations for pessimistic transactions
+	SchemaAmender
+	// CommitHook is a callback function called right after the transaction gets committed
+	CommitHook
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 // Priority value for transaction priority.
@@ -241,8 +255,26 @@ type MemBuffer interface {
 	Size() int
 	// Len returns the number of entries in the DB.
 	Len() int
+<<<<<<< HEAD
 	// Dirty returns whether the root staging buffer is updated.
 	Dirty() bool
+=======
+	// NewStagingBuffer returns a new write buffer,
+	// modifications in the returned buffer will not influence this buffer
+	// until you call Flush, or you can use Discard to discard all of them.
+	//
+	// Note: you cannot modify this MemBuffer until the child buffer finished,
+	// otherwise the Set operation will panic.
+	NewStagingBuffer() MemBuffer
+	// Flush flushes all kvs in this buffer to parrent buffer.
+	Flush() (int, error)
+	// Discard discards all kvs in this buffer.
+	Discard()
+	// GetFlag get KeyFlags by an exist key
+	GetFlags(ctx context.Context, k Key) memdb.KeyFlags
+	// DeleteWithNeedLock deletes key with a need lock mark
+	DeleteWithNeedLock(Key) error
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // Transaction defines the interface for operations inside a Transaction.
@@ -279,6 +311,8 @@ type Transaction interface {
 	Valid() bool
 	// GetMemBuffer return the MemBuffer binding to this transaction.
 	GetMemBuffer() MemBuffer
+	// GetMemBufferSnapshot is used to return a snapshot of MemBuffer without any statement modify.
+	GetMemBufferSnapshot() MemBuffer
 	// GetSnapshot returns the Snapshot binding to this transaction.
 	GetSnapshot() Snapshot
 	// GetUnionStore returns the UnionStore binding to this transaction.
@@ -292,6 +326,8 @@ type Transaction interface {
 	// If a key doesn't exist, there shouldn't be any corresponding entry in the result map.
 	BatchGet(ctx context.Context, keys []Key) (map[string][]byte, error)
 	IsPessimistic() bool
+	ResetStmtKeyExistErrs()
+	MergeStmtKeyExistErrs()
 }
 
 // LockCtx contains information for LockKeys method.
@@ -307,6 +343,10 @@ type LockCtx struct {
 	Values                map[string]ReturnedValue
 	ValuesLock            sync.Mutex
 	LockExpired           *uint32
+<<<<<<< HEAD
+=======
+	CheckKeyExists        map[string]struct{}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	Stats                 *execdetails.LockKeysDetails
 }
 
@@ -409,8 +449,11 @@ type Request struct {
 	BatchCop bool
 	// TaskID is an unique ID for an execution of a statement
 	TaskID uint64
+<<<<<<< HEAD
 	// TiDBServerID is the specified TiDB serverID to execute request. `0` means all TiDB instances.
 	TiDBServerID uint64
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // ResultSubset represents a result subset from a single storage unit.

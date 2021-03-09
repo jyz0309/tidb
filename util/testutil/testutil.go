@@ -36,7 +36,10 @@ import (
 	"github.com/pingcap/tidb/kv"
 	"github.com/pingcap/tidb/sessionctx/stmtctx"
 	"github.com/pingcap/tidb/types"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/util/codec"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/util/logutil"
 	"go.uber.org/zap"
 )

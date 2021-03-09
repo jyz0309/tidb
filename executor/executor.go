@@ -88,8 +88,11 @@ var (
 	_ Executor = &TopNExec{}
 	_ Executor = &UnionExec{}
 
+<<<<<<< HEAD
 	// GlobalMemoryUsageTracker is the ancestor of all the Executors' memory tracker and GlobalMemory Tracker
 	GlobalMemoryUsageTracker *memory.Tracker
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// GlobalDiskUsageTracker is the ancestor of all the Executors' disk tracker
 	GlobalDiskUsageTracker *disk.Tracker
 )
@@ -105,6 +108,7 @@ type baseExecutor struct {
 	runtimeStats  *execdetails.BasicRuntimeStats
 }
 
+<<<<<<< HEAD
 const (
 	// globalPanicStorageExceed represents the panic message when out of storage quota.
 	globalPanicStorageExceed string = "Out Of Global Storage Quota!"
@@ -112,12 +116,15 @@ const (
 	globalPanicMemoryExceed string = "Out Of Global Memory Limit!"
 )
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // globalPanicOnExceed panics when GlobalDisTracker storage usage exceeds storage quota.
 type globalPanicOnExceed struct {
 	memory.BaseOOMAction
 	mutex sync.Mutex // For synchronization.
 }
 
+<<<<<<< HEAD
 func init() {
 	action := &globalPanicOnExceed{}
 	GlobalMemoryUsageTracker = memory.NewGlobalTracker(memory.LabelForGlobalMemory, -1)
@@ -126,6 +133,8 @@ func init() {
 	GlobalDiskUsageTracker.SetActionOnExceed(action)
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // SetLogHook sets a hook for PanicOnExceed.
 func (a *globalPanicOnExceed) SetLogHook(hook func(uint64)) {}
 
@@ -133,6 +142,7 @@ func (a *globalPanicOnExceed) SetLogHook(hook func(uint64)) {}
 func (a *globalPanicOnExceed) Action(t *memory.Tracker) {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
+<<<<<<< HEAD
 	msg := ""
 	switch t.Label() {
 	case memory.LabelForGlobalStorage:
@@ -143,11 +153,28 @@ func (a *globalPanicOnExceed) Action(t *memory.Tracker) {
 		msg = "Out of Unknown Resource Quota!"
 	}
 	panic(msg)
+=======
+	panic(globalPanicStorageExceed)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // GetPriority get the priority of the Action
 func (a *globalPanicOnExceed) GetPriority() int64 {
 	return memory.DefPanicPriority
+<<<<<<< HEAD
+=======
+}
+
+const (
+	// globalPanicStorageExceed represents the panic message when out of storage quota.
+	globalPanicStorageExceed string = "Out Of Global Storage Quota!"
+)
+
+func init() {
+	GlobalDiskUsageTracker = disk.NewGlobalTrcaker(memory.LabelForGlobalStorage, -1)
+	action := &globalPanicOnExceed{}
+	GlobalDiskUsageTracker.SetActionOnExceed(action)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // base returns the baseExecutor of an executor, don't override this method!
@@ -210,8 +237,12 @@ func (e *baseExecutor) Next(ctx context.Context, req *chunk.Chunk) error {
 
 func (e *baseExecutor) updateDeltaForTableID(id int64) {
 	txnCtx := e.ctx.GetSessionVars().TxnCtx
+<<<<<<< HEAD
 	udpp := e.ctx.GetSessionVars().UseDynamicPartitionPrune()
 	txnCtx.UpdateDeltaForTable(id, id, 0, 0, map[int64]int64{}, udpp)
+=======
+	txnCtx.UpdateDeltaForTable(id, 0, 0, map[int64]int64{})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func newBaseExecutor(ctx sessionctx.Context, schema *expression.Schema, id int, children ...Executor) baseExecutor {
@@ -888,6 +919,7 @@ type SelectLockExec struct {
 
 	// tblID2Table is cached to reduce cost.
 	tblID2Table map[int64]table.PartitionedTable
+	inited      bool
 }
 
 // Open implements the Executor Open interface.
@@ -954,6 +986,7 @@ func (e *SelectLockExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		lockWaitTime = int64(e.Lock.WaitSec) * 1000
 	}
 
+<<<<<<< HEAD
 	if len(e.tblID2Handle) > 0 {
 		for id := range e.tblID2Handle {
 			e.updateDeltaForTableID(id)
@@ -967,6 +1000,31 @@ func (e *SelectLockExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	}
 
 	return doLockKeys(ctx, e.ctx, newLockCtx(e.ctx.GetSessionVars(), lockWaitTime), e.keys...)
+=======
+	err = doLockKeys(ctx, e.ctx, newLockCtx(e.ctx.GetSessionVars(), lockWaitTime), e.keys...)
+	if !e.inited && err == nil && len(e.keys) > 0 {
+		// Just update table delta when there really has keys locked.
+		if len(e.tblID2Handle) > 0 {
+			for id := range e.tblID2Handle {
+				e.updateDeltaForTableID(id)
+			}
+		}
+		if len(e.partitionedTable) > 0 {
+			for _, p := range e.partitionedTable {
+				pid := p.Meta().ID
+				e.updateDeltaForTableID(pid)
+			}
+		}
+		e.inited = true
+	}
+	return err
+}
+
+// Close implements the Executor interface.
+func (e *SelectLockExec) Close() error {
+	e.inited = false
+	return e.baseExecutor.Close()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func newLockCtx(seVars *variable.SessionVars, lockWaitTime int64) *kv.LockCtx {
@@ -979,6 +1037,10 @@ func newLockCtx(seVars *variable.SessionVars, lockWaitTime int64) *kv.LockCtx {
 		LockKeysDuration:      &seVars.StmtCtx.LockKeysDuration,
 		LockKeysCount:         &seVars.StmtCtx.LockKeysCount,
 		LockExpired:           &seVars.TxnCtx.LockExpire,
+<<<<<<< HEAD
+=======
+		CheckKeyExists:        seVars.StmtCtx.CheckKeyExists,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 }
 
@@ -998,7 +1060,11 @@ func doLockKeys(ctx context.Context, se sessionctx.Context, lockCtx *kv.LockCtx,
 	}
 	var lockKeyStats *execdetails.LockKeysDetails
 	ctx = context.WithValue(ctx, execdetails.LockKeysDetailCtxKey, &lockKeyStats)
+<<<<<<< HEAD
 	err = txn.LockKeys(tikvutil.SetSessionID(ctx, se.GetSessionVars().ConnectionID), lockCtx, keys...)
+=======
+	err = txn.LockKeys(sessionctx.SetCommitCtx(ctx, se), lockCtx, keys...)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if lockKeyStats != nil {
 		sctx.MergeLockKeysExecDetails(lockKeyStats)
 	}
@@ -1153,6 +1219,7 @@ func init() {
 			return nil, err
 		}
 		chk := newFirstChunk(exec)
+<<<<<<< HEAD
 
 		err = Next(ctx, exec, chk)
 		if err != nil {
@@ -1160,6 +1227,18 @@ func init() {
 		}
 		if chk.NumRows() == 0 {
 			return nil, nil
+=======
+		for {
+			err = Next(ctx, exec, chk)
+			if err != nil {
+				return nil, err
+			}
+			if chk.NumRows() == 0 {
+				return nil, nil
+			}
+			row := chk.GetRow(0).GetDatumRow(retTypes(exec))
+			return row, err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		row := chk.GetRow(0).GetDatumRow(retTypes(exec))
 		return row, err
@@ -1615,7 +1694,10 @@ func ResetContextOfStmt(ctx sessionctx.Context, s ast.StmtNode) (err error) {
 		DiskTracker: disk.NewTracker(memory.LabelForSQLText, -1),
 		TaskID:      stmtctx.AllocateTaskID(),
 	}
+<<<<<<< HEAD
 	sc.MemTracker.AttachToGlobalTracker(GlobalMemoryUsageTracker)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	globalConfig := config.GetGlobalConfig()
 	if globalConfig.OOMUseTmpStorage && GlobalDiskUsageTracker != nil {
 		sc.DiskTracker.AttachToGlobalTracker(GlobalDiskUsageTracker)
@@ -1654,7 +1736,19 @@ func ResetContextOfStmt(ctx sessionctx.Context, s ast.StmtNode) (err error) {
 	// pushing them down to TiKV as flags.
 	switch stmt := s.(type) {
 	case *ast.UpdateStmt:
+<<<<<<< HEAD
 		ResetUpdateStmtCtx(sc, stmt, vars)
+=======
+		sc.InUpdateStmt = true
+		sc.DupKeyAsWarning = stmt.IgnoreErr
+		sc.BadNullAsWarning = !vars.StrictSQLMode || stmt.IgnoreErr
+		sc.TruncateAsWarning = !vars.StrictSQLMode || stmt.IgnoreErr
+		sc.DividedByZeroAsWarning = !vars.StrictSQLMode || stmt.IgnoreErr
+		sc.AllowInvalidDate = vars.SQLMode.HasAllowInvalidDatesMode()
+		sc.IgnoreZeroInDate = !vars.SQLMode.HasNoZeroInDateMode() || !vars.SQLMode.HasNoZeroDateMode() || !vars.StrictSQLMode || stmt.IgnoreErr || sc.AllowInvalidDate
+		sc.Priority = stmt.Priority
+		sc.IgnoreNoPartition = stmt.IgnoreErr
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case *ast.DeleteStmt:
 		sc.InDeleteStmt = true
 		sc.DupKeyAsWarning = stmt.IgnoreErr
@@ -1670,7 +1764,11 @@ func ResetContextOfStmt(ctx sessionctx.Context, s ast.StmtNode) (err error) {
 		// should make TruncateAsWarning and DividedByZeroAsWarning,
 		// but should not make DupKeyAsWarning.
 		sc.DupKeyAsWarning = stmt.IgnoreErr
+<<<<<<< HEAD
 		sc.BadNullAsWarning = !vars.StrictSQLMode || stmt.IgnoreErr
+=======
+		sc.BadNullAsWarning = stmt.IgnoreErr
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		sc.IgnoreNoPartition = stmt.IgnoreErr
 		sc.TruncateAsWarning = !vars.StrictSQLMode || stmt.IgnoreErr
 		sc.DividedByZeroAsWarning = !vars.StrictSQLMode || stmt.IgnoreErr
@@ -1704,7 +1802,11 @@ func ResetContextOfStmt(ctx sessionctx.Context, s ast.StmtNode) (err error) {
 			sc.Priority = opts.Priority
 			sc.NotFillCache = !opts.SQLCache
 		}
+<<<<<<< HEAD
 	case *ast.SetOprStmt:
+=======
+	case *ast.UnionStmt:
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		sc.InSelectStmt = true
 		sc.OverflowAsWarning = true
 		sc.TruncateAsWarning = true
@@ -1747,15 +1849,22 @@ func ResetContextOfStmt(ctx sessionctx.Context, s ast.StmtNode) (err error) {
 	}
 
 	sc.TblInfo2UnionScan = make(map[*model.TableInfo]bool)
+<<<<<<< HEAD
+=======
+	sc.CheckKeyExists = make(map[string]struct{})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	errCount, warnCount := vars.StmtCtx.NumErrorWarnings()
 	vars.SysErrorCount = errCount
 	vars.SysWarningCount = warnCount
 	vars.StmtCtx = sc
 	vars.PrevFoundInPlanCache = vars.FoundInPlanCache
 	vars.FoundInPlanCache = false
+<<<<<<< HEAD
 	vars.ClearStmtVars()
 	vars.PrevFoundInBinding = vars.FoundInBinding
 	vars.FoundInBinding = false
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return
 }
 

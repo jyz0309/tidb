@@ -45,7 +45,11 @@ func (s *testOOMSuite) SetUpSuite(c *C) {
 	testleak.BeforeTest()
 	s.registerHook()
 	var err error
+<<<<<<< HEAD
 	s.store, err = mockstore.NewMockStore()
+=======
+	s.store, err = mockstore.NewMockTikvStore()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	domain.RunAutoAnalyze = false
 	s.do, err = session.BootstrapSession(s.store)

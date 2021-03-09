@@ -40,12 +40,20 @@ func ExplainAggFunc(agg *AggFuncDesc, normalized bool) string {
 						}
 					} else {
 						if normalized {
+<<<<<<< HEAD
 							fmt.Fprintf(&buffer, "%s", item.Expr.ExplainNormalizedInfo())
 						} else {
 							fmt.Fprintf(&buffer, "%s", item.Expr.ExplainInfo())
 						}
 					}
 
+=======
+							fmt.Fprintf(&buffer, "%s asc", item.Expr.ExplainNormalizedInfo())
+						} else {
+							fmt.Fprintf(&buffer, "%s asc", item.Expr.ExplainInfo())
+						}
+					}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 					if i+1 < len(agg.OrderByItems) {
 						buffer.WriteString(", ")
 					}

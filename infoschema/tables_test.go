@@ -484,8 +484,13 @@ func (s *testTableSuite) TestSomeTables(c *C) {
 	tk.Se.SetSessionManager(sm)
 	tk.MustQuery("select * from information_schema.PROCESSLIST order by ID;").Sort().Check(
 		testkit.Rows(
+<<<<<<< HEAD
 			fmt.Sprintf("1 user-1 localhost information_schema Quit 9223372036 %s %s abc1 0 0 ", "in transaction", "do something"),
 			fmt.Sprintf("2 user-2 localhost test Init DB 9223372036 %s %s abc2 0 0 ", "autocommit", strings.Repeat("x", 101)),
+=======
+			fmt.Sprintf("1 user-1 localhost information_schema Quit 9223372036 1 %s abc1 0 ", "do something"),
+			fmt.Sprintf("2 user-2 localhost test Init DB 9223372036 2 %s abc2 0 ", strings.Repeat("x", 101)),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		))
 	tk.MustQuery("SHOW PROCESSLIST;").Sort().Check(
 		testkit.Rows(
@@ -524,8 +529,13 @@ func (s *testTableSuite) TestSomeTables(c *C) {
 	tk.Se.GetSessionVars().TimeZone = time.UTC
 	tk.MustQuery("select * from information_schema.PROCESSLIST order by ID;").Check(
 		testkit.Rows(
+<<<<<<< HEAD
 			fmt.Sprintf("1 user-1 localhost information_schema Quit 9223372036 %s %s abc1 0 0 ", "in transaction", "<nil>"),
 			fmt.Sprintf("2 user-2 localhost <nil> Init DB 9223372036 %s %s abc2 0 0 07-29 03:26:05.158(410090409861578752)", "autocommit", strings.Repeat("x", 101)),
+=======
+			fmt.Sprintf("1 user-1 localhost information_schema Quit 9223372036 1 %s abc1 0 ", "<nil>"),
+			fmt.Sprintf("2 user-2 localhost <nil> Init DB 9223372036 2 %s abc2 0 07-29 03:26:05.158(410090409861578752)", strings.Repeat("x", 101)),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		))
 	tk.MustQuery("SHOW PROCESSLIST;").Sort().Check(
 		testkit.Rows(
@@ -539,11 +549,19 @@ func (s *testTableSuite) TestSomeTables(c *C) {
 		))
 	tk.MustQuery("select * from information_schema.PROCESSLIST where db is null;").Check(
 		testkit.Rows(
+<<<<<<< HEAD
 			fmt.Sprintf("2 user-2 localhost <nil> Init DB 9223372036 %s %s abc2 0 0 07-29 03:26:05.158(410090409861578752)", "autocommit", strings.Repeat("x", 101)),
 		))
 	tk.MustQuery("select * from information_schema.PROCESSLIST where Info is null;").Check(
 		testkit.Rows(
 			fmt.Sprintf("1 user-1 localhost information_schema Quit 9223372036 %s %s abc1 0 0 ", "in transaction", "<nil>"),
+=======
+			fmt.Sprintf("2 user-2 localhost <nil> Init DB 9223372036 2 %s abc2 0 07-29 03:26:05.158(410090409861578752)", strings.Repeat("x", 101)),
+		))
+	tk.MustQuery("select * from information_schema.PROCESSLIST where Info is null;").Check(
+		testkit.Rows(
+			fmt.Sprintf("1 user-1 localhost information_schema Quit 9223372036 1 %s abc1 0 ", "<nil>"),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		))
 }
 
@@ -563,7 +581,10 @@ func prepareSlowLogfile(c *C, slowLogFileName string) {
 # Wait_TS: 0.000000003
 # LockKeys_time: 1.71 Request_count: 1 Prewrite_time: 0.19 Wait_prewrite_binlog_time: 0.21 Commit_time: 0.01 Commit_backoff_time: 0.18 Backoff_types: [txnLock] Resolve_lock_time: 0.03 Write_keys: 15 Write_size: 480 Prewrite_region: 1 Txn_retry: 8
 # Cop_time: 0.3824278 Process_time: 0.161 Request_count: 1 Total_keys: 100001 Process_keys: 100000
+<<<<<<< HEAD
 # Rocksdb_delete_skipped_count: 100 Rocksdb_key_skipped_count: 10 Rocksdb_block_cache_hit_count: 10 Rocksdb_block_read_count: 10 Rocksdb_block_read_byte: 100
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 # Wait_time: 0.101
 # Backoff_time: 0.092
 # DB: test
@@ -646,10 +667,17 @@ func (s *testTableSuite) TestSlowQuery(c *C) {
 	tk.MustExec("set time_zone = '+08:00';")
 	re := tk.MustQuery("select * from information_schema.slow_query")
 	re.Check(testutil.RowsWithSep("|",
+<<<<<<< HEAD
 		"2019-02-12 19:33:56.571953|406315658548871171|root|localhost|6|57|0.12|4.895492|0.4|0.2|0.000000003|2|0.000000002|0.00000001|0.000000003|0.19|0.21|0.01|0|0.18|[txnLock]|0.03|0|15|480|1|8|0.3824278|0.161|0.101|0.092|1.71|1|100001|100000|100|10|10|10|100|test||0|42a1c8aae6f133e934d4bf0147491709a8812ea05ff8819ec522780fe657b772|t1:1,t2:2|0.1|0.2|0.03|127.0.0.1:20160|0.05|0.6|0.8|0.0.0.0:20160|70724|65536|0|0|0|0||0|1|1|0|abcd|60e9378c746d9a2be1c791047e008967cf252eb6de9167ad3aa6098fa2d523f4|update t set i = 2;|select * from t_slim;"))
 	tk.MustExec("set time_zone = '+00:00';")
 	re = tk.MustQuery("select * from information_schema.slow_query")
 	re.Check(testutil.RowsWithSep("|", "2019-02-12 11:33:56.571953|406315658548871171|root|localhost|6|57|0.12|4.895492|0.4|0.2|0.000000003|2|0.000000002|0.00000001|0.000000003|0.19|0.21|0.01|0|0.18|[txnLock]|0.03|0|15|480|1|8|0.3824278|0.161|0.101|0.092|1.71|1|100001|100000|100|10|10|10|100|test||0|42a1c8aae6f133e934d4bf0147491709a8812ea05ff8819ec522780fe657b772|t1:1,t2:2|0.1|0.2|0.03|127.0.0.1:20160|0.05|0.6|0.8|0.0.0.0:20160|70724|65536|0|0|0|0||0|1|1|0|abcd|60e9378c746d9a2be1c791047e008967cf252eb6de9167ad3aa6098fa2d523f4|update t set i = 2;|select * from t_slim;"))
+=======
+		"2019-02-12 19:33:56.571953|406315658548871171|root|localhost|6|57|0.12|4.895492|0.4|0.2|0.000000003|2|0.000000002|0.00000001|0.000000003|0.19|0.21|0.01|0|0.18|[txnLock]|0.03|0|15|480|1|8|0.3824278|0.161|0.101|0.092|1.71|1|100001|100000|test||0|42a1c8aae6f133e934d4bf0147491709a8812ea05ff8819ec522780fe657b772|t1:1,t2:2|0.1|0.2|0.03|127.0.0.1:20160|0.05|0.6|0.8|0.0.0.0:20160|70724|65536|0|0|0|0||0|1|1|abcd|60e9378c746d9a2be1c791047e008967cf252eb6de9167ad3aa6098fa2d523f4|update t set i = 2;|select * from t_slim;"))
+	tk.MustExec("set time_zone = '+00:00';")
+	re = tk.MustQuery("select * from information_schema.slow_query")
+	re.Check(testutil.RowsWithSep("|", "2019-02-12 11:33:56.571953|406315658548871171|root|localhost|6|57|0.12|4.895492|0.4|0.2|0.000000003|2|0.000000002|0.00000001|0.000000003|0.19|0.21|0.01|0|0.18|[txnLock]|0.03|0|15|480|1|8|0.3824278|0.161|0.101|0.092|1.71|1|100001|100000|test||0|42a1c8aae6f133e934d4bf0147491709a8812ea05ff8819ec522780fe657b772|t1:1,t2:2|0.1|0.2|0.03|127.0.0.1:20160|0.05|0.6|0.8|0.0.0.0:20160|70724|65536|0|0|0|0||0|1|1|abcd|60e9378c746d9a2be1c791047e008967cf252eb6de9167ad3aa6098fa2d523f4|update t set i = 2;|select * from t_slim;"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// Test for long query.
 	f, err := os.OpenFile(slowLogFileName, os.O_CREATE|os.O_WRONLY, 0644)
@@ -808,7 +836,11 @@ func (s *testClusterTableSuite) TestSelectClusterTable(c *C) {
 		tk.MustQuery("select count(*) from `CLUSTER_SLOW_QUERY`").Check(testkit.Rows("1"))
 		tk.MustQuery("select time from `CLUSTER_SLOW_QUERY` where time='2019-02-12 19:33:56.571953'").Check(testutil.RowsWithSep("|", "2019-02-12 19:33:56.571953"))
 		tk.MustQuery("select count(*) from `CLUSTER_PROCESSLIST`").Check(testkit.Rows("1"))
+<<<<<<< HEAD
 		tk.MustQuery("select * from `CLUSTER_PROCESSLIST`").Check(testkit.Rows(fmt.Sprintf(":10080 1 root 127.0.0.1 <nil> Query 9223372036 %s <nil>  0 0 ", "")))
+=======
+		tk.MustQuery("select * from `CLUSTER_PROCESSLIST`").Check(testkit.Rows(":10080 1 root 127.0.0.1 <nil> Query 9223372036 0 <nil>  0 "))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		tk.MustQuery("select query_time, conn_id from `CLUSTER_SLOW_QUERY` order by time limit 1").Check(testkit.Rows("4.895492 6"))
 		tk.MustQuery("select count(*) from `CLUSTER_SLOW_QUERY` group by digest").Check(testkit.Rows("1"))
 		tk.MustQuery("select digest, count(*) from `CLUSTER_SLOW_QUERY` group by digest").Check(testkit.Rows("42a1c8aae6f133e934d4bf0147491709a8812ea05ff8819ec522780fe657b772 1"))
@@ -859,7 +891,11 @@ select * from t3;
 	tk.MustQuery("select count(*) from `CLUSTER_SLOW_QUERY`").Check(testkit.Rows("4"))
 	tk.MustQuery("select count(*) from `SLOW_QUERY`").Check(testkit.Rows("4"))
 	tk.MustQuery("select count(*) from `CLUSTER_PROCESSLIST`").Check(testkit.Rows("1"))
+<<<<<<< HEAD
 	tk.MustQuery("select * from `CLUSTER_PROCESSLIST`").Check(testkit.Rows(fmt.Sprintf(":10080 1 root 127.0.0.1 <nil> Query 9223372036 %s <nil>  0 0 ", "")))
+=======
+	tk.MustQuery("select * from `CLUSTER_PROCESSLIST`").Check(testkit.Rows(":10080 1 root 127.0.0.1 <nil> Query 9223372036 0 <nil>  0 "))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("create user user1")
 	tk.MustExec("create user user2")
 	user1 := testkit.NewTestKit(c, s.store)
@@ -906,6 +942,7 @@ func (s *testTableSuite) TestSelectHiddenColumn(c *C) {
 	tk.MustQuery("select count(*) from INFORMATION_SCHEMA.COLUMNS where table_name = 'hidden'").Check(testkit.Rows("0"))
 }
 
+<<<<<<< HEAD
 func (s *testTableSuite) TestFormatVersion(c *C) {
 	// Test for defaultVersions.
 	defaultVersions := []string{"5.7.25-TiDB-None", "5.7.25-TiDB-8.0.18", "5.7.25-TiDB-8.0.18-beta.1", "5.7.25-TiDB-v4.0.0-beta-446-g5268094af"}
@@ -924,6 +961,8 @@ func (s *testTableSuite) TestFormatVersion(c *C) {
 	}
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // Test statements_summary.
 func (s *testTableSuite) TestStmtSummaryTable(c *C) {
 	tk := s.newTestKitWithRoot(c)
@@ -1376,6 +1415,27 @@ func (s *testTableSuite) TestPerformanceSchemaforPlanCache(c *C) {
 		testkit.Rows("3 1"))
 }
 
+<<<<<<< HEAD
+=======
+func (s *testTableSuite) TestFormatVersion(c *C) {
+	// Test for defaultVersions.
+	defaultVersions := []string{"5.7.25-TiDB-None", "5.7.25-TiDB-8.0.18", "5.7.25-TiDB-8.0.18-beta.1", "5.7.25-TiDB-v4.0.0-beta-446-g5268094af"}
+	defaultRes := []string{"None", "8.0.18", "8.0.18-beta.1", "4.0.0-beta"}
+	for i, v := range defaultVersions {
+		version := infoschema.FormatVersion(v, true)
+		c.Assert(version, Equals, defaultRes[i])
+	}
+
+	// Test for versions user set.
+	versions := []string{"8.0.18", "5.7.25-TiDB", "8.0.18-TiDB-4.0.0-beta.1"}
+	res := []string{"8.0.18", "5.7.25-TiDB", "8.0.18-TiDB-4.0.0-beta.1"}
+	for i, v := range versions {
+		version := infoschema.FormatVersion(v, false)
+		c.Assert(version, Equals, res[i])
+	}
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testTableSuite) TestServerInfoResolveLoopBackAddr(c *C) {
 	nodes := []infoschema.ServerInfo{
 		{Address: "127.0.0.1:4000", StatusAddr: "192.168.130.22:10080"},
@@ -1393,6 +1453,7 @@ func (s *testTableSuite) TestServerInfoResolveLoopBackAddr(c *C) {
 		c.Assert(n.StatusAddr, Equals, "192.168.130.22:10080")
 	}
 }
+<<<<<<< HEAD
 
 func (s *testTableSuite) TestPlacementPolicy(c *C) {
 	tk := s.newTestKitWithRoot(c)
@@ -1461,3 +1522,5 @@ func (s *testTableSuite) TestPlacementPolicy(c *C) {
 	tk.MustQuery("select rule_id, schema_name, table_name, partition_name from information_schema.placement_policy order by partition_name, rule_id").Check(testkit.Rows(
 		"0 test test_placement p0", "1 test test_placement p0", "0 test test_placement p1", "1 test test_placement p1"))
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

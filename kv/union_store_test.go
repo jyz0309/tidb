@@ -28,7 +28,11 @@ type testUnionStoreSuite struct {
 }
 
 func (s *testUnionStoreSuite) SetUpTest(c *C) {
+<<<<<<< HEAD
 	s.store = newMemDB()
+=======
+	s.store = NewMemDbBuffer()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	s.us = NewUnionStore(&mockSnapshot{s.store})
 }
 

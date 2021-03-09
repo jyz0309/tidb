@@ -621,6 +621,9 @@ func (s *testEvaluatorSuite) TestVecMonth(c *C) {
 	c.Assert(len(ctx.GetSessionVars().StmtCtx.GetWarnings()), Equals, 0)
 
 	ctx.GetSessionVars().StmtCtx.InInsertStmt = true
+<<<<<<< HEAD
 	ctx.GetSessionVars().StmtCtx.TruncateAsWarning = false
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(f.vecEvalInt(input, result), IsNil)
 }

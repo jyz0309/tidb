@@ -24,8 +24,13 @@ import (
 // these tasks one by one.
 var wholeTaskTypes = []TaskType{CopSingleReadTaskType, CopDoubleReadTaskType, RootTaskType}
 
+<<<<<<< HEAD
 // SortItem wraps the column and its order.
 type SortItem struct {
+=======
+// Item wraps the column and its order.
+type Item struct {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	Col  *expression.Column
 	Desc bool
 }
@@ -128,9 +133,15 @@ func (p *PhysicalProperty) AllColsFromSchema(schema *expression.Schema) bool {
 	return true
 }
 
+<<<<<<< HEAD
 // IsFlashProp return true if this physical property is only allowed to generate flash related task
 func (p *PhysicalProperty) IsFlashProp() bool {
 	return p.TaskTp == CopTiFlashLocalReadTaskType || p.TaskTp == CopTiFlashGlobalReadTaskType || p.TaskTp == MppTaskType
+=======
+// IsFlashOnlyProp return true if this physical property is only allowed to generate flash related task
+func (p *PhysicalProperty) IsFlashOnlyProp() bool {
+	return p.TaskTp == CopTiFlashLocalReadTaskType || p.TaskTp == CopTiFlashGlobalReadTaskType
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // GetAllPossibleChildTaskTypes enumrates the possible types of tasks for children.

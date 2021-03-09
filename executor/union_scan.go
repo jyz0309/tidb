@@ -15,8 +15,13 @@ package executor
 
 import (
 	"context"
+<<<<<<< HEAD
 	"fmt"
 	"runtime/trace"
+=======
+	"runtime/trace"
+	"sync"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	"github.com/pingcap/parser/model"
 	"github.com/pingcap/parser/mysql"
@@ -76,6 +81,7 @@ func (us *UnionScanExec) open(ctx context.Context) error {
 	}
 
 	defer trace.StartRegion(ctx, "UnionScanBuildRows").End()
+<<<<<<< HEAD
 	txn, err := us.ctx.Txn(false)
 	if err != nil {
 		return err
@@ -88,6 +94,8 @@ func (us *UnionScanExec) open(ctx context.Context) error {
 	us.memBuf = mb
 	us.memBufSnap = mb.SnapshotGetter()
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// 1. select without virtual columns
 	// 2. build virtual columns and select with virtual columns
 	switch x := reader.(type) {
@@ -273,5 +281,19 @@ func (us *UnionScanExec) compare(a, b []types.Datum) (int, error) {
 			return cmp, nil
 		}
 	}
+<<<<<<< HEAD
 	return us.belowHandleCols.Compare(a, b)
+=======
+	aHandle := a[us.belowHandleIndex].GetInt64()
+	bHandle := b[us.belowHandleIndex].GetInt64()
+	var cmp int
+	if aHandle == bHandle {
+		cmp = 0
+	} else if aHandle > bHandle {
+		cmp = 1
+	} else {
+		cmp = -1
+	}
+	return cmp, nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

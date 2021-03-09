@@ -19,6 +19,8 @@ import (
 	"math/rand"
 	"strings"
 
+	"github.com/pingcap/tidb/sessionctx/variable"
+
 	. "github.com/pingcap/check"
 	"github.com/pingcap/failpoint"
 	"github.com/pingcap/tidb/config"
@@ -241,6 +243,7 @@ func checkPlanAndRun(tk *testkit.TestKit, c *C, plan string, sql string) *testki
 	return tk.MustQuery(sql)
 }
 
+<<<<<<< HEAD
 func (s *testSerialSuite1) TestShuffleMergeJoinInDisk(c *C) {
 	defer config.RestoreFunc()()
 	config.UpdateGlobal(func(conf *config.Config) {
@@ -279,6 +282,9 @@ func (s *testSerialSuite1) TestShuffleMergeJoinInDisk(c *C) {
 	return
 }
 func (s *testSerialSuite1) TestMergeJoinInDisk(c *C) {
+=======
+func (s *testSuite2) TestMergeJoinInDisk(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	defer config.RestoreFunc()()
 	config.UpdateGlobal(func(conf *config.Config) {
 		conf.OOMUseTmpStorage = true
@@ -821,6 +827,7 @@ func (s *testSuiteJoin3) TestVectorizedMergeJoin(c *C) {
 	}
 }
 
+<<<<<<< HEAD
 // TestVectorizedShuffleMergeJoin is used to test vectorized shuffle merge join with some corner cases.
 func (s *testSuiteJoin3) TestVectorizedShuffleMergeJoin(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
@@ -920,6 +927,8 @@ func (s *testSuiteJoin3) TestVectorizedShuffleMergeJoin(c *C) {
 	}
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testSuite2) TestMergeJoinWithOtherConditions(c *C) {
 	// more than one inner tuple should be filtered on other conditions
 	tk := testkit.NewTestKit(c, s.store)
@@ -936,6 +945,7 @@ func (s *testSuite2) TestMergeJoinWithOtherConditions(c *C) {
 		`2`,
 	))
 }
+<<<<<<< HEAD
 
 func (s *testSuite2) TestShuffleMergeJoinWithOtherConditions(c *C) {
 	// more than one inner tuple should be filtered on other conditions
@@ -954,3 +964,5 @@ func (s *testSuite2) TestShuffleMergeJoinWithOtherConditions(c *C) {
 		`2`,
 	))
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

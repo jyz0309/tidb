@@ -64,12 +64,19 @@ func (s *mockStore) TLSConfig() *tls.Config {
 func (s *HelperTestSuite) SetUpSuite(c *C) {
 	url := s.mockPDHTTPServer(c)
 	time.Sleep(100 * time.Millisecond)
+<<<<<<< HEAD
 	mockTikvStore, err := mockstore.NewMockStore(
 		mockstore.WithClusterInspector(func(c cluster.Cluster) {
 			mockstore.BootstrapWithMultiRegions(c, []byte("x"))
 		}),
 	)
 
+=======
+	cluster := mocktikv.NewCluster()
+	mocktikv.BootstrapWithMultiRegions(cluster, []byte("x"))
+	mvccStore := mocktikv.MustNewMVCCStore()
+	mockTikvStore, err := mockstore.NewMockTikvStore(mockstore.WithCluster(cluster), mockstore.WithMVCCStore(mvccStore))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	s.store = &mockStore{
 		mockTikvStore.(tikv.Storage),
 		[]string{url[len("http://"):]},
@@ -85,7 +92,11 @@ func (s *HelperTestSuite) TestHotRegion(c *C) {
 	regionMetric, err := h.FetchHotRegion(pdapi.HotRead)
 	c.Assert(err, IsNil, Commentf("err: %+v", err))
 	expected := map[uint64]helper.RegionMetric{
+<<<<<<< HEAD
 		2: {
+=======
+		3: {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			FlowBytes:    100,
 			MaxHotDegree: 1,
 			Count:        0,
@@ -154,7 +165,11 @@ func (s *HelperTestSuite) mockHotRegionResponse(w http.ResponseWriter, req *http
 		RegionsStat: []helper.RegionStat{
 			{
 				FlowBytes: 100,
+<<<<<<< HEAD
 				RegionID:  2,
+=======
+				RegionID:  3,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				HotDegree: 1,
 			},
 			{

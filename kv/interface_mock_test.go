@@ -16,6 +16,7 @@ package kv
 import (
 	"context"
 
+	"github.com/pingcap/tidb/kv/memdb"
 	"github.com/pingcap/tidb/store/tikv/oracle"
 )
 
@@ -81,6 +82,7 @@ func (t *mockTxn) IterReverse(k Key) (Iterator, error) {
 func (t *mockTxn) Set(k Key, v []byte) error {
 	return nil
 }
+
 func (t *mockTxn) Delete(k Key) error {
 	return nil
 }
@@ -101,14 +103,21 @@ func (t *mockTxn) GetMemBuffer() MemBuffer {
 	return nil
 }
 
+func (t *mockTxn) GetMemBufferSnapshot() MemBuffer {
+	return nil
+}
+
 func (t *mockTxn) GetSnapshot() Snapshot {
 	return nil
 }
 
+<<<<<<< HEAD:kv/interface_mock_test.go
 func (t *mockTxn) GetUnionStore() UnionStore {
 	return nil
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:kv/mock.go
 func (t *mockTxn) NewStagingBuffer() MemBuffer {
 	return nil
 }
@@ -133,8 +142,29 @@ func (t *mockTxn) GetVars() *Variables {
 	return nil
 }
 
+<<<<<<< HEAD:kv/interface_mock_test.go
 // newMockTxn new a mockTxn.
 func newMockTxn() Transaction {
+=======
+func (t *mockTxn) ResetStmtKeyExistErrs() {
+
+}
+
+func (t *mockTxn) MergeStmtKeyExistErrs() {
+
+}
+
+func (t *mockTxn) DeleteWithNeedLock(k Key) error {
+	return t.Delete(k)
+}
+
+func (t *mockTxn) GetFlags(ctx context.Context, k Key) memdb.KeyFlags {
+	return 0
+}
+
+// NewMockTxn new a mockTxn.
+func NewMockTxn() Transaction {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:kv/mock.go
 	return &mockTxn{
 		opts:  make(map[Option]interface{}),
 		valid: true,
@@ -169,8 +199,13 @@ func (s *mockStorage) BeginWithExactStaleness(txnScope string, prevSec uint64) (
 
 func (s *mockStorage) GetSnapshot(ver Version) Snapshot {
 	return &mockSnapshot{
+<<<<<<< HEAD:kv/interface_mock_test.go
 		store: newMemDB(),
 	}
+=======
+		store: NewMemDbBuffer(),
+	}, nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1:kv/mock.go
 }
 
 func (s *mockStorage) Close() error {

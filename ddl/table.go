@@ -15,7 +15,10 @@ package ddl
 
 import (
 	"fmt"
+<<<<<<< HEAD
 	"strconv"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"sync/atomic"
 	"time"
 
@@ -578,6 +581,7 @@ func onRebaseAutoID(store kv.Storage, t *meta.Meta, job *model.Job, tp autoid.Al
 		job.State = model.JobStateCancelled
 		return ver, errors.Trace(err)
 	}
+<<<<<<< HEAD
 	if alloc := tbl.Allocators(nil).Get(tp); alloc != nil {
 		// The next value to allocate is `newBase`.
 		newEnd := newBase - 1
@@ -587,6 +591,33 @@ func onRebaseAutoID(store kv.Storage, t *meta.Meta, job *model.Job, tp autoid.Al
 		}
 	}
 	ver, err = updateVersionAndTableInfo(t, job, tblInfo, true)
+=======
+	// The operation of the minus 1 to make sure that the current value doesn't be used,
+	// the next Alloc operation will get this value.
+	// Its behavior is consistent with MySQL.
+	err = tbl.RebaseAutoID(nil, newBase-1, false, tp)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
+	if err != nil {
+		return ver, errors.Trace(err)
+	}
+	job.FinishTableJob(model.JobStateDone, model.StatePublic, ver, tblInfo)
+	return ver, nil
+}
+
+func onModifyTableAutoIDCache(t *meta.Meta, job *model.Job) (int64, error) {
+	var cache int64
+	if err := job.DecodeArgs(&cache); err != nil {
+		job.State = model.JobStateCancelled
+		return 0, errors.Trace(err)
+	}
+
+	tblInfo, err := getTableInfoAndCancelFaultJob(t, job, job.SchemaID)
+	if err != nil {
+		return 0, errors.Trace(err)
+	}
+
+	tblInfo.AutoIdCache = cache
+	ver, err := updateVersionAndTableInfo(t, job, tblInfo, true)
 	if err != nil {
 		return ver, errors.Trace(err)
 	}
@@ -688,6 +719,7 @@ func onRenameTable(d *ddlCtx, t *meta.Meta, job *model.Job) (ver int64, _ error)
 		return ver, errors.Trace(err)
 	}
 
+<<<<<<< HEAD
 	ver, tblInfo, err := checkAndRenameTables(t, job, oldSchemaID, job.SchemaID, &tableName)
 	if err != nil {
 		return ver, errors.Trace(err)
@@ -735,12 +767,22 @@ func checkAndRenameTables(t *meta.Meta, job *model.Job, oldSchemaID int64, newSc
 		return ver, tblInfo, errors.Trace(err)
 	}
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	var autoTableID int64
 	var autoRandID int64
 	shouldDelAutoID := false
 	if newSchemaID != oldSchemaID {
 		shouldDelAutoID = true
 		autoTableID, err = t.GetAutoTableID(tblInfo.GetDBID(oldSchemaID), tblInfo.ID)
+<<<<<<< HEAD
+=======
+		if err != nil {
+			job.State = model.JobStateCancelled
+			return ver, errors.Trace(err)
+		}
+		autoRandID, err = t.GetAutoRandomID(tblInfo.GetDBID(oldSchemaID), tblInfo.ID)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			job.State = model.JobStateCancelled
 			return ver, tblInfo, errors.Trace(err)
@@ -779,6 +821,14 @@ func checkAndRenameTables(t *meta.Meta, job *model.Job, oldSchemaID int64, newSc
 	// Update the table's auto-increment ID.
 	if newSchemaID != oldSchemaID {
 		_, err = t.GenAutoTableID(newSchemaID, tblInfo.ID, autoTableID)
+<<<<<<< HEAD
+=======
+		if err != nil {
+			job.State = model.JobStateCancelled
+			return ver, errors.Trace(err)
+		}
+		_, err = t.GenAutoRandomID(newSchemaID, tblInfo.ID, autoRandID)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			job.State = model.JobStateCancelled
 			return ver, tblInfo, errors.Trace(err)

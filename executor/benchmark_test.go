@@ -835,7 +835,11 @@ func defaultHashJoinTestCase(cols []*types.FieldType, joinType core.JoinType, us
 	ctx.GetSessionVars().MaxChunkSize = variable.DefMaxChunkSize
 	ctx.GetSessionVars().StmtCtx.MemTracker = memory.NewTracker(-1, -1)
 	ctx.GetSessionVars().StmtCtx.DiskTracker = disk.NewTracker(-1, -1)
+<<<<<<< HEAD
 	ctx.GetSessionVars().SetIndexLookupJoinConcurrency(4)
+=======
+	ctx.GetSessionVars().IndexLookupJoinConcurrency = 4
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tc := &hashJoinTestCase{rows: 100000, concurrency: 4, ctx: ctx, keyIdx: []int{0, 1}, rawData: wideString}
 	tc.cols = cols
 	tc.useOuterToBuild = useOuterToBuild
@@ -1536,6 +1540,7 @@ func prepare4MergeJoin(tc *mergeJoinTestCase, innerDS, outerDS *mockDataSource, 
 
 	defaultValues := make([]types.Datum, len(innerCols))
 
+<<<<<<< HEAD
 	var leftExec, rightExec Executor
 	if sorted {
 		leftSortExec := &SortExec{
@@ -1560,6 +1565,30 @@ func prepare4MergeJoin(tc *mergeJoinTestCase, innerDS, outerDS *mockDataSource, 
 	} else {
 		leftExec = innerDS
 		rightExec = outerDS
+=======
+	// only benchmark inner join
+	e := &MergeJoinExec{
+		stmtCtx:      tc.ctx.GetSessionVars().StmtCtx,
+		baseExecutor: newBaseExecutor(tc.ctx, joinSchema, 3, leftExec, rightExec),
+		compareFuncs: compareFuncs,
+		joiner: newJoiner(
+			tc.ctx,
+			0,
+			false,
+			defaultValues,
+			nil,
+			retTypes(leftExec),
+			retTypes(rightExec),
+			nil,
+		),
+		isOuterJoin: false,
+	}
+
+	e.innerTable = &mergeJoinTable{
+		isInner:    true,
+		childIndex: 1,
+		joinKeys:   innerJoinKeys,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	var e Executor
@@ -1869,6 +1898,7 @@ func BenchmarkSortExec(b *testing.B) {
 	}
 }
 
+<<<<<<< HEAD
 type limitCase struct {
 	rows                  int
 	offset                int
@@ -1986,6 +2016,8 @@ func BenchmarkLimitExec(b *testing.B) {
 	}
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func BenchmarkReadLastLinesOfHugeLine(b *testing.B) {
 	// step 1. initial a huge line log file
 	hugeLine := make([]byte, 1024*1024*10)
@@ -2018,6 +2050,7 @@ func BenchmarkReadLastLinesOfHugeLine(b *testing.B) {
 		}
 	}
 }
+<<<<<<< HEAD
 
 func BenchmarkAggPartialResultMapperMemoryUsage(b *testing.B) {
 	b.ReportAllocs()
@@ -2073,3 +2106,5 @@ func BenchmarkAggPartialResultMapperMemoryUsage(b *testing.B) {
 		})
 	}
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

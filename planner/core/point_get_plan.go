@@ -30,13 +30,17 @@ import (
 	"github.com/pingcap/tidb/infoschema"
 	"github.com/pingcap/tidb/kv"
 	"github.com/pingcap/tidb/planner/property"
+	"github.com/pingcap/tidb/planner/util"
 	"github.com/pingcap/tidb/privilege"
 	"github.com/pingcap/tidb/sessionctx"
 	"github.com/pingcap/tidb/sessionctx/stmtctx"
 	"github.com/pingcap/tidb/table/tables"
 	"github.com/pingcap/tidb/types"
 	driver "github.com/pingcap/tidb/types/parser_driver"
+<<<<<<< HEAD
 	tidbutil "github.com/pingcap/tidb/util"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/util/logutil"
 	"github.com/pingcap/tidb/util/math"
 	"github.com/pingcap/tidb/util/plancodec"
@@ -70,6 +74,8 @@ type PointGetPlan struct {
 	LockWaitTime       int64
 	partitionColumnPos int
 	Columns            []*model.ColumnInfo
+
+	Path *util.AccessPath
 }
 
 type nameValuePair struct {
@@ -261,6 +267,8 @@ type BatchPointGetPlan struct {
 	Lock             bool
 	LockWaitTime     int64
 	Columns          []*model.ColumnInfo
+
+	Path *util.AccessPath
 }
 
 // Clone implements PhysicalPlan interface.
@@ -426,6 +434,7 @@ func TryFastPlan(ctx sessionctx.Context, node ast.Node) (p Plan) {
 		if fp := tryWhereIn2BatchPointGet(ctx, x); fp != nil {
 			if checkFastPlanPrivilege(ctx, fp.dbName, fp.TblInfo.Name.L, mysql.SelectPriv) != nil {
 				return
+<<<<<<< HEAD
 			}
 			if tidbutil.IsMemDB(fp.dbName) {
 				return nil
@@ -435,6 +444,14 @@ func TryFastPlan(ctx sessionctx.Context, node ast.Node) (p Plan) {
 			return
 		}
 		if fp := tryPointGetPlan(ctx, x, isForUpdateReadSelectLock(x.LockInfo)); fp != nil {
+=======
+			}
+			fp.Lock, fp.LockWaitTime = getLockWaitTime(ctx, x.LockTp)
+			p = fp
+			return
+		}
+		if fp := tryPointGetPlan(ctx, x, isForUpdateReadSelectLock(x.LockTp)); fp != nil {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			if checkFastPlanPrivilege(ctx, fp.dbName, fp.TblInfo.Name.L, mysql.SelectPriv) != nil {
 				return nil
 			}
@@ -448,7 +465,11 @@ func TryFastPlan(ctx sessionctx.Context, node ast.Node) (p Plan) {
 				p = tableDual.Init(ctx, &property.StatsInfo{}, 0)
 				return
 			}
+<<<<<<< HEAD
 			fp.Lock, fp.LockWaitTime = getLockWaitTime(ctx, x.LockInfo)
+=======
+			fp.Lock, fp.LockWaitTime = getLockWaitTime(ctx, x.LockTp)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			p = fp
 			return
 		}
@@ -831,7 +852,11 @@ func tryPointGetPlan(ctx sessionctx.Context, selStmt *ast.SelectStmt, check bool
 		}
 
 		p := newPointGetPlan(ctx, dbName, schema, tbl, names)
+<<<<<<< HEAD
 		p.Handle = kv.IntHandle(handlePair.value.GetInt64())
+=======
+		p.Handle = handlePair.value.GetInt64()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		p.UnsignedHandle = mysql.HasUnsignedFlag(fieldType.Flag)
 		p.HandleParam = handlePair.param
 		p.PartitionInfo = partitionInfo
@@ -865,6 +890,26 @@ func tryPointGetPlan(ctx sessionctx.Context, selStmt *ast.SelectStmt, check bool
 			p.IsTableDual = true
 			return p
 		}
+<<<<<<< HEAD
+=======
+		if isTableDual {
+			if check && latestIndexes == nil {
+				latestIndexes, check, err = getLatestIndexInfo(ctx, tbl.ID, 0)
+				if err != nil {
+					logutil.BgLogger().Warn("get information schema failed", zap.Error(err))
+					return nil
+				}
+			}
+			if check {
+				if latestIndex, ok := latestIndexes[idxInfo.ID]; !ok || latestIndex.State != model.StatePublic {
+					continue
+				}
+			}
+			p := newPointGetPlan(ctx, tblName.Schema.O, schema, tbl, names)
+			p.IsTableDual = true
+			return p
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 		idxValues, idxValueParams := getIndexValues(idxInfo, pairs)
 		if idxValues == nil {
@@ -920,7 +965,11 @@ func newPointGetPlan(ctx sessionctx.Context, dbName string, schema *expression.S
 
 func checkFastPlanPrivilege(ctx sessionctx.Context, dbName, tableName string, checkTypes ...mysql.PrivilegeType) error {
 	pm := privilege.GetPrivilegeManager(ctx)
+<<<<<<< HEAD
 	var visitInfos []visitInfo
+=======
+	visitInfos := []visitInfo{}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	for _, checkType := range checkTypes {
 		if pm != nil && !pm.RequestVerification(ctx.GetSessionVars().ActiveRoles, dbName, tableName, "", checkType) {
 			return errors.New("privilege check fail")
@@ -1085,10 +1134,17 @@ func getNameValuePairs(stmtCtx *stmtctx.StatementContext, tbl *model.TableInfo, 
 		if col == nil || // Handling the case when the column is _tidb_rowid.
 			(col.Tp == mysql.TypeString && col.Collate == charset.CollationBin) { // This type we needn't to pad `\0` in here.
 			return append(nvPairs, nameValuePair{colName: colName.Name.Name.L, value: d, param: param}), false
+<<<<<<< HEAD
 		}
 		if !checkCanConvertInPointGet(col, d) {
 			return nil, false
 		}
+=======
+		}
+		if !checkCanConvertInPointGet(col, d) {
+			return nil, false
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		dVal, err := d.ConvertTo(stmtCtx, &col.FieldType)
 		if err != nil {
 			if terror.ErrorEqual(types.ErrOverflow, err) {

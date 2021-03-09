@@ -16,7 +16,10 @@ package executor_test
 import (
 	"context"
 	"fmt"
+<<<<<<< HEAD
 	"strings"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"sync"
 	"time"
 
@@ -520,6 +523,16 @@ func (s *testPointGetSuite) TestSelectCheckVisibility(c *C) {
 	checkSelectResultError("select * from t", tikv.ErrGCTooEarly)
 }
 
+func (s *testPointGetSuite) TestNullValues(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t")
+	tk.MustExec("create table t ( id bigint(10) primary key, f varchar(191) default null, unique key `idx_f` (`f`))")
+	tk.MustExec(`insert into t values (1, "")`)
+	rs := tk.MustQuery(`select * from t where f in (null)`).Rows()
+	c.Assert(len(rs), Equals, 0)
+}
+
 func (s *testPointGetSuite) TestReturnValues(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -536,7 +549,11 @@ func (s *testPointGetSuite) TestReturnValues(c *C) {
 	txnCtx := tk.Se.GetSessionVars().TxnCtx
 	val, ok := txnCtx.GetKeyInPessimisticLockCache(pk)
 	c.Assert(ok, IsTrue)
+<<<<<<< HEAD
 	handle, err := tablecodec.DecodeHandleInUniqueIndexValue(val, false)
+=======
+	handle, err := tablecodec.DecodeHandle(val)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, IsNil)
 	rowKey := tablecodec.EncodeRowKeyWithHandle(tid, handle)
 	_, ok = txnCtx.GetKeyInPessimisticLockCache(rowKey)
@@ -544,6 +561,7 @@ func (s *testPointGetSuite) TestReturnValues(c *C) {
 	tk.MustExec("rollback")
 }
 
+<<<<<<< HEAD
 func (s *testPointGetSuite) TestClusterIndexPointGet(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -758,6 +776,44 @@ func (s *testPointGetSuite) TestPointGetWriteLock(c *C) {
 	explain = fmt.Sprintf("%v", rows[0])
 	c.Assert(explain, Matches, ".*num_rpc.*")
 	tk.MustExec("unlock tables")
+=======
+func (s *testPointGetSuite) TestWithTiDBSnapshot(c *C) {
+	// Fix issue https://github.com/pingcap/tidb/issues/22436
+	// Point get should not use math.MaxUint64 when variable @@tidb_snapshot is set.
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists xx")
+	tk.MustExec(`create table xx (id int key)`)
+	tk.MustExec(`insert into xx values (1), (7)`)
+
+	// Unrelated code, to make this test pass in the unit test.
+	// The `tikv_gc_safe_point` global variable must be there, otherwise the 'set @@tidb_snapshot' operation fails.
+	timeSafe := time.Now().Add(-48 * 60 * 60 * time.Second).Format("20060102-15:04:05 -0700 MST")
+	safePointSQL := `INSERT HIGH_PRIORITY INTO mysql.tidb VALUES ('tikv_gc_safe_point', '%[1]s', '')
+			       ON DUPLICATE KEY
+			       UPDATE variable_value = '%[1]s'`
+	tk.MustExec(fmt.Sprintf(safePointSQL, timeSafe))
+
+	// Record the current tso.
+	tk.MustExec("begin")
+	tso := tk.Se.GetSessionVars().TxnCtx.StartTS
+	tk.MustExec("rollback")
+	c.Assert(tso > 0, IsTrue)
+
+	// Insert data.
+	tk.MustExec("insert into xx values (8)")
+
+	// Change the snapshot before the tso, the inserted data should not be seen.
+	tk.MustExec(fmt.Sprintf("set @@tidb_snapshot = '%d'", tso))
+	tk.MustQuery("select * from xx where id = 8").Check(testkit.Rows())
+
+	tk.MustQuery("select * from xx").Check(testkit.Rows("1", "7"))
+
+	// Check the query inside a transaction.
+	tk.MustExec("begin")
+	tk.MustQuery("select * from xx where id = 8").Check(testkit.Rows())
+	tk.MustExec("rollback")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testPointGetSuite) TestPointGetLockExistKey(c *C) {
@@ -770,7 +826,10 @@ func (s *testPointGetSuite) TestPointGetLockExistKey(c *C) {
 
 		errCh <- tk1.ExecToErr("use test")
 		errCh <- tk2.ExecToErr("use test")
+<<<<<<< HEAD
 		tk1.Se.GetSessionVars().EnableClusteredIndex = false
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 		errCh <- tk1.ExecToErr(fmt.Sprintf("drop table if exists %s", tableName))
 		errCh <- tk1.ExecToErr(fmt.Sprintf("create table %s(id int, v int, k int, %s key0(id, v))", tableName, key))
@@ -793,7 +852,11 @@ func (s *testPointGetSuite) TestPointGetLockExistKey(c *C) {
 		errCh <- tk2.ExecToErr(fmt.Sprintf("insert into %s values(2, 2, 2)", tableName))
 		go func() {
 			errCh <- tk2.ExecToErr(fmt.Sprintf("insert into %s values(1, 1, 10)", tableName))
+<<<<<<< HEAD
 			// tk2.MustExec(fmt.Sprintf("insert into %s values(1, 1, 10)", tableName))
+=======
+			//tk2.MustExec(fmt.Sprintf("insert into %s values(1, 1, 10)", tableName))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			doneCh <- struct{}{}
 		}()
 		time.Sleep(150 * time.Millisecond)
@@ -884,6 +947,7 @@ func (s *testPointGetSuite) TestPointGetLockExistKey(c *C) {
 		c.Assert(err, IsNil)
 	}
 }
+<<<<<<< HEAD
 
 func (s *testPointGetSuite) TestWithTiDBSnapshot(c *C) {
 	// Fix issue https://github.com/pingcap/tidb/issues/22436
@@ -917,3 +981,5 @@ func (s *testPointGetSuite) TestWithTiDBSnapshot(c *C) {
 
 	tk.MustQuery("select * from xx").Check(testkit.Rows("1", "7"))
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

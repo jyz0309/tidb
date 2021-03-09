@@ -54,6 +54,7 @@ type InfoSchema interface {
 	TableIsView(schema, table model.CIStr) bool
 	// TableIsSequence indicates whether the schema.table is a sequence.
 	TableIsSequence(schema, table model.CIStr) bool
+<<<<<<< HEAD
 	FindTableByPartitionID(partitionID int64) (table.Table, *model.DBInfo, *model.PartitionDefinition)
 	// BundleByName is used to get a rule bundle.
 	BundleByName(name string) (*placement.Bundle, bool)
@@ -61,6 +62,9 @@ type InfoSchema interface {
 	SetBundle(*placement.Bundle)
 	// RuleBundles will return a copy of all rule bundles.
 	RuleBundles() []*placement.Bundle
+=======
+	FindTableByPartitionID(partitionID int64) (table.Table, *model.DBInfo)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 type sortedTables []table.Table
@@ -136,7 +140,10 @@ func MockInfoSchema(tbList []*model.TableInfo) InfoSchema {
 func MockInfoSchemaWithSchemaVer(tbList []*model.TableInfo, schemaVer int64) InfoSchema {
 	result := &infoSchema{}
 	result.schemaMap = make(map[string]*schemaTables)
+<<<<<<< HEAD
 	result.ruleBundleMap = make(map[string]*placement.Bundle)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	result.sortedTablesBuckets = make([]sortedTables, bucketCount)
 	dbInfo := &model.DBInfo{ID: 0, Name: model.NewCIStr("test"), Tables: tbList}
 	tableNames := &schemaTables{

@@ -21,6 +21,7 @@ import (
 	"io"
 	"io/ioutil"
 	"math/rand"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -80,6 +81,10 @@ func newTestServerClient() *testServerClient {
 		statusPort:   0,
 		statusScheme: "http",
 	}
+}
+
+func getPortFromTCPAddr(addr net.Addr) uint {
+	return uint(addr.(*net.TCPAddr).Port)
 }
 
 // statusURL return the full URL of a status path
@@ -503,6 +508,7 @@ func (cli *testServerClient) runTestLoadDataForSlowLog(c *C, server *Server) {
 		checkPlan(rows, expectedPlan)
 	})
 }
+<<<<<<< HEAD
 
 func (cli *testServerClient) prepareLoadDataFile(c *C, path string, rows ...string) {
 	fp, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
@@ -805,6 +811,8 @@ func (cli *testServerClient) checkRows(c *C, rows *sql.Rows, expectedRows ...str
 	}
 	c.Assert(strings.Join(result, "\n"), Equals, strings.Join(expectedRows, "\n"))
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 func (cli *testServerClient) runTestLoadData(c *C, server *Server) {
 	// create a file and write data.
@@ -1346,6 +1354,74 @@ func (cli *testServerClient) runTestLoadData(c *C, server *Server) {
 	})
 }
 
+func (cli *testServerClient) runTestLoadDataAutoRandom(c *C) {
+	path := "/tmp/load_data_txn_error.csv"
+
+	fp, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	c.Assert(err, IsNil)
+	c.Assert(fp, NotNil)
+
+	defer func() {
+		_ = os.Remove(path)
+	}()
+
+	cksum1 := 0
+	cksum2 := 0
+	for i := 0; i < 50000; i++ {
+		n1 := rand.Intn(1000)
+		n2 := rand.Intn(1000)
+		str1 := strconv.Itoa(n1)
+		str2 := strconv.Itoa(n2)
+		row := str1 + "\t" + str2
+		_, err := fp.WriteString(row)
+		c.Assert(err, IsNil)
+		_, err = fp.WriteString("\n")
+		c.Assert(err, IsNil)
+
+		if i == 0 {
+			cksum1 = n1
+			cksum2 = n2
+		} else {
+			cksum1 = cksum1 ^ n1
+			cksum2 = cksum2 ^ n2
+		}
+	}
+
+	err = fp.Close()
+	c.Assert(err, IsNil)
+
+	cli.runTestsOnNewDB(c, func(config *mysql.Config) {
+		config.AllowAllFiles = true
+		config.Params = map[string]string{"sql_mode": "''"}
+	}, "load_data_batch_dml", func(dbt *DBTest) {
+		// Set batch size, and check if load data got a invalid txn error.
+		dbt.mustExec("set @@session.tidb_dml_batch_size = 128")
+		dbt.mustExec("drop table if exists t")
+		dbt.mustExec("create table t(c1 bigint auto_random primary key, c2 bigint, c3 bigint)")
+		dbt.mustExec(fmt.Sprintf("load data local infile %q into table t (c2, c3)", path))
+
+		var (
+			rowCnt    int
+			colCkSum1 int
+			colCkSum2 int
+		)
+		rows := dbt.mustQuery("select count(*) from t")
+		dbt.Check(rows.Next(), IsTrue, Commentf("unexpected data"))
+		err = rows.Scan(&rowCnt)
+		dbt.Check(err, IsNil)
+		dbt.Check(rowCnt, DeepEquals, 50000)
+		dbt.Check(rows.Next(), IsFalse, Commentf("unexpected data"))
+
+		rows = dbt.mustQuery("select bit_xor(c2), bit_xor(c3) from t")
+		dbt.Check(rows.Next(), IsTrue, Commentf("unexpected data"))
+		err = rows.Scan(&colCkSum1, &colCkSum2)
+		dbt.Check(err, IsNil)
+		dbt.Check(colCkSum1, DeepEquals, cksum1)
+		dbt.Check(colCkSum2, DeepEquals, cksum2)
+		dbt.Check(rows.Next(), IsFalse, Commentf("unexpected data"))
+	})
+}
+
 func (cli *testServerClient) runTestConcurrentUpdate(c *C) {
 	dbName := "Concurrent"
 	cli.runTestsOnNewDB(c, func(config *mysql.Config) {
@@ -1636,6 +1712,7 @@ func (cli *testServerClient) runTestStatusAPI(c *C) {
 func (cli *testServerClient) runFailedTestMultiStatements(c *C) {
 	cli.runTestsOnNewDB(c, nil, "FailedMultiStatements", func(dbt *DBTest) {
 
+<<<<<<< HEAD
 		// Default is now OFF in new installations.
 		// It is still WARN in upgrade installations (for now)
 		_, err := dbt.db.Exec("SELECT 1; SELECT 1; SELECT 2; SELECT 3;")
@@ -1643,6 +1720,9 @@ func (cli *testServerClient) runFailedTestMultiStatements(c *C) {
 
 		// Change to WARN (legacy mode)
 		dbt.mustExec("SET tidb_multi_statement_mode='WARN'")
+=======
+		// Default of WARN
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		dbt.mustExec("CREATE TABLE `test` (`id` int(11) NOT NULL, `value` int(11) NOT NULL) ")
 		res := dbt.mustExec("INSERT INTO test VALUES (1, 1)")
 		count, err := res.RowsAffected()
@@ -1653,7 +1733,18 @@ func (cli *testServerClient) runFailedTestMultiStatements(c *C) {
 		c.Assert(err, IsNil, Commentf("res.RowsAffected() returned error"))
 		c.Assert(count, Equals, int64(1))
 		rows := dbt.mustQuery("show warnings")
+<<<<<<< HEAD
 		cli.checkRows(c, rows, "Warning 8130 client has multi-statement capability disabled. Run SET GLOBAL tidb_multi_statement_mode='ON' after you understand the security risk")
+=======
+		c.Assert(rows.Next(), IsTrue)
+		var level, code, message string
+		err = rows.Scan(&level, &code, &message)
+		c.Assert(err, IsNil)
+		c.Assert(rows.Close(), IsNil)
+		c.Assert(level, Equals, "Warning")
+		c.Assert(code, Equals, "8130")
+		c.Assert(message, Equals, "client has multi-statement capability disabled. Run SET GLOBAL tidb_multi_statement_mode='ON' after you understand the security risk")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		var out int
 		rows = dbt.mustQuery("SELECT value FROM test WHERE id=1;")
 		if rows.Next() {
@@ -1667,6 +1758,14 @@ func (cli *testServerClient) runFailedTestMultiStatements(c *C) {
 			dbt.Error("no data")
 		}
 
+<<<<<<< HEAD
+=======
+		// Change to OFF = Does not work
+		dbt.mustExec("SET tidb_multi_statement_mode='OFF'")
+		_, err = dbt.db.Exec("SELECT 1; SELECT 1; SELECT 2; SELECT 3;")
+		c.Assert(err.Error(), Equals, "Error 8130: client has multi-statement capability disabled. Run SET GLOBAL tidb_multi_statement_mode='ON' after you understand the security risk")
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		// Change to ON = Fully supported, TiDB legacy. No warnings or Errors.
 		dbt.mustExec("SET tidb_multi_statement_mode='ON';")
 		dbt.mustExec("DROP TABLE IF EXISTS test")

@@ -123,7 +123,11 @@ func clearStorage(store kv.Storage) error {
 	return txn.Commit(context.Background())
 }
 
+<<<<<<< HEAD
 func clearETCD(ebd kv.EtcdBackend) error {
+=======
+func clearETCD(ebd tikv.EtcdBackend) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	endpoints, err := ebd.EtcdAddrs()
 	if err != nil {
 		return err
@@ -179,11 +183,19 @@ func (s *testSessionSuiteBase) SetUpSuite(c *C) {
 	if *withTiKV {
 		initPdAddrs()
 		s.pdAddr = <-pdAddrChan
+<<<<<<< HEAD
 		var d store.TiKVDriver
 		config.UpdateGlobal(func(conf *config.Config) {
 			conf.TxnLocalLatches.Enabled = false
 		})
 		store, err := d.Open(fmt.Sprintf("tikv://%s?disableGC=true", s.pdAddr))
+=======
+		var d tikv.Driver
+		config.UpdateGlobal(func(conf *config.Config) {
+			conf.TxnLocalLatches.Enabled = false
+		})
+		store, err := d.Open(fmt.Sprintf("tikv://%s", s.pdAddr))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		c.Assert(err, IsNil)
 		err = clearStorage(store)
 		c.Assert(err, IsNil)
@@ -2142,8 +2154,11 @@ func (s *testSchemaSuite) TestRetrySchemaChangeForEmptyChange(c *C) {
 	tk.MustExec("insert into t1 values (1)")
 	tk.MustExec("commit")
 
+<<<<<<< HEAD
 	// TODO remove this enable after fixing table delta map.
 	tk.MustExec("set tidb_enable_amend_pessimistic_txn = 1")
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("begin pessimistic")
 	tk1.MustExec("alter table t add k int")
 	tk.MustExec("select * from t for update")
@@ -3111,6 +3126,18 @@ func (s *testSessionSuite2) TestStmtHints(c *C) {
 	c.Assert(tk.Se.GetSessionVars().StmtCtx.GetWarnings(), HasLen, 1)
 	c.Assert(tk.Se.GetSessionVars().StmtCtx.GetWarnings()[0].Err.Error(), Equals, "[util:3126]Hint MEMORY_QUOTA(`3145728`) is ignored as conflicting/duplicated.")
 
+	tk.MustExec("use test")
+	tk.MustExec("create table t1(a int);")
+	tk.MustExec("insert /*+ MEMORY_QUOTA(1 MB) */ into t1 (a) values (1);")
+	val = int64(1) * 1024 * 1024
+	c.Assert(tk.Se.GetSessionVars().StmtCtx.MemTracker.CheckBytesLimit(val), IsTrue)
+
+	tk.MustExec("insert /*+ MEMORY_QUOTA(1 MB) */  into t1 select /*+ MEMORY_QUOTA(3 MB) */ * from t1;")
+	val = int64(1) * 1024 * 1024
+	c.Assert(tk.Se.GetSessionVars().StmtCtx.MemTracker.CheckBytesLimit(val), IsTrue)
+	c.Assert(tk.Se.GetSessionVars().StmtCtx.GetWarnings(), HasLen, 1)
+	c.Assert(tk.Se.GetSessionVars().StmtCtx.GetWarnings()[0].Err.Error(), Equals, "[util:3126]Hint MEMORY_QUOTA(`3145728`) is ignored as conflicting/duplicated.")
+
 	// Test NO_INDEX_MERGE hint
 	tk.Se.GetSessionVars().SetEnableIndexMerge(true)
 	tk.MustExec("select /*+ NO_INDEX_MERGE() */ 1;")
@@ -3248,6 +3275,7 @@ func (s *testSessionSuite2) TestPerStmtTaskID(c *C) {
 	c.Assert(taskID1 != taskID2, IsTrue)
 }
 
+<<<<<<< HEAD
 func (s *testSessionSuite2) TestSetTxnScope(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.store)
 	// assert default value
@@ -3612,6 +3640,8 @@ func (s *testSessionSuite3) TestSetVarHint(c *C) {
 	c.Assert(tk.Se.GetSessionVars().StmtCtx.GetWarnings()[0].Err.Error(), Equals, "[planner:3126]Hint SET_VAR(group_concat_max_len=2048) is ignored as conflicting/duplicated.")
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // TestDeprecateSlowLogMasking should be in serial suite because it changes a global variable.
 func (s *testSessionSerialSuite) TestDeprecateSlowLogMasking(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.store)
@@ -3641,6 +3671,7 @@ func (s *testSessionSerialSuite) TestDeprecateSlowLogMasking(c *C) {
 	tk.MustQuery("select @@session.tidb_slow_log_masking").Check(testkit.Rows("0"))
 }
 
+<<<<<<< HEAD
 func (s *testSessionSerialSuite) TestDoDDLJobQuit(c *C) {
 	// test https://github.com/pingcap/tidb/issues/18714, imitate DM's use environment
 	// use isolated store, because in below failpoint we will cancel its context
@@ -3662,6 +3693,8 @@ func (s *testSessionSerialSuite) TestDoDDLJobQuit(c *C) {
 	c.Assert(err.Error(), Equals, "context canceled")
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testBackupRestoreSuite) TestBackupAndRestore(c *C) {
 	// only run BR SQL integration test with tikv store.
 	if *withTiKV {
@@ -3729,8 +3762,30 @@ func (s *testSessionSuite2) TestSelectLockInShare(c *C) {
 	tk1.MustExec("DROP TABLE t_sel_in_share")
 }
 
+<<<<<<< HEAD
 func (s *testSessionSerialSuite) TestCoprocessorOOMAction(c *C) {
 	// Assert Coprocessor OOMAction
+=======
+func (s *testSessionSuite2) TestSetEnableRateLimitAction(c *C) {
+	tk := testkit.NewTestKitWithInit(c, s.store)
+	// assert default value
+	result := tk.MustQuery("select @@tidb_enable_rate_limit_action;")
+	result.Check(testkit.Rows("on"))
+
+	// assert set sys variable
+	tk.MustExec("set global tidb_enable_rate_limit_action= '0';")
+	tk.Se.Close()
+
+	se, err := session.CreateSession4Test(s.store)
+	c.Check(err, IsNil)
+	tk.Se = se
+	result = tk.MustQuery("select @@tidb_enable_rate_limit_action;")
+	result.Check(testkit.Rows("0"))
+}
+
+func (s *testSessionSerialSuite) TestCoprocessorOOMAction(c *C) {
+	//Assert Coprocessor OOMAction
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
 	tk.MustExec(`set @@tidb_wait_split_region_finish=1`)
@@ -3855,6 +3910,7 @@ func (s *testSessionSerialSuite) TestDefaultWeekFormat(c *C) {
 	tk2.MustQuery("select week('2020-02-02'), @@default_week_format, week('2020-02-02');").Check(testkit.Rows("6 4 6"))
 }
 
+<<<<<<< HEAD
 func (s *testSessionSerialSuite) TestIssue21944(c *C) {
 	tk1 := testkit.NewTestKitWithInit(c, s.store)
 	_, err := tk1.Exec("set @@tidb_current_ts=1;")
@@ -4142,6 +4198,8 @@ func (s *testSessionSerialSuite) TestTiKVSystemVars(c *C) {
 
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testSessionSerialSuite) TestProcessInfoIssue22068(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -4160,6 +4218,91 @@ func (s *testSessionSerialSuite) TestProcessInfoIssue22068(c *C) {
 	wg.Wait()
 }
 
+<<<<<<< HEAD
+=======
+func (s *testSessionSuite2) TestNonAutocommitTxnRetry(c *C) {
+	tk1 := testkit.NewTestKitWithInit(c, s.store)
+	tk1.MustExec("drop table if exists t")
+	tk1.MustExec("create table t(pk varchar(50), c1 varchar(50), c2 varchar(50), key k1(c1, c2), primary key(pk))")
+	tk1.MustExec("insert into t values ('1', '10', '100')")
+
+	tk1.MustExec("set tidb_disable_txn_auto_retry = 0")
+	tk1.MustExec("set autocommit = 0")
+	tk1.MustExec("set tidb_txn_mode = ''")
+	tk2 := testkit.NewTestKitWithInit(c, s.store)
+	tk1.MustExec("update t set c1 = '11' where pk = '1'")
+	tk1.MustExec("update t set c2 = '101' where pk = '1'")
+	tk2.MustExec("begin optimistic")
+	tk2.MustQuery("select * from t for update").Check(testkit.Rows("1 10 100"))
+	tk2.MustExec("commit")
+	tk1.MustExec("commit")
+	tk2.MustExec("admin check table t")
+	tk2.MustQuery("select * from t use index(k1)").Check(testkit.Rows("1 11 101"))
+	tk2.MustQuery("select * from t where pk = '1'").Check(testkit.Rows("1 11 101"))
+}
+
+func (s *testSessionSuite2) TestAutocommitTxnRetry(c *C) {
+	tk1 := testkit.NewTestKitWithInit(c, s.store)
+	tk1.MustExec("drop table if exists t")
+	tk1.MustExec("create table t(pk varchar(50), c1 varchar(50), c2 varchar(50), key k1(c1, c2), primary key(pk))")
+	tk1.MustExec("insert into t values ('1', '10', '100')")
+
+	tk1.MustExec("set tidb_disable_txn_auto_retry = 0")
+	tk1.MustExec("set autocommit = 0")
+	tk1.MustExec("begin optimistic")
+	tk2 := testkit.NewTestKitWithInit(c, s.store)
+	tk1.MustExec("update t set c1 = '11' where pk = '1'")
+	tk1.MustExec("update t set c2 = '101' where pk = '1'")
+	tk2.MustExec("begin optimistic")
+	tk2.MustQuery("select * from t for update").Check(testkit.Rows("1 10 100"))
+	tk2.MustExec("commit")
+	tk1.MustExec("commit")
+	tk2.MustExec("admin check table t")
+	tk2.MustQuery("select * from t use index(k1)").Check(testkit.Rows("1 11 101"))
+	tk2.MustQuery("select * from t where pk = '1'").Check(testkit.Rows("1 11 101"))
+}
+
+func (s *testSessionSuite2) TestRetryWithSet(c *C) {
+	tk1 := testkit.NewTestKitWithInit(c, s.store)
+	tk1.MustExec("drop table if exists t")
+	tk1.MustExec("create table t(pk varchar(50), c1 bigint, c2 varchar(50), key k1(c1, c2), primary key(pk))")
+	tk1.MustExec("insert into t values ('1', '10', '100')")
+
+	tk1.MustExec("set tidb_disable_txn_auto_retry = 0")
+	tk1.MustExec("set autocommit = 0")
+	tk1.MustQuery("select * from t").Check(testkit.Rows("1 10 100"))
+	tk1.MustExec("set @a=@@tidb_current_ts")
+	tk1.MustExec("update t set c1 = @a where pk = '1'")
+	tk2 := testkit.NewTestKitWithInit(c, s.store)
+	tk2.MustExec("begin optimistic")
+	tk2.MustQuery("select * from t for update").Check(testkit.Rows("1 10 100"))
+	tk2.MustExec("commit")
+	tk1.MustExec("commit")
+	tk1.MustQuery("select c1 > 0 from t").Check(testkit.Rows("1"))
+}
+
+func (s *testSessionSuite2) TestRetryCommitWithSet(c *C) {
+	tk1 := testkit.NewTestKitWithInit(c, s.store)
+	tk1.MustExec("drop table if exists t")
+	tk1.MustExec("create table t(pk varchar(50), c1 varchar(50), c2 varchar(50), key k1(c1, c2), primary key(pk))")
+	tk1.MustExec("insert into t values ('1', '10', '100')")
+
+	tk1.MustExec("set tidb_disable_txn_auto_retry = 0")
+	tk1.MustExec("set autocommit = 0")
+	tk1.MustExec("set tidb_txn_mode = ''")
+	tk2 := testkit.NewTestKitWithInit(c, s.store)
+	tk1.MustExec("update t set c1 = '11' where pk = '1'")
+	tk1.MustExec("update t set c2 = '101' where pk = '1'")
+	tk2.MustExec("begin optimistic")
+	tk2.MustQuery("select * from t for update").Check(testkit.Rows("1 10 100"))
+	tk2.MustExec("commit")
+	tk1.MustExec("set autocommit = 1")
+	tk2.MustExec("admin check table t")
+	tk2.MustQuery("select * from t use index(k1)").Check(testkit.Rows("1 11 101"))
+	tk2.MustQuery("select * from t where pk = '1'").Check(testkit.Rows("1 11 101"))
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testSessionSerialSuite) TestParseWithParams(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.store)
 	se := tk.Se
@@ -4171,6 +4314,7 @@ func (s *testSessionSerialSuite) TestParseWithParams(c *C) {
 	defer func() {
 		se.GetSessionVars().InRestrictedSQL = origin
 	}()
+<<<<<<< HEAD
 	_, err := exec.ParseWithParams(context.TODO(), "SELECT 4")
 	c.Assert(err, IsNil)
 
@@ -4191,6 +4335,27 @@ func (s *testSessionSerialSuite) TestParseWithParams(c *C) {
 
 	// test invalid arguments to escape
 	_, err = exec.ParseWithParams(context.TODO(), "SELECT %?, %?", 3)
+=======
+	_, err := exec.ParseWithParams(context.Background(), "SELECT 4")
+	c.Assert(err, IsNil)
+
+	// test charset attack
+	stmt, err := exec.ParseWithParams(context.Background(), "SELECT * FROM test WHERE name = %? LIMIT 1", "\xbf\x27 OR 1=1 /*")
+	c.Assert(err, IsNil)
+
+	var sb strings.Builder
+	ctx := format.NewRestoreCtx(format.RestoreStringDoubleQuotes, &sb)
+	err = stmt.Restore(ctx)
+	c.Assert(err, IsNil)
+	c.Assert(sb.String(), Equals, "SELECT * FROM test WHERE name=_utf8mb4\"\xbf' OR 1=1 /*\" LIMIT 1")
+
+	// test invalid sql
+	_, err = exec.ParseWithParams(context.Background(), "SELECT")
+	c.Assert(err, ErrorMatches, ".*You have an error in your SQL syntax.*")
+
+	// test invalid arguments to escape
+	_, err = exec.ParseWithParams(context.Background(), "SELECT %?")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(err, ErrorMatches, "missing arguments.*")
 
 	// test noescape

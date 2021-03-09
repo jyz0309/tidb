@@ -86,7 +86,11 @@ func (s *Scanner) Value() []byte {
 
 // Next return next element.
 func (s *Scanner) Next() error {
+<<<<<<< HEAD
 	bo := NewBackofferWithVars(context.WithValue(context.Background(), TxnStartKey, s.snapshot.version.Ver), scannerNextMaxBackoff, s.snapshot.vars)
+=======
+	bo := NewBackofferWithVars(context.WithValue(context.Background(), txnStartKey, s.snapshot.version.Ver), scannerNextMaxBackoff, s.snapshot.vars)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if !s.valid {
 		return errors.New("scanner iterator is invalid")
 	}

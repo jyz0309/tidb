@@ -92,8 +92,13 @@ func (s *testPointGetSuite) TestPointGetPlanCache(c *C) {
 		"Delete N/A root  N/A",
 		"└─Point_Get 1.00 root table:t handle:1",
 	))
+<<<<<<< HEAD
 	tk.MustQuery("explain format = 'brief' select a from t where a = -1").Check(testkit.Rows(
 		"TableDual 0.00 root  rows:0",
+=======
+	tk.MustQuery("explain select a from t where a = -1").Check(testkit.Rows(
+		"TableDual_6 0.00 root  rows:0",
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	))
 	tk.MustExec(`prepare stmt0 from "select a from t where a = ?"`)
 	tk.MustExec("set @p0 = -1")
@@ -456,6 +461,7 @@ func (s *testPointGetSuite) TestIssue19141(c *C) {
 	tk.MustQuery("select * from t19141 order by c_int").Check(testkit.Rows("1", "2", "3", "4"))
 }
 
+<<<<<<< HEAD
 func (s *testPointGetSuite) TestSelectInMultiColumns(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -477,6 +483,8 @@ func (s *testPointGetSuite) TestSelectInMultiColumns(c *C) {
 	c.Assert(err.Error(), Equals, "[expression:1241]Operand should contain 3 column(s)")
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testPointGetSuite) TestUpdateWithTableReadLockWillFail(c *C) {
 	gcfg := config.GetGlobalConfig()
 	etl := gcfg.EnableTableLock
@@ -494,6 +502,7 @@ func (s *testPointGetSuite) TestUpdateWithTableReadLockWillFail(c *C) {
 	c.Assert(err.Error(), Equals, "[schema:1099]Table 'tbllock' was locked with a READ lock and can't be updated")
 }
 
+<<<<<<< HEAD
 func (s *testPointGetSuite) TestIssue20692(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -563,12 +572,36 @@ func (s *testPointGetSuite) TestBatchPointGetWithInvisibleIndex(c *C) {
 		"└─Selection 2.00 cop[tikv]  in(test.t.c1, 10, 20)",
 		"  └─TableFullScan 10000.00 cop[tikv] table:t keep order:false, stats:pseudo",
 	))
+=======
+func (s *testPointGetSuite) TestSelectInMultiColumns(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t2")
+	tk.MustExec("create table t2(a int, b int, c int, primary key(a, b, c));")
+	tk.MustExec("insert into t2 values (1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4)")
+	tk.MustQuery("select * from t2 where (a, b, c) in ((1, 1, 1));").Check(testkit.Rows("1 1 1"))
+
+	_, err := tk.Exec("select * from t2 where (a, b, c) in ((1, 1, 1, 1));")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[expression:1241]Operand should contain 3 column(s)")
+
+	_, err = tk.Exec("select * from t2 where (a, b, c) in ((1, 1, 1), (2, 2, 2, 2));")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[expression:1241]Operand should contain 3 column(s)")
+
+	_, err = tk.Exec("select * from t2 where (a, b, c) in ((1, 1), (2, 2, 2));")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[expression:1241]Operand should contain 3 column(s)")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testPointGetSuite) TestCBOShouldNotUsePointGet(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
+<<<<<<< HEAD
 	tk.Se.GetSessionVars().EnableClusteredIndex = true
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("drop tables if exists t1, t2, t3, t4, t5")
 	tk.MustExec("create table t1(id varchar(20) primary key)")
 	tk.MustExec("create table t2(id varchar(20), unique(id))")
@@ -589,7 +622,11 @@ func (s *testPointGetSuite) TestCBOShouldNotUsePointGet(c *C) {
 	}
 	s.testData.GetTestCases(c, &input, &output)
 	for i, sql := range input {
+<<<<<<< HEAD
 		plan := tk.MustQuery("explain format = 'brief' " + sql)
+=======
+		plan := tk.MustQuery("explain " + sql)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		res := tk.MustQuery(sql)
 		s.testData.OnRecord(func() {
 			output[i].SQL = sql

@@ -45,6 +45,11 @@ type CMSketch struct {
 	table        [][]uint32
 }
 
+// GetH2 get the the second part of `murmur3.Sum128()`, just for test.
+func (t *TopNMeta) GetH2() uint64 {
+	return t.h2
+}
+
 // NewCMSketch returns a new CM sketch.
 func NewCMSketch(d, w int32) *CMSketch {
 	tbl := make([][]uint32, d)
@@ -186,6 +191,21 @@ func (c *TopN) updateTopNWithDelta(d []byte, delta uint64, increase bool) bool {
 	return false
 }
 
+<<<<<<< HEAD
+=======
+// QueryTopN returns the results for (h1, h2) in murmur3.Sum128(), if not exists, return (0, false).
+func (c *CMSketch) QueryTopN(h1, h2 uint64, d []byte) (uint64, bool) {
+	if c.topN == nil {
+		return 0, false
+	}
+	meta := c.findTopNMeta(h1, h2, d)
+	if meta != nil {
+		return meta.Count, true
+	}
+	return 0, false
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // InsertBytes inserts the bytes value into the CM Sketch.
 func (c *CMSketch) InsertBytes(bytes []byte) {
 	c.InsertBytesByCount(bytes, 1)
@@ -207,12 +227,18 @@ func (c *CMSketch) considerDefVal(cnt uint64) bool {
 
 func updateValueBytes(c *CMSketch, t *TopN, d []byte, count uint64) {
 	h1, h2 := murmur3.Sum128(d)
+<<<<<<< HEAD
 	if oriCount, ok := t.QueryTopN(d); ok {
 		if count > oriCount {
 			t.updateTopNWithDelta(d, count-oriCount, true)
 		} else {
 			t.updateTopNWithDelta(d, oriCount-count, false)
 		}
+=======
+	if oriCount, ok := c.QueryTopN(h1, h2, d); ok {
+		deltaCount := count - oriCount
+		c.updateTopNWithDelta(h1, h2, d, deltaCount)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	c.setValue(h1, h2, count)
 }
@@ -266,6 +292,12 @@ func (c *CMSketch) QueryBytes(d []byte) uint64 {
 		failpoint.Return(uint64(val.(int)))
 	})
 	h1, h2 := murmur3.Sum128(d)
+<<<<<<< HEAD
+=======
+	if count, ok := c.QueryTopN(h1, h2, d); ok {
+		return count
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return c.queryHashValue(h1, h2)
 }
 
@@ -293,10 +325,17 @@ func (c *CMSketch) queryHashValue(h1, h2 uint64) uint64 {
 	res := vals[(c.depth-1)/2] + (vals[c.depth/2]-vals[(c.depth-1)/2])/2
 	if res > min+temp {
 		res = min + temp
+<<<<<<< HEAD
 	}
 	if res == 0 {
 		return uint64(0)
 	}
+=======
+	}
+	if res == 0 {
+		return uint64(0)
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	res = res - temp
 	if c.considerDefVal(uint64(res)) {
 		return c.defaultValue
@@ -327,6 +366,12 @@ func (c *CMSketch) MergeCMSketch(rc *CMSketch) error {
 	if c.depth != rc.depth || c.width != rc.width {
 		return errors.New("Dimensions of Count-Min Sketch should be the same")
 	}
+<<<<<<< HEAD
+=======
+	if len(c.topN) > 0 || len(rc.topN) > 0 {
+		c.mergeTopN(c.topN, rc.topN, numTopN, false)
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.count += rc.count
 	for i := range c.table {
 		for j := range c.table[i] {
@@ -348,6 +393,12 @@ func (c *CMSketch) MergeCMSketch4IncrementalAnalyze(rc *CMSketch, numTopN uint32
 	if c.depth != rc.depth || c.width != rc.width {
 		return errors.New("Dimensions of Count-Min Sketch should be the same")
 	}
+<<<<<<< HEAD
+=======
+	if len(c.topN) > 0 || len(rc.topN) > 0 {
+		c.mergeTopN(c.topN, rc.topN, numTopN, true)
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	for i := range c.table {
 		c.count = 0
 		for j := range c.table[i] {
@@ -568,10 +619,22 @@ func (c *TopN) BetweenCount(l, r []byte) uint64 {
 	return ret
 }
 
+<<<<<<< HEAD
 // Sort sorts the topn items.
 func (c *TopN) Sort() {
 	if c == nil {
 		return
+=======
+// TopNMap gets the origin topN map.
+func (c *CMSketch) TopNMap() map[uint64][]*TopNMeta {
+	return c.topN
+}
+
+// AppendTopN appends a topn into the cm sketch.
+func (c *CMSketch) AppendTopN(data []byte, count uint64) {
+	if c.topN == nil {
+		c.topN = make(map[uint64][]*TopNMeta)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	sort.Slice(c.TopN, func(i, j int) bool {
 		return bytes.Compare(c.TopN[i].Encoded, c.TopN[j].Encoded) < 0
@@ -679,4 +742,17 @@ func MergeTopN(topNs []*TopN, n uint32) (*TopN, []TopNMeta) {
 	}
 	finalTopN.Sort()
 	return &finalTopN, popedTopNPair
+}
+
+// CalcDefaultValForAnalyze calculate the default value for Analyze.
+// The value of it is count / NDV in CMSketch. This means count and NDV are not include topN.
+func (c *CMSketch) CalcDefaultValForAnalyze(NDV uint64) {
+	// If NDV <= TopN, all values should be in TopN.
+	// So we set c.defaultValue to 0 and return immediately.
+	if NDV <= uint64(len(c.topN)) {
+		c.defaultValue = 0
+		return
+	}
+	remainNDV := NDV - uint64(len(c.topN))
+	c.defaultValue = c.count / mathutil.MaxUint64(1, remainNDV)
 }

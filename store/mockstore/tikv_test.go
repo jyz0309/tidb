@@ -32,7 +32,11 @@ func (s testSuite) SetUpSuite(c *C) {}
 var _ = Suite(testSuite{})
 
 func (s testSuite) TestConfig(c *C) {
+<<<<<<< HEAD
 	tidbcfg.UpdateGlobal(func(conf *tidbcfg.Config) {
+=======
+	config.UpdateGlobal(func(conf *config.Config) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		conf.TxnLocalLatches = config.TxnLocalLatches{
 			Enabled:  true,
 			Capacity: 10240,
@@ -49,7 +53,11 @@ func (s testSuite) TestConfig(c *C) {
 	c.Assert(store.(LatchEnableChecker).IsLatchEnabled(), IsTrue)
 	store.Close()
 
+<<<<<<< HEAD
 	tidbcfg.UpdateGlobal(func(conf *tidbcfg.Config) {
+=======
+	config.UpdateGlobal(func(conf *config.Config) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		conf.TxnLocalLatches = config.TxnLocalLatches{
 			Enabled:  false,
 			Capacity: 10240,

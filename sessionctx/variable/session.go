@@ -50,6 +50,10 @@ import (
 	"github.com/pingcap/tidb/util/execdetails"
 	"github.com/pingcap/tidb/util/logutil"
 	"github.com/pingcap/tidb/util/rowcodec"
+<<<<<<< HEAD
+=======
+	"github.com/pingcap/tidb/util/storeutil"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/util/stringutil"
 	"github.com/pingcap/tidb/util/timeutil"
 	"github.com/twmb/murmur3"
@@ -126,6 +130,15 @@ func (r *retryInfoAutoIDs) getCurrent() (int64, bool) {
 	id := r.autoIDs[r.currentOffset]
 	r.currentOffset++
 	return id, true
+<<<<<<< HEAD
+=======
+}
+
+// stmtFuture is used to async get timestamp for statement.
+type stmtFuture struct {
+	future   oracle.Future
+	cachedTS uint64
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // TransactionContext is used to store variables that has transaction scope.
@@ -162,6 +175,7 @@ type TransactionContext struct {
 	StatementCount int
 	CouldRetry     bool
 	IsPessimistic  bool
+<<<<<<< HEAD
 	// IsStaleness indicates whether the txn is read only staleness txn.
 	IsStaleness bool
 	Isolation   string
@@ -199,6 +213,14 @@ func (tc *TransactionContext) updateShard() {
 	var buf [8]byte
 	binary.LittleEndian.PutUint64(buf[:], tc.shardRand.Uint64())
 	tc.currentShard = int64(murmur3.Sum32(buf[:]))
+=======
+	Isolation      string
+	LockExpire     uint32
+	ForUpdate      uint32
+
+	// TableDeltaMap lock to prevent potential data race
+	tdmLock sync.Mutex
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // AddUnchangedRowKey adds an unchanged row key in update statement for pessimistic lock.
@@ -219,7 +241,11 @@ func (tc *TransactionContext) CollectUnchangedRowKeys(buf []kv.Key) []kv.Key {
 }
 
 // UpdateDeltaForTable updates the delta info for some table.
+<<<<<<< HEAD
 func (tc *TransactionContext) UpdateDeltaForTable(logicalTableID, physicalTableID int64, delta int64, count int64, colSize map[int64]int64, saveAsLogicalTblID bool) {
+=======
+func (tc *TransactionContext) UpdateDeltaForTable(physicalTableID int64, delta int64, count int64, colSize map[int64]int64) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tc.tdmLock.Lock()
 	defer tc.tdmLock.Unlock()
 	if tc.TableDeltaMap == nil {
@@ -479,13 +505,19 @@ type SessionVars struct {
 	// MultiStatementMode permits incorrect client library usage. Not recommended to be turned on.
 	MultiStatementMode int
 
+<<<<<<< HEAD
 	// AllowWriteRowID variable is currently not recommended to be turned on.
+=======
+	// AllowWriteRowID can be set to false to forbid write data to _tidb_rowid.
+	// This variable is currently not recommended to be turned on.
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	AllowWriteRowID bool
 
 	// AllowBatchCop means if we should send batch coprocessor to TiFlash. Default value is 1, means to use batch cop in case of aggregation and join.
 	// If value is set to 2 , which means to force to send batch cop for any query. Value is set to 0 means never use batch cop.
 	AllowBatchCop int
 
+<<<<<<< HEAD
 	// AllowMPPExecution will prefer using mpp way to execute a query.
 	AllowMPPExecution bool
 
@@ -501,6 +533,11 @@ type SessionVars struct {
 	BroadcastJoinThresholdCount int64
 
 	// AllowWriteRowID can be set to false to forbid write data to _tidb_rowid.
+=======
+	// TiDBAllowAutoRandExplicitInsert indicates whether explicit insertion on auto_random column is allowed.
+	AllowAutoRandExplicitInsert bool
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// CorrelationThreshold is the guard to enable row count estimation using column order correlation.
 	CorrelationThreshold float64
 
@@ -745,6 +782,7 @@ type SessionVars struct {
 	// PrevFoundInPlanCache indicates whether the last statement was found in plan cache.
 	PrevFoundInPlanCache bool
 
+<<<<<<< HEAD
 	// FoundInBinding indicates whether the execution plan is matched with the hints in the binding.
 	FoundInBinding bool
 	// PrevFoundInBinding indicates whether the last execution plan is matched with the hints in the binding.
@@ -855,6 +893,22 @@ func (p PartitionPruneMode) Valid() bool {
 	default:
 		return false
 	}
+=======
+	// SelectLimit limits the max counts of select statement's output
+	SelectLimit uint64
+
+	// EnableRedactLog indicates that whether redact log.
+	EnableRedactLog bool
+
+	// EnableAmendPessimisticTxn indicates if schema change amend is enabled for pessimistic transactions.
+	EnableAmendPessimisticTxn bool
+
+	// LastTxnInfo keeps track the info of last committed transaction
+	LastTxnInfo kv.TxnInfo
+
+	// EnabledRateLimitAction indicates whether enabled ratelimit action during coprocessor
+	EnabledRateLimitAction bool
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // PreparedParams contains the parameters of the current prepared statement when executing it.
@@ -907,8 +961,11 @@ func NewSessionVars() *SessionVars {
 		StmtCtx:                     new(stmtctx.StatementContext),
 		AllowAggPushDown:            false,
 		AllowBCJ:                    false,
+<<<<<<< HEAD
 		BroadcastJoinThresholdSize:  DefBroadcastJoinThresholdSize,
 		BroadcastJoinThresholdCount: DefBroadcastJoinThresholdSize,
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		OptimizerSelectivityLevel:   DefTiDBOptimizerSelectivityLevel,
 		RetryLimit:                  DefTiDBRetryLimit,
 		DisableTxnAutoRetry:         DefTiDBDisableTxnAutoRetry,
@@ -941,7 +998,10 @@ func NewSessionVars() *SessionVars {
 		AllowRemoveAutoInc:          DefTiDBAllowRemoveAutoInc,
 		UsePlanBaselines:            DefTiDBUsePlanBaselines,
 		EvolvePlanBaselines:         DefTiDBEvolvePlanBaselines,
+<<<<<<< HEAD
 		EnableExtendedStats:         false,
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		IsolationReadEngines:        make(map[kv.StoreType]struct{}),
 		LockWaitTimeout:             DefInnodbLockWaitTimeout * 1000,
 		MetricSchemaStep:            DefTiDBMetricSchemaStep,
@@ -950,6 +1010,7 @@ func NewSessionVars() *SessionVars {
 		WindowingUseHighPrecision:   true,
 		PrevFoundInPlanCache:        DefTiDBFoundInPlanCache,
 		FoundInPlanCache:            DefTiDBFoundInPlanCache,
+<<<<<<< HEAD
 		PrevFoundInBinding:          DefTiDBFoundInBinding,
 		FoundInBinding:              DefTiDBFoundInBinding,
 		SelectLimit:                 math.MaxUint64,
@@ -986,6 +1047,25 @@ func NewSessionVars() *SessionVars {
 		mergeJoinConcurrency:       DefTiDBMergeJoinConcurrency,
 		streamAggConcurrency:       DefTiDBStreamAggConcurrency,
 		ExecutorConcurrency:        DefExecutorConcurrency,
+=======
+		SelectLimit:                 math.MaxUint64,
+		AllowAutoRandExplicitInsert: DefTiDBAllowAutoRandExplicitInsert,
+		EnableAmendPessimisticTxn:   DefTiDBEnableAmendPessimisticTxn,
+		EnabledRateLimitAction:      DefTiDBEnableRateLimitAction,
+	}
+	vars.KVVars = kv.NewVariables(&vars.Killed)
+	vars.Concurrency = Concurrency{
+		IndexLookupConcurrency:     DefIndexLookupConcurrency,
+		IndexSerialScanConcurrency: DefIndexSerialScanConcurrency,
+		IndexLookupJoinConcurrency: DefIndexLookupJoinConcurrency,
+		HashJoinConcurrency:        DefTiDBHashJoinConcurrency,
+		ProjectionConcurrency:      DefTiDBProjectionConcurrency,
+		DistSQLScanConcurrency:     DefDistSQLScanConcurrency,
+		HashAggPartialConcurrency:  DefTiDBHashAggPartialConcurrency,
+		HashAggFinalConcurrency:    DefTiDBHashAggFinalConcurrency,
+		WindowConcurrency:          DefTiDBWindowConcurrency,
+		UnionConcurrency:           DefTiDBUnionConcurrency,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	vars.MemQuota = MemQuota{
 		MemQuotaQuery:      config.GetGlobalConfig().MemQuotaQuery,
@@ -1017,7 +1097,10 @@ func NewSessionVars() *SessionVars {
 	terror.Log(vars.SetSystemVar(TiDBEnableStreaming, enableStreaming))
 
 	vars.AllowBatchCop = DefTiDBAllowBatchCop
+<<<<<<< HEAD
 	vars.AllowMPPExecution = DefTiDBAllowMPPExecution
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	var enableChunkRPC string
 	if config.GetGlobalConfig().TiKVClient.EnableChunkRPC {
@@ -1238,9 +1321,12 @@ func (s *SessionVars) GetSystemVar(name string) (string, bool) {
 	if name == TiDBSlowLogMasking {
 		name = TiDBRedactLog
 	}
+<<<<<<< HEAD
 	if val, ok := s.stmtVars[name]; ok {
 		return val, ok
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	val, ok := s.systems[name]
 	return val, ok
 }
@@ -1383,10 +1469,13 @@ func (s *SessionVars) SetSystemVar(name string, val string) error {
 		s.AllowAggPushDown = TiDBOptOn(val)
 	case TiDBOptBCJ:
 		s.AllowBCJ = TiDBOptOn(val)
+<<<<<<< HEAD
 	case TiDBBCJThresholdSize:
 		s.BroadcastJoinThresholdSize = tidbOptInt64(val, DefBroadcastJoinThresholdSize)
 	case TiDBBCJThresholdCount:
 		s.BroadcastJoinThresholdCount = tidbOptInt64(val, DefBroadcastJoinThresholdCount)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case TiDBOptDistinctAggPushDown:
 		s.AllowDistinctAggPushDown = TiDBOptOn(val)
 	case TiDBOptWriteRowID:
@@ -1427,8 +1516,11 @@ func (s *SessionVars) SetSystemVar(name string, val string) error {
 		s.IndexJoinBatchSize = tidbOptPositiveInt32(val, DefIndexJoinBatchSize)
 	case TiDBAllowBatchCop:
 		s.AllowBatchCop = int(tidbOptInt64(val, DefTiDBAllowBatchCop))
+<<<<<<< HEAD
 	case TiDBAllowMPPExecution:
 		s.AllowMPPExecution = TiDBOptOn(val)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case TiDBIndexLookupSize:
 		s.IndexLookupSize = tidbOptPositiveInt32(val, DefIndexLookupSize)
 	case TiDBHashJoinConcurrency:
@@ -1440,11 +1532,17 @@ func (s *SessionVars) SetSystemVar(name string, val string) error {
 	case TiDBHashAggFinalConcurrency:
 		s.hashAggFinalConcurrency = tidbOptPositiveInt32(val, ConcurrencyUnset)
 	case TiDBWindowConcurrency:
+<<<<<<< HEAD
 		s.windowConcurrency = tidbOptPositiveInt32(val, ConcurrencyUnset)
 	case TiDBMergeJoinConcurrency:
 		s.mergeJoinConcurrency = tidbOptPositiveInt32(val, ConcurrencyUnset)
 	case TiDBStreamAggConcurrency:
 		s.streamAggConcurrency = tidbOptPositiveInt32(val, ConcurrencyUnset)
+=======
+		s.WindowConcurrency = tidbOptPositiveInt32(val, DefTiDBWindowConcurrency)
+	case TiDBUnionConcurrency:
+		s.UnionConcurrency = tidbOptPositiveInt32(val, DefTiDBUnionConcurrency)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case TiDBDistSQLScanConcurrency:
 		s.distSQLScanConcurrency = tidbOptPositiveInt32(val, DefDistSQLScanConcurrency)
 	case TiDBIndexSerialScanConcurrency:
@@ -1464,7 +1562,13 @@ func (s *SessionVars) SetSystemVar(name string, val string) error {
 	case TiDBBatchCommit:
 		s.BatchCommit = TiDBOptOn(val)
 	case TiDBDMLBatchSize:
+<<<<<<< HEAD
 		s.DMLBatchSize = int(tidbOptInt64(val, DefOptCorrelationExpFactor))
+=======
+		s.DMLBatchSize = tidbOptPositiveInt32(val, DefDMLBatchSize)
+	case TiDBCurrentTS, TiDBLastTxnInfo, TiDBConfig:
+		return ErrReadOnly
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case TiDBMaxChunkSize:
 		s.MaxChunkSize = tidbOptPositiveInt32(val, DefMaxChunkSize)
 	case TiDBInitChunkSize:
@@ -1582,6 +1686,7 @@ func (s *SessionVars) SetSystemVar(name string, val string) error {
 	case TiDBMetricSchemaRangeDuration:
 		s.MetricSchemaRangeDuration = tidbOptInt64(val, DefTiDBMetricSchemaRangeDuration)
 	case CollationConnection, CollationDatabase, CollationServer:
+<<<<<<< HEAD
 		coll, err := collate.GetCollationByName(val)
 		if err != nil {
 			logutil.BgLogger().Warn(err.Error())
@@ -1625,6 +1730,29 @@ func (s *SessionVars) SetSystemVar(name string, val string) error {
 			s.systems[CharacterSetServer] = cht
 		}
 		val = cht
+=======
+		if _, err := collate.GetCollationByName(val); err != nil {
+			var ok bool
+			var charsetVal string
+			var err2 error
+			if name == CollationConnection {
+				charsetVal, ok = s.systems[CharacterSetConnection]
+			} else if name == CollationDatabase {
+				charsetVal, ok = s.systems[CharsetDatabase]
+			} else {
+				// CollationServer
+				charsetVal, ok = s.systems[CharacterSetServer]
+			}
+			if !ok {
+				return err
+			}
+			val, err2 = charset.GetDefaultCollation(charsetVal)
+			if err2 != nil {
+				return err2
+			}
+			logutil.BgLogger().Warn(err.Error())
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case TiDBSlowLogThreshold:
 		atomic.StoreUint64(&config.GetGlobalConfig().Log.SlowThreshold, uint64(tidbOptInt64(val, logutil.DefaultSlowThreshold)))
 	case TiDBRecordPlanInSlowLog:
@@ -1637,6 +1765,7 @@ func (s *SessionVars) SetSystemVar(name string, val string) error {
 		config.GetGlobalConfig().CheckMb4ValueInUTF8 = TiDBOptOn(val)
 	case TiDBFoundInPlanCache:
 		s.FoundInPlanCache = TiDBOptOn(val)
+<<<<<<< HEAD
 	case TiDBFoundInBinding:
 		s.FoundInBinding = TiDBOptOn(val)
 	case TiDBEnableCollectExecutionInfo:
@@ -1647,12 +1776,15 @@ func (s *SessionVars) SetSystemVar(name string, val string) error {
 			newConfig.EnableCollectExecutionInfo = newValue
 			config.StoreGlobalConfig(&newConfig)
 		}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case SQLSelectLimit:
 		result, err := strconv.ParseUint(val, 10, 64)
 		if err != nil {
 			return errors.Trace(err)
 		}
 		s.SelectLimit = result
+<<<<<<< HEAD
 	case TiDBAllowAutoRandExplicitInsert:
 		s.AllowAutoRandExplicitInsert = TiDBOptOn(val)
 	case TiDBEnableClusteredIndex:
@@ -1661,12 +1793,19 @@ func (s *SessionVars) SetSystemVar(name string, val string) error {
 		s.PartitionPruneMode.Store(strings.ToLower(strings.TrimSpace(val)))
 	case TiDBEnableParallelApply:
 		s.EnableParallelApply = TiDBOptOn(val)
+=======
+	case TiDBEnableCollectExecutionInfo:
+		config.GetGlobalConfig().EnableCollectExecutionInfo = TiDBOptOn(val)
+	case TiDBAllowAutoRandExplicitInsert:
+		s.AllowAutoRandExplicitInsert = TiDBOptOn(val)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case TiDBSlowLogMasking:
 		// TiDBSlowLogMasking is deprecated and a alias of TiDBRedactLog.
 		return s.SetSystemVar(TiDBRedactLog, val)
 	case TiDBRedactLog:
 		s.EnableRedactLog = TiDBOptOn(val)
 		errors.RedactLogEnabled.Store(s.EnableRedactLog)
+<<<<<<< HEAD
 	case TiDBShardAllocateStep:
 		s.ShardAllocateStep = tidbOptInt64(val, DefTiDBShardAllocateStep)
 	case TiDBEnableChangeColumnType:
@@ -1703,6 +1842,23 @@ func (s *SessionVars) SetSystemVar(name string, val string) error {
 		s.TiDBEnableExchangePartition = TiDBOptOn(val)
 	case TiDBEnableTiFlashFallbackTiKV:
 		s.EnableTiFlashFallbackTiKV = TiDBOptOn(val)
+=======
+	case TiDBEnableAmendPessimisticTxn:
+		s.EnableAmendPessimisticTxn = TiDBOptOn(val)
+	case TiDBEnableRateLimitAction:
+		s.EnabledRateLimitAction = TiDBOptOn(val)
+	case TiDBMemoryUsageAlarmRatio:
+		floatVal, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return ErrWrongTypeForVar.GenWithStackByArgs(TiDBMemoryUsageAlarmRatio)
+		}
+		if floatVal < 0 || floatVal > 1 {
+			return ErrWrongValueForVar.GenWithStackByArgs(TiDBMemoryUsageAlarmRatio, val)
+		}
+		MemoryUsageAlarmRatio.Store(floatVal)
+	case TiDBMultiStatementMode:
+		s.MultiStatementMode = TiDBOptMultiStmt(val)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	s.systems[name] = val
 	return nil
@@ -1903,6 +2059,7 @@ func (c *Concurrency) SetStreamAggConcurrency(n int) {
 	c.streamAggConcurrency = n
 }
 
+<<<<<<< HEAD
 // SetIndexSerialScanConcurrency set the number of concurrent index serial scan worker.
 func (c *Concurrency) SetIndexSerialScanConcurrency(n int) {
 	c.indexSerialScanConcurrency = n
@@ -1994,6 +2151,13 @@ func (c *Concurrency) IndexSerialScanConcurrency() int {
 // UnionConcurrency return the num of concurrent union worker.
 func (c *Concurrency) UnionConcurrency() int {
 	return c.ExecutorConcurrency
+=======
+	// IndexSerialScanConcurrency is the number of concurrent index serial scan worker.
+	IndexSerialScanConcurrency int
+
+	// UnionConcurrency is the number of concurrent union worker.
+	UnionConcurrency int
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // MemQuota defines memory quota values.
@@ -2113,8 +2277,11 @@ const (
 	SlowLogPrepared = "Prepared"
 	// SlowLogPlanFromCache is used to indicate whether this plan is from plan cache.
 	SlowLogPlanFromCache = "Plan_from_cache"
+<<<<<<< HEAD
 	// SlowLogPlanFromBinding is used to indicate whether this plan is matched with the hints in the binding.
 	SlowLogPlanFromBinding = "Plan_from_binding"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// SlowLogHasMoreResults is used to indicate whether this sql has more following results.
 	SlowLogHasMoreResults = "Has_more_results"
 	// SlowLogSucc is used to indicate whether this sql execute successfully.
@@ -2167,16 +2334,26 @@ type SlowQueryLogItems struct {
 	Succ              bool
 	Prepared          bool
 	PlanFromCache     bool
+<<<<<<< HEAD
 	PlanFromBinding   bool
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	HasMoreResults    bool
 	PrevStmt          string
 	Plan              string
 	PlanDigest        string
+<<<<<<< HEAD
 	RewriteInfo       RewritePhaseInfo
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	KVTotal           time.Duration
 	PDTotal           time.Duration
 	BackoffTotal      time.Duration
 	WriteSQLRespTotal time.Duration
+<<<<<<< HEAD
+=======
+	RewriteInfo       RewritePhaseInfo
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	ExecRetryCount    uint
 	ExecRetryTime     time.Duration
 }
@@ -2335,7 +2512,10 @@ func (s *SessionVars) SlowLogFormat(logItems *SlowQueryLogItems) string {
 
 	writeSlowLogItem(&buf, SlowLogPrepared, strconv.FormatBool(logItems.Prepared))
 	writeSlowLogItem(&buf, SlowLogPlanFromCache, strconv.FormatBool(logItems.PlanFromCache))
+<<<<<<< HEAD
 	writeSlowLogItem(&buf, SlowLogPlanFromBinding, strconv.FormatBool(logItems.PlanFromBinding))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	writeSlowLogItem(&buf, SlowLogHasMoreResults, strconv.FormatBool(logItems.HasMoreResults))
 	writeSlowLogItem(&buf, SlowLogKVTotal, strconv.FormatFloat(logItems.KVTotal.Seconds(), 'f', -1, 64))
 	writeSlowLogItem(&buf, SlowLogPDTotal, strconv.FormatFloat(logItems.PDTotal.Seconds(), 'f', -1, 64))
@@ -2369,6 +2549,7 @@ func (s *SessionVars) SlowLogFormat(logItems *SlowQueryLogItems) string {
 func writeSlowLogItem(buf *bytes.Buffer, key, value string) {
 	buf.WriteString(SlowLogRowPrefixStr + key + SlowLogSpaceMarkStr + value + "\n")
 }
+<<<<<<< HEAD
 
 // QueryInfo represents the information of last executed query. It's used to expose information for test purpose.
 type QueryInfo struct {
@@ -2377,3 +2558,5 @@ type QueryInfo struct {
 	ForUpdateTS uint64 `json:"for_update_ts"`
 	ErrMsg      string `json:"error,omitempty"`
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

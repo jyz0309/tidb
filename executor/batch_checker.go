@@ -33,9 +33,14 @@ import (
 )
 
 type keyValueWithDupInfo struct {
+<<<<<<< HEAD
 	newKey       kv.Key
 	dupErr       error
 	commonHandle bool
+=======
+	newKey kv.Key
+	dupErr error
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 type toBeCheckedRow struct {
@@ -150,7 +155,11 @@ func getKeysNeedCheckOneRow(ctx sessionctx.Context, t table.Table, row []types.D
 		}
 		handleKey = &keyValueWithDupInfo{
 			newKey: t.RecordKey(handle),
+<<<<<<< HEAD
 			dupErr: kv.ErrKeyExists.FastGenByArgs(stringutil.MemoizeStr(fn), "PRIMARY"),
+=======
+			dupErr: kv.ErrKeyExists.FastGenByArgs(strconv.FormatInt(handle, 10), "PRIMARY"),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 	}
 
@@ -190,9 +199,14 @@ func getKeysNeedCheckOneRow(ctx sessionctx.Context, t table.Table, row []types.D
 			return nil, err1
 		}
 		uniqueKeys = append(uniqueKeys, &keyValueWithDupInfo{
+<<<<<<< HEAD
 			newKey:       key,
 			dupErr:       kv.ErrKeyExists.FastGenByArgs(colValStr, v.Meta().Name),
 			commonHandle: t.Meta().IsCommonHandle,
+=======
+			newKey: key,
+			dupErr: kv.ErrKeyExists.FastGenByArgs(colValStr, v.Meta().Name),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		})
 	}
 	if addChangingColTimes == 1 {

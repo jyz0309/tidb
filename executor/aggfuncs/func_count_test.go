@@ -103,6 +103,7 @@ func (s *testSuite) TestCount(c *C) {
 	}
 }
 
+<<<<<<< HEAD
 func (s *testSuite) TestMemCount(c *C) {
 	tests := []aggMemTest{
 		buildAggMemTester(ast.AggFuncCount, mysql.TypeLonglong, 5,
@@ -145,6 +146,8 @@ func (s *testSuite) TestMemCount(c *C) {
 	}
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testSuite) TestWriteTime(c *C) {
 	t, err := types.ParseDate(&(stmtctx.StatementContext{}), "2020-11-11")
 	c.Assert(err, IsNil)

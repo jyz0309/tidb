@@ -1343,23 +1343,60 @@ func (e *maxMin4Enum) AppendFinalResult2Chunk(sctx sessionctx.Context, pr Partia
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *maxMin4Enum) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) (memDelta int64, err error) {
+=======
+type maxMin4Enum struct {
+	baseMaxMinAggFunc
+}
+
+func (e *maxMin4Enum) AllocPartialResult() PartialResult {
+	p := new(partialResult4MaxMinEnum)
+	p.isNull = true
+	return PartialResult(p)
+}
+
+func (e *maxMin4Enum) ResetPartialResult(pr PartialResult) {
+	p := (*partialResult4MaxMinEnum)(pr)
+	p.isNull = true
+}
+
+func (e *maxMin4Enum) AppendFinalResult2Chunk(sctx sessionctx.Context, pr PartialResult, chk *chunk.Chunk) error {
+	p := (*partialResult4MaxMinEnum)(pr)
+	if p.isNull {
+		chk.AppendNull(e.ordinal)
+		return nil
+	}
+	chk.AppendEnum(e.ordinal, p.val)
+	return nil
+}
+
+func (e *maxMin4Enum) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	p := (*partialResult4MaxMinEnum)(pr)
 	for _, row := range rowsInGroup {
 		d, err := e.args[0].Eval(row)
 		if err != nil {
+<<<<<<< HEAD
 			return memDelta, err
+=======
+			return err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		if d.IsNull() {
 			continue
 		}
 		if p.isNull {
 			p.val = d.GetMysqlEnum().Copy()
+<<<<<<< HEAD
 			memDelta += int64(len(d.GetMysqlEnum().Name))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			p.isNull = false
 			continue
 		}
 		en := d.GetMysqlEnum()
+<<<<<<< HEAD
 		if e.isMax && en.Name > p.val.Name || !e.isMax && en.Name < p.val.Name {
 			oldMem := len(p.val.Name)
 			newMem := len(en.Name)
@@ -1383,16 +1420,45 @@ func (e *maxMin4Enum) MergePartialResult(sctx sessionctx.Context, src, dst Parti
 		p2.val, p2.isNull = p1.val, false
 	}
 	return 0, nil
+=======
+		if e.isMax && en.Value > p.val.Value || !e.isMax && en.Value < p.val.Value {
+			p.val = en.Copy()
+		}
+	}
+	return nil
+}
+
+func (e *maxMin4Enum) MergePartialResult(sctx sessionctx.Context, src, dst PartialResult) error {
+	p1, p2 := (*partialResult4MaxMinEnum)(src), (*partialResult4MaxMinEnum)(dst)
+	if p1.isNull {
+		return nil
+	}
+	if p2.isNull {
+		*p2 = *p1
+		return nil
+	}
+	if e.isMax && p1.val.Value > p2.val.Value || !e.isMax && p1.val.Value < p2.val.Value {
+		p2.val, p2.isNull = p1.val, false
+	}
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 type maxMin4Set struct {
 	baseMaxMinAggFunc
 }
 
+<<<<<<< HEAD
 func (e *maxMin4Set) AllocPartialResult() (pr PartialResult, memDelta int64) {
 	p := new(partialResult4MaxMinSet)
 	p.isNull = true
 	return PartialResult(p), DefPartialResult4MaxMinSetSize
+=======
+func (e *maxMin4Set) AllocPartialResult() PartialResult {
+	p := new(partialResult4MaxMinSet)
+	p.isNull = true
+	return PartialResult(p)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (e *maxMin4Set) ResetPartialResult(pr PartialResult) {
@@ -1410,23 +1476,35 @@ func (e *maxMin4Set) AppendFinalResult2Chunk(sctx sessionctx.Context, pr Partial
 	return nil
 }
 
+<<<<<<< HEAD
 func (e *maxMin4Set) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) (memDelta int64, err error) {
+=======
+func (e *maxMin4Set) UpdatePartialResult(sctx sessionctx.Context, rowsInGroup []chunk.Row, pr PartialResult) error {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	p := (*partialResult4MaxMinSet)(pr)
 	for _, row := range rowsInGroup {
 		d, err := e.args[0].Eval(row)
 		if err != nil {
+<<<<<<< HEAD
 			return memDelta, err
+=======
+			return err
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		if d.IsNull() {
 			continue
 		}
 		if p.isNull {
 			p.val = d.GetMysqlSet().Copy()
+<<<<<<< HEAD
 			memDelta += int64(len(d.GetMysqlSet().Name))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			p.isNull = false
 			continue
 		}
 		s := d.GetMysqlSet()
+<<<<<<< HEAD
 		if e.isMax && s.Name > p.val.Name || !e.isMax && s.Name < p.val.Name {
 			oldMem := len(p.val.Name)
 			newMem := len(s.Name)
@@ -1450,4 +1528,26 @@ func (e *maxMin4Set) MergePartialResult(sctx sessionctx.Context, src, dst Partia
 		p2.val, p2.isNull = p1.val, false
 	}
 	return 0, nil
+=======
+		if e.isMax && s.Value > p.val.Value || !e.isMax && s.Value < p.val.Value {
+			p.val = s.Copy()
+		}
+	}
+	return nil
+}
+
+func (e *maxMin4Set) MergePartialResult(sctx sessionctx.Context, src, dst PartialResult) error {
+	p1, p2 := (*partialResult4MaxMinSet)(src), (*partialResult4MaxMinSet)(dst)
+	if p1.isNull {
+		return nil
+	}
+	if p2.isNull {
+		*p2 = *p1
+		return nil
+	}
+	if e.isMax && p1.val.Value > p2.val.Value || !e.isMax && p1.val.Value < p2.val.Value {
+		p2.val, p2.isNull = p1.val, false
+	}
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

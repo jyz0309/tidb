@@ -737,6 +737,7 @@ func (s *testStatsSuite) TestCollationColumnEstimate(c *C) {
 		tk.MustQuery(input[i]).Check(testkit.Rows(output[i]...))
 	}
 }
+<<<<<<< HEAD
 
 // TestDNFCondSelectivity tests selectivity calculation with DNF conditions covered by using independence assumption.
 func (s *testStatsSuite) TestDNFCondSelectivity(c *C) {
@@ -830,3 +831,5 @@ func (s *testStatsSuite) TestIndexEstimationCrossValidate(c *C) {
 		"└─Selection_6 1.00 cop[tikv]  eq(test.t2.b, 2)",
 		"  └─TableFullScan_5 5.00 cop[tikv] table:t2 keep order:false"))
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

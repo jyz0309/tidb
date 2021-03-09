@@ -16,10 +16,14 @@ package executor
 import (
 	"context"
 	"crypto/tls"
+<<<<<<< HEAD
 	"runtime"
 	"strconv"
 	"time"
 	"unsafe"
+=======
+	"time"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	. "github.com/pingcap/check"
 	"github.com/pingcap/failpoint"
@@ -304,6 +308,10 @@ func (s *testExecSerialSuite) TestSortSpillDisk(c *C) {
 		conf.OOMUseTmpStorage = true
 		conf.MemQuotaQuery = 1
 	})
+<<<<<<< HEAD
+=======
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(failpoint.Enable("github.com/pingcap/tidb/executor/testSortedRowContainerSpill", "return(true)"), IsNil)
 	defer func() {
 		c.Assert(failpoint.Disable("github.com/pingcap/tidb/executor/testSortedRowContainerSpill"), IsNil)
@@ -449,6 +457,7 @@ func (s *pkgTestSuite) TestSlowQueryRuntimeStats(c *C) {
 	c.Assert(stats.String(), Equals, stats.Clone().String())
 	stats.Merge(stats.Clone())
 	c.Assert(stats.String(), Equals, "initialize: 2ms, read_file: 2s, parse_log: {time:200ms, concurrency:15}, total_file: 4, read_file: 4, read_size: 2 GB")
+<<<<<<< HEAD
 }
 
 // Test whether the actual buckets in Golang Map is same with the estimated number.
@@ -579,4 +588,6 @@ func getGrowing(m aggPartialResultMapper) bool {
 	point := (**hmap)(unsafe.Pointer(&m))
 	value := *point
 	return value.oldbuckets != nil
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

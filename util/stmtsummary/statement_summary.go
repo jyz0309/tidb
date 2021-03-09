@@ -193,7 +193,10 @@ type stmtSummaryByDigestElement struct {
 	// plan cache
 	planInCache   bool
 	planCacheHits int64
+<<<<<<< HEAD
 	planInBinding bool
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// pessimistic execution retry information.
 	execRetryCount uint
 	execRetryTime  time.Duration
@@ -225,7 +228,10 @@ type StmtExecInfo struct {
 	IsInternal     bool
 	Succeed        bool
 	PlanInCache    bool
+<<<<<<< HEAD
 	PlanInBinding  bool
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	ExecRetryCount uint
 	ExecRetryTime  time.Duration
 	execdetails.StmtExecDetails
@@ -639,7 +645,10 @@ func newStmtSummaryByDigestElement(sei *StmtExecInfo, beginTime int64, intervalS
 		authUsers:     make(map[string]struct{}),
 		planInCache:   false,
 		planCacheHits: 0,
+<<<<<<< HEAD
 		planInBinding: false,
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		prepared:      sei.Prepared,
 	}
 	ssElement.add(sei, intervalSeconds)
@@ -810,7 +819,11 @@ func (ssElement *stmtSummaryByDigestElement) add(sei *StmtExecInfo, intervalSeco
 		commitDetails.Mu.Unlock()
 	}
 
+<<<<<<< HEAD
 	// plan cache
+=======
+	//plan cache
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if sei.PlanInCache {
 		ssElement.planInCache = true
 		ssElement.planCacheHits += 1
@@ -818,6 +831,7 @@ func (ssElement *stmtSummaryByDigestElement) add(sei *StmtExecInfo, intervalSeco
 		ssElement.planInCache = false
 	}
 
+<<<<<<< HEAD
 	// SPM
 	if sei.PlanInBinding {
 		ssElement.planInBinding = true
@@ -825,6 +839,8 @@ func (ssElement *stmtSummaryByDigestElement) add(sei *StmtExecInfo, intervalSeco
 		ssElement.planInBinding = false
 	}
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// other
 	ssElement.sumAffectedRows += sei.StmtCtx.AffectedRows()
 	ssElement.sumMem += sei.MemMax
@@ -952,7 +968,10 @@ func (ssElement *stmtSummaryByDigestElement) toDatum(ssbd *stmtSummaryByDigest) 
 		types.NewTime(types.FromGoTime(ssElement.lastSeen), mysql.TypeTimestamp, 0),
 		ssElement.planInCache,
 		ssElement.planCacheHits,
+<<<<<<< HEAD
 		ssElement.planInBinding,
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		ssElement.sampleSQL,
 		ssElement.prevSQL,
 		ssbd.planDigest,

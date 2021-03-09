@@ -45,6 +45,11 @@ var (
 type ExecDetails struct {
 	CalleeAddress    string
 	CopTime          time.Duration
+<<<<<<< HEAD
+=======
+	ProcessTime      time.Duration
+	WaitTime         time.Duration
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	BackoffTime      time.Duration
 	LockKeysDuration time.Duration
 	BackoffSleep     map[string]time.Duration
@@ -52,8 +57,11 @@ type ExecDetails struct {
 	RequestCount     int
 	CommitDetail     *CommitDetails
 	LockKeysDetail   *LockKeysDetails
+<<<<<<< HEAD
 	ScanDetail       *ScanDetail
 	TimeDetail       TimeDetail
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 type stmtExecDetailKeyType struct{}
@@ -169,6 +177,7 @@ func (ld *LockKeysDetails) Clone() *LockKeysDetails {
 	return lock
 }
 
+<<<<<<< HEAD
 // TimeDetail contains coprocessor time detail information.
 type TimeDetail struct {
 	// WaitWallTimeMs is the off-cpu wall time which is elapsed in TiKV side. Usually this includes queue waiting time and
@@ -283,6 +292,8 @@ func (sd *ScanDetail) MergeFromScanDetailV2(scanDetail *kvrpcpb.ScanDetailV2) {
 	}
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 const (
 	// CopTimeStr represents the sum of cop-task time spend in TiDB distSQL.
 	CopTimeStr = "Cop_time"
@@ -341,6 +352,12 @@ func (d ExecDetails) String() string {
 	parts := make([]string, 0, 8)
 	if d.CopTime > 0 {
 		parts = append(parts, CopTimeStr+": "+strconv.FormatFloat(d.CopTime.Seconds(), 'f', -1, 64))
+<<<<<<< HEAD
+=======
+	}
+	if d.ProcessTime > 0 {
+		parts = append(parts, ProcessTimeStr+": "+strconv.FormatFloat(d.ProcessTime.Seconds(), 'f', -1, 64))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	if d.TimeDetail.ProcessTime > 0 {
 		parts = append(parts, ProcessTimeStr+": "+strconv.FormatFloat(d.TimeDetail.ProcessTime.Seconds(), 'f', -1, 64))
@@ -434,11 +451,19 @@ func (d ExecDetails) ToZapFields() (fields []zap.Field) {
 	if d.CopTime > 0 {
 		fields = append(fields, zap.String(strings.ToLower(CopTimeStr), strconv.FormatFloat(d.CopTime.Seconds(), 'f', -1, 64)+"s"))
 	}
+<<<<<<< HEAD
 	if d.TimeDetail.ProcessTime > 0 {
 		fields = append(fields, zap.String(strings.ToLower(ProcessTimeStr), strconv.FormatFloat(d.TimeDetail.ProcessTime.Seconds(), 'f', -1, 64)+"s"))
 	}
 	if d.TimeDetail.WaitTime > 0 {
 		fields = append(fields, zap.String(strings.ToLower(WaitTimeStr), strconv.FormatFloat(d.TimeDetail.WaitTime.Seconds(), 'f', -1, 64)+"s"))
+=======
+	if d.ProcessTime > 0 {
+		fields = append(fields, zap.String(strings.ToLower(ProcessTimeStr), strconv.FormatFloat(d.ProcessTime.Seconds(), 'f', -1, 64)+"s"))
+	}
+	if d.WaitTime > 0 {
+		fields = append(fields, zap.String(strings.ToLower(WaitTimeStr), strconv.FormatFloat(d.WaitTime.Seconds(), 'f', -1, 64)+"s"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	if d.BackoffTime > 0 {
 		fields = append(fields, zap.String(strings.ToLower(BackoffTimeStr), strconv.FormatFloat(d.BackoffTime.Seconds(), 'f', -1, 64)+"s"))
@@ -545,10 +570,14 @@ type CopRuntimeStats struct {
 	// have many region leaders, several coprocessor tasks can be sent to the
 	// same tikv-server instance. We have to use a list to maintain all tasks
 	// executed on each instance.
+<<<<<<< HEAD
 	stats      map[string][]*basicCopRuntimeStats
 	scanDetail *ScanDetail
 	// do not use kv.StoreType because it will meet cycle import error
 	storeType string
+=======
+	stats map[string][]*BasicRuntimeStats
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // RecordOneCopTask records a specific cop tasks's execution detail.
@@ -556,7 +585,11 @@ func (crs *CopRuntimeStats) RecordOneCopTask(address string, summary *tipb.Execu
 	crs.Lock()
 	defer crs.Unlock()
 	crs.stats[address] = append(crs.stats[address],
+<<<<<<< HEAD
 		&basicCopRuntimeStats{BasicRuntimeStats: BasicRuntimeStats{loop: int32(*summary.NumIterations),
+=======
+		&BasicRuntimeStats{loop: int32(*summary.NumIterations),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			consume: int64(*summary.TimeProcessedNs),
 			rows:    int64(*summary.NumProducedRows)},
 			threads:   int32(summary.GetConcurrency()),
@@ -608,6 +641,7 @@ func (crs *CopRuntimeStats) String() string {
 
 	buf := bytes.NewBuffer(make([]byte, 0, 16))
 	if totalTasks == 1 {
+<<<<<<< HEAD
 		buf.WriteString(fmt.Sprintf("%v_task:{time:%v, loops:%d", crs.storeType, FormatDuration(procTimes[0]), totalIters))
 		if isTiFlashCop {
 			buf.WriteString(fmt.Sprintf(", threads:%d}", totalThreads))
@@ -632,6 +666,16 @@ func (crs *CopRuntimeStats) String() string {
 			buf.WriteString(detail.String())
 		}
 	}
+=======
+		buf.WriteString(fmt.Sprintf("tikv_task:{time:%v, loops:%d}", FormatDuration(procTimes[0]), totalIters))
+	} else {
+		n := len(procTimes)
+		sort.Slice(procTimes, func(i, j int) bool { return procTimes[i] < procTimes[j] })
+		buf.WriteString(fmt.Sprintf("tikv_task:{proc max:%v, min:%v, p80:%v, p95:%v, iters:%v, tasks:%v}",
+			FormatDuration(procTimes[n-1]), FormatDuration(procTimes[0]),
+			FormatDuration(procTimes[n*4/5]), FormatDuration(procTimes[n*19/20]), totalIters, totalTasks))
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return buf.String()
 }
 
@@ -654,18 +698,26 @@ const (
 	TpJoinRuntimeStats
 	// TpSelectResultRuntimeStats is the tp for SelectResultRuntimeStats.
 	TpSelectResultRuntimeStats
+<<<<<<< HEAD
 	// TpInsertRuntimeStat is the tp for InsertRuntimeStat
 	TpInsertRuntimeStat
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// TpIndexLookUpRunTimeStats is the tp for TpIndexLookUpRunTimeStats
 	TpIndexLookUpRunTimeStats
 	// TpSlowQueryRuntimeStat is the tp for TpSlowQueryRuntimeStat
 	TpSlowQueryRuntimeStat
+<<<<<<< HEAD
 	// TpHashAggRuntimeStat is the tp for HashAggRuntimeStat
 	TpHashAggRuntimeStat
 	// TpIndexMergeRunTimeStats is the tp for TpIndexMergeRunTimeStats
 	TpIndexMergeRunTimeStats
 	// TpBasicCopRunTimeStats is the tp for TpBasicCopRunTimeStats
 	TpBasicCopRunTimeStats
+=======
+	// TpInsertRuntimeStat is the tp for InsertRuntimeStat
+	TpInsertRuntimeStat
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 // RuntimeStats is used to express the executor runtime information.
@@ -846,6 +898,7 @@ func (e *RuntimeStatsColl) GetRootStats(planID int) *RootRuntimeStats {
 
 // GetCopStats gets the CopRuntimeStats specified by planID.
 func (e *RuntimeStatsColl) GetCopStats(planID int) *CopRuntimeStats {
+<<<<<<< HEAD
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	copStats, ok := e.copStats[planID]
@@ -857,15 +910,21 @@ func (e *RuntimeStatsColl) GetCopStats(planID int) *CopRuntimeStats {
 
 // GetOrCreateCopStats gets the CopRuntimeStats specified by planID, if not exists a new one will be created.
 func (e *RuntimeStatsColl) GetOrCreateCopStats(planID int, storeType string) *CopRuntimeStats {
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	copStats, ok := e.copStats[planID]
 	if !ok {
+<<<<<<< HEAD
 		copStats = &CopRuntimeStats{
 			stats:      make(map[string][]*basicCopRuntimeStats),
 			scanDetail: &ScanDetail{},
 			storeType:  storeType,
 		}
+=======
+		copStats = &CopRuntimeStats{stats: make(map[string][]*BasicRuntimeStats)}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		e.copStats[planID] = copStats
 	}
 	return copStats
@@ -882,12 +941,17 @@ func getPlanIDFromExecutionSummary(summary *tipb.ExecutorExecutionSummary) (int,
 }
 
 // RecordOneCopTask records a specific cop tasks's execution detail.
+<<<<<<< HEAD
 func (e *RuntimeStatsColl) RecordOneCopTask(planID int, storeType string, address string, summary *tipb.ExecutorExecutionSummary) {
+=======
+func (e *RuntimeStatsColl) RecordOneCopTask(planID int, address string, summary *tipb.ExecutorExecutionSummary) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// for TiFlash cop response, ExecutorExecutionSummary contains executor id, so if there is a valid executor id in
 	// summary, use it overwrite the planID
 	if id, valid := getPlanIDFromExecutionSummary(summary); valid {
 		planID = id
 	}
+<<<<<<< HEAD
 	copStats := e.GetOrCreateCopStats(planID, storeType)
 	copStats.RecordOneCopTask(address, summary)
 }
@@ -898,6 +962,12 @@ func (e *RuntimeStatsColl) RecordScanDetail(planID int, storeType string, detail
 	copStats.scanDetail.Merge(detail)
 }
 
+=======
+	copStats := e.GetCopStats(planID)
+	copStats.RecordOneCopTask(address, summary)
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // ExistsRootStats checks if the planID exists in the rootStats collection.
 func (e *RuntimeStatsColl) ExistsRootStats(planID int) bool {
 	e.mu.Lock()

@@ -97,6 +97,7 @@ func (p *PhysicalSelection) ToPB(ctx sessionctx.Context, storeType kv.StoreType)
 	}
 	selExec := &tipb.Selection{
 		Conditions: conditions,
+<<<<<<< HEAD
 	}
 	executorID := ""
 	if storeType == kv.TiFlash {
@@ -107,10 +108,23 @@ func (p *PhysicalSelection) ToPB(ctx sessionctx.Context, storeType kv.StoreType)
 		}
 		executorID = p.ExplainID().String()
 	}
+=======
+	}
+	executorID := ""
+	if storeType == kv.TiFlash {
+		var err error
+		selExec.Child, err = p.children[0].ToPB(ctx, storeType)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		executorID = p.ExplainID().String()
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	return &tipb.Executor{Tp: tipb.ExecType_TypeSelection, Selection: selExec, ExecutorId: &executorID}, nil
 }
 
 // ToPB implements PhysicalPlan ToPB interface.
+<<<<<<< HEAD
 func (p *PhysicalProjection) ToPB(ctx sessionctx.Context, storeType kv.StoreType) (*tipb.Executor, error) {
 	sc := ctx.GetSessionVars().StmtCtx
 	client := ctx.GetClient()
@@ -136,6 +150,8 @@ func (p *PhysicalProjection) ToPB(ctx sessionctx.Context, storeType kv.StoreType
 }
 
 // ToPB implements PhysicalPlan ToPB interface.
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (p *PhysicalTopN) ToPB(ctx sessionctx.Context, storeType kv.StoreType) (*tipb.Executor, error) {
 	sc := ctx.GetSessionVars().StmtCtx
 	client := ctx.GetClient()
@@ -176,19 +192,31 @@ func (p *PhysicalLimit) ToPB(ctx sessionctx.Context, storeType kv.StoreType) (*t
 
 // ToPB implements PhysicalPlan ToPB interface.
 func (p *PhysicalTableScan) ToPB(ctx sessionctx.Context, storeType kv.StoreType) (*tipb.Executor, error) {
+<<<<<<< HEAD
 	tsExec := tables.BuildTableScanFromInfos(p.Table, p.Columns)
 	tsExec.Desc = p.Desc
+=======
+	tsExec := &tipb.TableScan{
+		TableId: p.Table.ID,
+		Columns: util.ColumnsToProto(p.Columns, p.Table.PKIsHandle),
+		Desc:    p.Desc,
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if p.isPartition {
 		tsExec.TableId = p.physicalTableID
 	}
 	executorID := ""
 	if storeType == kv.TiFlash && p.IsGlobalRead {
 		tsExec.NextReadEngine = tipb.EngineType_TiFlash
+<<<<<<< HEAD
 		splitedRanges, _ := distsql.SplitRangesBySign(p.Ranges, false, false, p.Table.IsCommonHandle)
 		ranges, err := distsql.TableHandleRangesToKVRanges(ctx.GetSessionVars().StmtCtx, []int64{tsExec.TableId}, p.Table.IsCommonHandle, splitedRanges, nil)
 		if err != nil {
 			return nil, err
 		}
+=======
+		ranges := distsql.TableRangesToKVRanges(tsExec.TableId, p.Ranges, nil)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		for _, keyRange := range ranges {
 			tsExec.Ranges = append(tsExec.Ranges, tipb.KeyRange{Low: keyRange.StartKey, High: keyRange.EndKey})
 		}
@@ -324,7 +352,11 @@ func (p *PhysicalIndexScan) ToPB(ctx sessionctx.Context, _ kv.StoreType) (*tipb.
 }
 
 // ToPB implements PhysicalPlan ToPB interface.
+<<<<<<< HEAD
 func (p *PhysicalHashJoin) ToPB(ctx sessionctx.Context, storeType kv.StoreType) (*tipb.Executor, error) {
+=======
+func (p *PhysicalBroadCastJoin) ToPB(ctx sessionctx.Context, storeType kv.StoreType) (*tipb.Executor, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	sc := ctx.GetSessionVars().StmtCtx
 	client := ctx.GetClient()
 	leftJoinKeys := make([]expression.Expression, 0, len(p.LeftJoinKeys))
@@ -352,6 +384,7 @@ func (p *PhysicalHashJoin) ToPB(ctx sessionctx.Context, storeType kv.StoreType) 
 	if err != nil {
 		return nil, err
 	}
+<<<<<<< HEAD
 
 	leftConditions, err := expression.ExpressionsToPBList(sc, p.LeftConditions, client)
 	if err != nil {
@@ -366,12 +399,15 @@ func (p *PhysicalHashJoin) ToPB(ctx sessionctx.Context, storeType kv.StoreType) 
 		return nil, err
 	}
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	pbJoinType := tipb.JoinType_TypeInnerJoin
 	switch p.JoinType {
 	case LeftOuterJoin:
 		pbJoinType = tipb.JoinType_TypeLeftOuterJoin
 	case RightOuterJoin:
 		pbJoinType = tipb.JoinType_TypeRightOuterJoin
+<<<<<<< HEAD
 	case SemiJoin:
 		pbJoinType = tipb.JoinType_TypeSemiJoin
 	case AntiSemiJoin:
@@ -403,6 +439,16 @@ func (p *PhysicalHashJoin) ToPB(ctx sessionctx.Context, storeType kv.StoreType) 
 		RightConditions: rightConditions,
 		OtherConditions: otherConditions,
 		Children:        []*tipb.Executor{lChildren, rChildren},
+=======
+	}
+	join := &tipb.Join{
+		JoinType:      pbJoinType,
+		JoinExecType:  tipb.JoinExecType_TypeHashJoin,
+		InnerIdx:      int64(p.InnerChildIdx),
+		LeftJoinKeys:  left,
+		RightJoinKeys: right,
+		Children:      []*tipb.Executor{lChildren, rChildren},
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	executorID := p.ExplainID().String()

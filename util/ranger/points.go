@@ -279,11 +279,14 @@ func (r *builder) buildFormBinOp(expr *expression.ScalarFunction) []*point {
 	}
 
 	value, op, isValidRange := handleUnsignedCol(ft, value, op)
+<<<<<<< HEAD
 	if !isValidRange {
 		return nil
 	}
 
 	value, op, isValidRange = handleBoundCol(ft, value, op)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if !isValidRange {
 		return nil
 	}
@@ -358,6 +361,7 @@ func handleUnsignedCol(ft *types.FieldType, val types.Datum, op string) (types.D
 	return val, op, false
 }
 
+<<<<<<< HEAD
 // handleBoundCol handles the case when column meets overflow value.
 // The three returned values are: fixed constant value, fixed operator, and a boolean
 // which indicates whether the range is valid or not.
@@ -411,6 +415,17 @@ func (r *builder) buildFromIsTrue(expr *expression.ScalarFunction, isNot int, ke
 			endPoint := &point{}
 			endPoint.value.SetInt64(0)
 			return []*point{startPoint, endPoint}
+=======
+func (r *builder) buildFromIsTrue(expr *expression.ScalarFunction, isNot int, keepNull bool) []point {
+	if isNot == 1 {
+		if keepNull {
+			// Range is {[0, 0]}
+			startPoint := point{start: true}
+			startPoint.value.SetInt64(0)
+			endPoint := point{}
+			endPoint.value.SetInt64(0)
+			return []point{startPoint, endPoint}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		// NOT TRUE range is {[null null] [0, 0]}
 		startPoint1 := &point{start: true}
@@ -477,7 +492,11 @@ func (r *builder) buildFromIn(expr *expression.ScalarFunction) ([]*point, bool) 
 			dt, err = types.ConvertDatumToFloatYear(r.sc, dt)
 			if err != nil {
 				r.err = ErrUnsupportedType.GenWithStack("expr:%v is not converted to year", e)
+<<<<<<< HEAD
 				return getFullRange(), hasNull
+=======
+				return fullRange, hasNull
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 		}
 		var startValue, endValue types.Datum
@@ -509,7 +528,11 @@ func (r *builder) buildFromIn(expr *expression.ScalarFunction) ([]*point, bool) 
 	return rangePoints[:curPos], hasNull
 }
 
+<<<<<<< HEAD
 func (r *builder) newBuildFromPatternLike(expr *expression.ScalarFunction) []*point {
+=======
+func (r *builder) newBuildFromPatternLike(expr *expression.ScalarFunction) []point {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	_, collation := expr.CharsetAndCollation(expr.GetCtx())
 	if !collate.CompatibleCollate(expr.GetArgs()[0].GetType().Collate, collation) {
 		return getFullRange()

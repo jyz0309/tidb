@@ -14,12 +14,16 @@
 package aggfuncs_test
 
 import (
+<<<<<<< HEAD
 	"bytes"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"fmt"
 
 	. "github.com/pingcap/check"
 	"github.com/pingcap/parser/ast"
 	"github.com/pingcap/parser/mysql"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/executor/aggfuncs"
 	"github.com/pingcap/tidb/planner/util"
 	"github.com/pingcap/tidb/sessionctx/variable"
@@ -28,6 +32,10 @@ import (
 	"github.com/pingcap/tidb/util/codec"
 	"github.com/pingcap/tidb/util/hack"
 	"github.com/pingcap/tidb/util/set"
+=======
+	"github.com/pingcap/tidb/sessionctx/variable"
+	"github.com/pingcap/tidb/types"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 func (s *testSuite) TestMergePartialResult4GroupConcat(c *C) {
@@ -51,6 +59,7 @@ func (s *testSuite) TestGroupConcat(c *C) {
 		test2.orderBy = true
 		s.testMultiArgsAggFunc(c, test2)
 	}
+<<<<<<< HEAD
 }
 
 func (s *testSuite) TestMemGroupConcat(c *C) {
@@ -196,4 +205,6 @@ func groupConcatDistinctOrderMultiArgsUpdateMemDeltaGens(srcChk *chunk.Chunk, da
 		memDeltas = append(memDeltas, memDelta)
 	}
 	return memDeltas, nil
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

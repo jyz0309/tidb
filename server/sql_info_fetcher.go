@@ -88,7 +88,11 @@ func (sh *sqlInfoFetcher) zipInfoForSQL(w http.ResponseWriter, r *http.Request) 
 	timeoutString := r.FormValue("timeout")
 	curDB := strings.ToLower(r.FormValue("current_db"))
 	if curDB != "" {
+<<<<<<< HEAD
 		_, err = sh.s.ExecuteInternal(context.Background(), "use %n", curDB)
+=======
+		_, err = sh.s.ExecuteInternal(reqCtx, "use %n", curDB)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			serveError(w, http.StatusInternalServerError, fmt.Sprintf("use database %v failed, err: %v", curDB, err))
 			return
@@ -259,6 +263,10 @@ type explainAnalyzeResult struct {
 func (sh *sqlInfoFetcher) getExplainAnalyze(ctx context.Context, sql string, resultChan chan<- *explainAnalyzeResult) {
 	recordSets, err := sh.s.(sqlexec.SQLExecutor).Execute(ctx, fmt.Sprintf("explain analyze %s", sql))
 	if err != nil {
+		for _, rs := range recordSets {
+			err1 := rs.Close()
+			terror.Log(err1)
+		}
 		resultChan <- &explainAnalyzeResult{err: err}
 		return
 	}

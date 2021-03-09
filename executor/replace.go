@@ -23,7 +23,10 @@ import (
 	"github.com/pingcap/parser/charset"
 	"github.com/pingcap/parser/mysql"
 	"github.com/pingcap/tidb/kv"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/sessionctx/stmtctx"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/tablecodec"
 	"github.com/pingcap/tidb/types"
 	"github.com/pingcap/tidb/util/chunk"
@@ -178,7 +181,12 @@ func (e *ReplaceExec) removeIndexRow(ctx context.Context, txn kv.Transaction, r 
 			}
 			return false, false, err
 		}
+<<<<<<< HEAD
 		handle, err := tablecodec.DecodeHandleInUniqueIndexValue(val, uk.commonHandle)
+=======
+
+		handle, err := tablecodec.DecodeHandle(val)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			return false, true, err
 		}
@@ -217,6 +225,17 @@ func (e *ReplaceExec) exec(ctx context.Context, newRows [][]types.Datum) error {
 		return err
 	}
 	txnSize := txn.Size()
+<<<<<<< HEAD
+=======
+
+	if e.collectRuntimeStatsEnabled() {
+		if snapshot := txn.GetSnapshot(); snapshot != nil {
+			snapshot.SetOption(kv.CollectRuntimeStats, e.stats.SnapshotRuntimeStats)
+			defer snapshot.DelOption(kv.CollectRuntimeStats)
+		}
+	}
+	prefetchStart := time.Now()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	if e.collectRuntimeStatsEnabled() {
 		if snapshot := txn.GetSnapshot(); snapshot != nil {

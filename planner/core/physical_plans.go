@@ -54,6 +54,7 @@ var (
 	_ PhysicalPlan = &PhysicalStreamAgg{}
 	_ PhysicalPlan = &PhysicalApply{}
 	_ PhysicalPlan = &PhysicalIndexJoin{}
+	_ PhysicalPlan = &PhysicalBroadCastJoin{}
 	_ PhysicalPlan = &PhysicalHashJoin{}
 	_ PhysicalPlan = &PhysicalMergeJoin{}
 	_ PhysicalPlan = &PhysicalUnionScan{}
@@ -75,6 +76,7 @@ type PhysicalTableReader struct {
 	// StoreType indicates table read from which type of store.
 	StoreType kv.StoreType
 
+<<<<<<< HEAD
 	IsCommonHandle bool
 
 	// Used by partition table.
@@ -87,6 +89,10 @@ type PartitionInfo struct {
 	PartitionNames []model.CIStr
 	Columns        []*expression.Column
 	ColumnNames    types.NameSlice
+=======
+	// BatchCop = true means the cop task in the physical table reader will be executed in batch mode(use in TiFlash only)
+	BatchCop bool
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // GetTablePlan exports the tablePlan.
@@ -104,7 +110,11 @@ func (p *PhysicalTableReader) GetTableScan() *PhysicalTableScan {
 		} else if chCnt == 1 {
 			curPlan = curPlan.Children()[0]
 		} else {
+<<<<<<< HEAD
 			join := curPlan.(*PhysicalHashJoin)
+=======
+			join := curPlan.(*PhysicalBroadCastJoin)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			curPlan = join.children[1-join.globalChildIndex]
 		}
 	}
@@ -844,6 +854,7 @@ type PhysicalMergeJoin struct {
 	Desc bool
 }
 
+<<<<<<< HEAD
 // PhysicalExchangeReceiver accepts connection and receives data passively.
 type PhysicalExchangeReceiver struct {
 	basePhysicalPlan
@@ -878,6 +889,12 @@ func (p *PhysicalMergeJoin) Clone() (PhysicalPlan, error) {
 	}
 	cloned.Desc = p.Desc
 	return cloned, nil
+=======
+// PhysicalBroadCastJoin only works for TiFlash Engine, which broadcast the small table to every replica of probe side of tables.
+type PhysicalBroadCastJoin struct {
+	basePhysicalJoin
+	globalChildIndex int
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // PhysicalLock is the physical operator of lock, which is used for `select ... for update` clause.
@@ -1045,6 +1062,7 @@ type PhysicalSort struct {
 	basePhysicalPlan
 
 	ByItems []*util.ByItems
+<<<<<<< HEAD
 }
 
 // Clone implements PhysicalPlan interface.
@@ -1068,6 +1086,8 @@ func (ls *PhysicalSort) ExtractCorrelatedCols() []*expression.CorrelatedColumn {
 		corCols = append(corCols, expression.ExtractCorColumns(item.Expr)...)
 	}
 	return corCols
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // NominalSort asks sort properties for its child. It is a fake operator that will not

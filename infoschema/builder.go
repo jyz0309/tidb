@@ -95,14 +95,21 @@ func (b *Builder) ApplyDiff(m *meta.Meta, diff *model.SchemaDiff) ([]int64, erro
 	var allocs autoid.Allocators
 	if tableIDIsValid(oldTableID) {
 		if oldTableID == newTableID && diff.Type != model.ActionRenameTable &&
+<<<<<<< HEAD
 			diff.Type != model.ActionExchangeTablePartition &&
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			// For repairing table in TiDB cluster, given 2 normal node and 1 repair node.
 			// For normal node's information schema, repaired table is existed.
 			// For repair node's information schema, repaired table is filtered (couldn't find it in `is`).
 			// So here skip to reserve the allocators when repairing table.
+<<<<<<< HEAD
 			diff.Type != model.ActionRepairTable &&
 			// Alter sequence will change the sequence info in the allocator, so the old allocator is not valid any more.
 			diff.Type != model.ActionAlterSequence {
+=======
+			diff.Type != model.ActionRepairTable {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			oldAllocs, _ := b.is.AllocByID(oldTableID)
 			allocs = filterAllocators(diff, oldAllocs)
 		}

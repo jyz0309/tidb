@@ -15,9 +15,12 @@ package domain
 
 import (
 	"context"
+<<<<<<< HEAD
 	"fmt"
 	"math/rand"
 	"strconv"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"sync"
 	"sync/atomic"
 	"time"
@@ -48,7 +51,10 @@ import (
 	"github.com/pingcap/tidb/sessionctx/variable"
 	"github.com/pingcap/tidb/statistics/handle"
 	"github.com/pingcap/tidb/store/tikv"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/store/tikv/oracle"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/telemetry"
 	"github.com/pingcap/tidb/util"
 	"github.com/pingcap/tidb/util/dbterror"
@@ -85,11 +91,14 @@ type Domain struct {
 	wg                   sync.WaitGroup
 	statsUpdating        sync2.AtomicInt32
 	cancel               context.CancelFunc
+<<<<<<< HEAD
 	indexUsageSyncLease  time.Duration
 
 	serverID             uint64
 	serverIDSession      *concurrency.Session
 	isLostConnectionToPD sync2.AtomicInt32 // !0: true, 0: false.
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // loadInfoSchema loads infoschema at startTS into handle, usedSchemaVersion is the currently used
@@ -97,7 +106,14 @@ type Domain struct {
 // It returns the latest schema version, the changed table IDs, whether it's a full load and an error.
 func (do *Domain) loadInfoSchema(handle *infoschema.Handle, usedSchemaVersion int64,
 	startTS uint64) (neededSchemaVersion int64, change *tikv.RelatedSchemaChange, fullLoad bool, err error) {
+<<<<<<< HEAD
 	snapshot := do.store.GetSnapshot(kv.NewVersion(startTS))
+=======
+	snapshot, err := do.store.GetSnapshot(kv.NewVersion(startTS))
+	if err != nil {
+		return 0, nil, fullLoad, err
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	m := meta.NewSnapshotMeta(snapshot)
 	neededSchemaVersion, err = m.GetSchemaVersion()
 	if err != nil {
@@ -432,6 +448,10 @@ func (do *Domain) ShowSlowQuery(showSlow *ast.ShowSlow) []*SlowQueryInfo {
 
 func (do *Domain) topNSlowQueryLoop() {
 	defer util.Recover(metrics.LabelDomain, "topNSlowQueryLoop", nil, false)
+<<<<<<< HEAD
+=======
+	defer do.wg.Done()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	ticker := time.NewTicker(time.Minute * 10)
 	defer func() {
 		ticker.Stop()
@@ -488,6 +508,10 @@ func (do *Domain) infoSyncerKeeper() {
 }
 
 func (do *Domain) topologySyncerKeeper() {
+<<<<<<< HEAD
+=======
+	defer do.wg.Done()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	defer util.Recover(metrics.LabelDomain, "topologySyncerKeeper", nil, false)
 	ticker := time.NewTicker(infosync.TopologyTimeToRefresh)
 	defer func() {
@@ -517,15 +541,24 @@ func (do *Domain) topologySyncerKeeper() {
 }
 
 func (do *Domain) loadSchemaInLoop(ctx context.Context, lease time.Duration) {
+<<<<<<< HEAD
+=======
+	defer do.wg.Done()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	defer util.Recover(metrics.LabelDomain, "loadSchemaInLoop", nil, true)
 	// Lease renewal can run at any frequency.
 	// Use lease/2 here as recommend by paper.
 	ticker := time.NewTicker(lease / 2)
+<<<<<<< HEAD
 	defer func() {
 		ticker.Stop()
 		do.wg.Done()
 		logutil.BgLogger().Info("loadSchemaInLoop exited.")
 	}()
+=======
+	defer ticker.Stop()
+	defer util.Recover(metrics.LabelDomain, "loadSchemaInLoop", nil, true)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	syncer := do.ddl.SchemaSyncer()
 
 	for {
@@ -682,6 +715,7 @@ const resourceIdleTimeout = 3 * time.Minute // resources in the ResourcePool wil
 func NewDomain(store kv.Storage, ddlLease time.Duration, statsLease time.Duration, idxUsageSyncLease time.Duration, factory pools.Factory) *Domain {
 	capacity := 200 // capacity of the sysSessionPool size
 	do := &Domain{
+<<<<<<< HEAD
 		store:               store,
 		exit:                make(chan struct{}),
 		sysSessionPool:      newSessionPool(capacity, factory),
@@ -689,6 +723,14 @@ func NewDomain(store kv.Storage, ddlLease time.Duration, statsLease time.Duratio
 		infoHandle:          infoschema.NewHandle(store),
 		slowQuery:           newTopNSlowQueries(30, time.Hour*24*7, 500),
 		indexUsageSyncLease: idxUsageSyncLease,
+=======
+		store:          store,
+		exit:           make(chan struct{}),
+		sysSessionPool: newSessionPool(capacity, factory),
+		statsLease:     statsLease,
+		infoHandle:     infoschema.NewHandle(store),
+		slowQuery:      newTopNSlowQueries(30, time.Hour*24*7, 500),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	do.SchemaValidator = NewSchemaValidator(ddlLease, do)
@@ -700,7 +742,11 @@ const serverIDForStandalone = 1 // serverID for standalone deployment.
 // Init initializes a domain.
 func (do *Domain) Init(ddlLease time.Duration, sysFactory func(*Domain) (pools.Resource, error)) error {
 	perfschema.Init()
+<<<<<<< HEAD
 	if ebd, ok := do.store.(kv.EtcdBackend); ok {
+=======
+	if ebd, ok := do.store.(tikv.EtcdBackend); ok {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		var addrs []string
 		var err error
 		if addrs, err = ebd.EtcdAddrs(); err != nil {
@@ -773,6 +819,7 @@ func (do *Domain) Init(ddlLease time.Duration, sysFactory func(*Domain) (pools.R
 	if err != nil {
 		return err
 	}
+<<<<<<< HEAD
 
 	if config.GetGlobalConfig().Experimental.EnableGlobalKill {
 		if do.etcdClient != nil {
@@ -793,6 +840,9 @@ func (do *Domain) Init(ddlLease time.Duration, sysFactory func(*Domain) (pools.R
 	}
 
 	do.info, err = infosync.GlobalInfoSyncerInit(ctx, do.ddl.GetID(), do.ServerID, do.etcdClient, skipRegisterToDashboard)
+=======
+	do.info, err = infosync.GlobalInfoSyncerInit(ctx, do.ddl.GetID(), do.etcdClient, skipRegisterToDashboard)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return err
 	}
@@ -1140,6 +1190,10 @@ func (do *Domain) newOwnerManager(prompt, ownerKey string) owner.Manager {
 
 func (do *Domain) loadStatsWorker() {
 	defer util.Recover(metrics.LabelDomain, "loadStatsWorker", nil, false)
+<<<<<<< HEAD
+=======
+	defer do.wg.Done()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	lease := do.statsLease
 	if lease == 0 {
 		lease = 3 * time.Second
@@ -1320,6 +1374,7 @@ func (do *Domain) NotifyUpdatePrivilege(ctx sessionctx.Context) {
 		if err != nil {
 			logutil.BgLogger().Error("unable to update privileges", zap.Error(err))
 		}
+<<<<<<< HEAD
 	}
 }
 
@@ -1552,6 +1607,8 @@ func (do *Domain) serverIDKeeper() {
 		case <-do.exit:
 			return
 		}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 }
 

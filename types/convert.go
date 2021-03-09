@@ -637,7 +637,11 @@ func ConvertJSONToDecimal(sc *stmtctx.StatementContext, j json.BinaryJSON) (*MyD
 	res := new(MyDecimal)
 	switch j.TypeCode {
 	case json.TypeCodeObject, json.TypeCodeArray:
+<<<<<<< HEAD
 		err = ErrTruncatedWrongVal.GenWithStackByArgs("DECIMAL", j.String())
+=======
+		res = res.FromInt(0)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case json.TypeCodeLiteral:
 		switch j.Value[0] {
 		case json.LiteralNil, json.LiteralFalse:

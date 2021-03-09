@@ -139,15 +139,37 @@ func RegisterMetrics() {
 	prometheus.MustRegister(TotalQueryProcHistogram)
 	prometheus.MustRegister(TotalCopProcHistogram)
 	prometheus.MustRegister(TotalCopWaitHistogram)
+<<<<<<< HEAD
+=======
+	prometheus.MustRegister(TiKVStatusDuration)
+	prometheus.MustRegister(TiKVStatusCounter)
+	prometheus.MustRegister(TiKVBatchPendingRequests)
+	prometheus.MustRegister(TiKVBatchRequests)
+	prometheus.MustRegister(TiKVBatchWaitDuration)
+	prometheus.MustRegister(TiKVBatchSendLatency)
+	prometheus.MustRegister(TiKvBatchWaitOverLoad)
+	prometheus.MustRegister(TiKVBatchClientUnavailable)
+	prometheus.MustRegister(TiKVBatchClientWaitEstablish)
+	prometheus.MustRegister(TiKVRangeTaskStats)
+	prometheus.MustRegister(TiKVRangeTaskPushDuration)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	prometheus.MustRegister(HandleSchemaValidate)
 	prometheus.MustRegister(GRPCConnTransientFailureCounter)
+<<<<<<< HEAD
+=======
+	prometheus.MustRegister(TiKVTTLLifeTimeReachCounter)
+	prometheus.MustRegister(TiKVNoAvailableConnectionCounter)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	prometheus.MustRegister(MaxProcs)
 	prometheus.MustRegister(GOGC)
 	prometheus.MustRegister(ConnIdleDurationHistogram)
 	prometheus.MustRegister(ServerInfo)
 	prometheus.MustRegister(TokenGauge)
 	prometheus.MustRegister(ConfigStatus)
+<<<<<<< HEAD
 
 	tikvmetrics.InitMetrics("tidb", "tikvclient")
 	tikvmetrics.RegisterMetrics()
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

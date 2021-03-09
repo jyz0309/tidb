@@ -131,6 +131,18 @@ func (s *testPrepareSerialSuite) TestPrepareCache(c *C) {
 	tk.Se = rootSe
 	tk.MustExec("drop table if exists tp")
 	tk.MustExec(`DROP USER 'u_tp'@'localhost';`)
+
+	// Test issue https://github.com/pingcap/tidb/issues/17491.
+	tk.MustExec("drop table if exists point_get_test")
+	tk.MustExec("create table point_get_test(a varchar(20), b int, unique index idx(a))")
+	tk.MustExec("insert into point_get_test values('aaa', 1), (NULL, 1), (NULL, 1)")
+	tk.MustExec(`prepare pt_stmt from "select * from point_get_test where a = ? and b = ?"`)
+	tk.MustExec(`set @a = "aaa", @b = 1`)
+	tk.MustQuery("execute pt_stmt using @a, @b").Check(testkit.Rows("aaa 1"))
+	tk.MustExec(`set @a = "bbb", @b = 1`)
+	tk.MustQuery("execute pt_stmt using @a, @b").Check(testkit.Rows())
+	tk.MustExec(`set @a = NULL, @b = 1`)
+	tk.MustQuery("execute pt_stmt using @a, @b").Check(testkit.Rows())
 }
 
 func (s *testPrepareSerialSuite) TestPrepareCacheIndexScan(c *C) {
@@ -445,6 +457,7 @@ func (s *testPrepareSerialSuite) TestPrepareCacheForPartition(c *C) {
 	c.Assert(err, IsNil)
 
 	tk.MustExec("use test")
+<<<<<<< HEAD
 	for _, val := range []string{string(variable.StaticOnly), string(variable.DynamicOnly)} {
 		tk.MustExec("set @@tidb_partition_prune_mode = '" + val + "'")
 		// Test for PointGet and IndexRead.
@@ -548,6 +561,70 @@ func (s *testPrepareSerialSuite) TestPrepareCacheForPartition(c *C) {
 		tk.MustExec("set @id=100")
 		tk.MustQuery("execute stmt8 using @id").Check(testkit.Rows())
 	}
+=======
+	// Test for PointGet and IndexRead.
+	tk.MustExec("drop table if exists t_index_read")
+	tk.MustExec("create table t_index_read (id int, k int, c varchar(10), primary key (id, k)) partition by hash(id+k) partitions 10")
+	tk.MustExec("insert into t_index_read values (1, 2, 'abc'), (3, 4, 'def'), (5, 6, 'xyz')")
+	tk.MustExec("prepare stmt1 from 'select c from t_index_read where id = ? and k = ?;'")
+	tk.MustExec("set @id=1, @k=2")
+	// When executing one statement at the first time, we don't use cache, so we need to execute it at least twice to test the cache.
+	tk.MustQuery("execute stmt1 using @id, @k").Check(testkit.Rows("abc"))
+	tk.MustQuery("execute stmt1 using @id, @k").Check(testkit.Rows("abc"))
+	tk.MustExec("set @id=5, @k=6")
+	tk.MustQuery("execute stmt1 using @id, @k").Check(testkit.Rows("xyz"))
+	tk.MustExec("prepare stmt2 from 'select c from t_index_read where id = ? and k = ? and 1 = 1;'")
+	tk.MustExec("set @id=1, @k=2")
+	tk.MustQuery("execute stmt2 using @id, @k").Check(testkit.Rows("abc"))
+	tk.MustQuery("execute stmt2 using @id, @k").Check(testkit.Rows("abc"))
+	tk.MustExec("set @id=5, @k=6")
+	tk.MustQuery("execute stmt2 using @id, @k").Check(testkit.Rows("xyz"))
+	// Test for TableScan.
+	tk.MustExec("drop table if exists t_table_read")
+	tk.MustExec("create table t_table_read (id int, k int, c varchar(10), primary key(id)) partition by hash(id) partitions 10")
+	tk.MustExec("insert into t_table_read values (1, 2, 'abc'), (3, 4, 'def'), (5, 6, 'xyz')")
+	tk.MustExec("prepare stmt3 from 'select c from t_index_read where id = ?;'")
+	tk.MustExec("set @id=1")
+	// When executing one statement at the first time, we don't use cache, so we need to execute it at least twice to test the cache.
+	tk.MustQuery("execute stmt3 using @id").Check(testkit.Rows("abc"))
+	tk.MustQuery("execute stmt3 using @id").Check(testkit.Rows("abc"))
+	tk.MustExec("set @id=5")
+	tk.MustQuery("execute stmt3 using @id").Check(testkit.Rows("xyz"))
+	tk.MustExec("prepare stmt4 from 'select c from t_index_read where id = ? and k = ?'")
+	tk.MustExec("set @id=1, @k=2")
+	tk.MustQuery("execute stmt4 using @id, @k").Check(testkit.Rows("abc"))
+	tk.MustQuery("execute stmt4 using @id, @k").Check(testkit.Rows("abc"))
+	tk.MustExec("set @id=5, @k=6")
+	tk.MustQuery("execute stmt4 using @id, @k").Check(testkit.Rows("xyz"))
+	// Query on range partition tables should not raise error.
+	tk.MustExec("create table t_range_index (id int, k int, c varchar(10), primary key(id)) partition by range(id) ( PARTITION p0 VALUES LESS THAN (4), PARTITION p1 VALUES LESS THAN (14),PARTITION p2 VALUES LESS THAN (20) )")
+	tk.MustExec("insert into t_range_index values (1, 2, 'abc'), (5, 4, 'def'), (13, 6, 'xyz'), (17, 6, 'hij')")
+	tk.MustExec("prepare stmt5 from 'select c from t_range_index where id = ?'")
+	tk.MustExec("set @id=1")
+	tk.MustQuery("execute stmt5 using @id").Check(testkit.Rows("abc"))
+	tk.MustQuery("execute stmt5 using @id").Check(testkit.Rows("abc"))
+	tk.MustExec("set @id=5")
+	tk.MustQuery("execute stmt5 using @id").Check(testkit.Rows("def"))
+	tk.MustQuery("execute stmt5 using @id").Check(testkit.Rows("def"))
+	tk.MustExec("set @id=13")
+	tk.MustQuery("execute stmt5 using @id").Check(testkit.Rows("xyz"))
+	tk.MustExec("set @id=17")
+	tk.MustQuery("execute stmt5 using @id").Check(testkit.Rows("hij"))
+
+	tk.MustExec("create table t_range_table (id int, k int, c varchar(10)) partition by range(id) ( PARTITION p0 VALUES LESS THAN (4), PARTITION p1 VALUES LESS THAN (14),PARTITION p2 VALUES LESS THAN (20) )")
+	tk.MustExec("insert into t_range_table values (1, 2, 'abc'), (5, 4, 'def'), (13, 6, 'xyz'), (17, 6, 'hij')")
+	tk.MustExec("prepare stmt6 from 'select c from t_range_table where id = ?'")
+	tk.MustExec("set @id=1")
+	tk.MustQuery("execute stmt6 using @id").Check(testkit.Rows("abc"))
+	tk.MustQuery("execute stmt6 using @id").Check(testkit.Rows("abc"))
+	tk.MustExec("set @id=5")
+	tk.MustQuery("execute stmt6 using @id").Check(testkit.Rows("def"))
+	tk.MustQuery("execute stmt6 using @id").Check(testkit.Rows("def"))
+	tk.MustExec("set @id=13")
+	tk.MustQuery("execute stmt6 using @id").Check(testkit.Rows("xyz"))
+	tk.MustExec("set @id=17")
+	tk.MustQuery("execute stmt6 using @id").Check(testkit.Rows("hij"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func newSession(c *C, store kv.Storage, dbName string) session.Session {
@@ -894,6 +971,7 @@ func (s *testPrepareSuite) TestPrepareForGroupByMultiItems(c *C) {
 	tk.MustQuery(`execute stmt2 using @v1, @v2`).Check(testkit.Rows("10"))
 }
 
+<<<<<<< HEAD
 func (s *testPrepareSuite) TestInvisibleIndex(c *C) {
 	defer testleak.AfterTest(c)()
 	store, dom, err := newStoreWithBootstrap()
@@ -927,6 +1005,8 @@ func (s *testPrepareSuite) TestInvisibleIndex(c *C) {
 	c.Assert(tk.Se.GetSessionVars().StmtCtx.IndexNames[0], Equals, "t:idx_a")
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // Test for issue https://github.com/pingcap/tidb/issues/22167
 func (s *testPrepareSerialSuite) TestPrepareCacheWithJoinTable(c *C) {
 	defer testleak.AfterTest(c)()

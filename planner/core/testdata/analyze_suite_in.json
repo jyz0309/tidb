@@ -123,6 +123,12 @@
     ]
   },
   {
+    "name": "TestLowSelIndexGreedySearch",
+    "cases": [
+      "explain select max(e) from t where a='T3382' and b='ECO' and c='TOPIC' and d='23660fa1ace9455cb7f3ee831e14a342'"
+    ]
+  },
+  {
     "name": "TestEmptyTable",
     "cases": [
       "select * from t where t.c1 <= 50",
@@ -189,6 +195,7 @@
       // 7639902 is out of range for the analyzed histogram, and we know from the data writer that for each value
       // of `a` in the table, there are 6 rows in average. Before this PR, the row count estimation is 150k, which is
       // far from the real value.
+<<<<<<< HEAD
       "explain format = 'brief' select * from t where a = 7639902",
       // Should choose `primary` index instead of index `b`.
       "explain format = 'brief' select c, b from t where a = 7639902 order by b asc limit 6"
@@ -201,6 +208,11 @@
       "explain format = 'brief' select * from t where a <= 10000 order by b limit 1",
       // Should choose idx_b instead of idx_a, because idx_b would scan only 1 row.
       "explain format = 'brief' select * from t where a >= 999900 order by b limit 1"
+=======
+      "explain select * from t where a = 7639902",
+      // Should choose `primary` index instead of index `b`.
+      "explain select c, b from t where a = 7639902 order by b asc limit 6"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
     ]
   }
 ]

@@ -14,8 +14,11 @@
 package telemetry
 
 import (
+<<<<<<< HEAD
 	"context"
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/errors"
 	"github.com/pingcap/tidb/sessionctx"
 	"github.com/pingcap/tidb/util/sqlexec"
@@ -35,12 +38,16 @@ type clusterInfoItem struct {
 
 func getClusterInfo(ctx sessionctx.Context) ([]*clusterInfoItem, error) {
 	// Explicitly list all field names instead of using `*` to avoid potential leaking sensitive info when adding new fields in future.
+<<<<<<< HEAD
 	exec := ctx.(sqlexec.RestrictedSQLExecutor)
 	stmt, err := exec.ParseWithParams(context.TODO(), `SELECT TYPE, INSTANCE, STATUS_ADDRESS, VERSION, GIT_HASH, START_TIME, UPTIME FROM information_schema.cluster_info`)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	rows, _, err := exec.ExecRestrictedStmt(context.TODO(), stmt)
+=======
+	rows, _, err := ctx.(sqlexec.RestrictedSQLExecutor).ExecRestrictedSQL(`SELECT TYPE, INSTANCE, STATUS_ADDRESS, VERSION, GIT_HASH, START_TIME, UPTIME FROM information_schema.cluster_info`)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

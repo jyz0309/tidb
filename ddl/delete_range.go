@@ -36,7 +36,11 @@ import (
 
 const (
 	insertDeleteRangeSQLPrefix = `INSERT IGNORE INTO mysql.gc_delete_range VALUES `
+<<<<<<< HEAD
 	insertDeleteRangeSQLValue  = `(%?, %?, %?, %?, %?)`
+=======
+	insertDeleteRangeSQLValue  = `("%d", "%d", "%s", "%s", "%d")`
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	insertDeleteRangeSQL       = insertDeleteRangeSQLPrefix + insertDeleteRangeSQLValue
 
 	delBatchSize = 65536
@@ -446,6 +450,23 @@ func doBatchInsert(s sqlexec.SQLExecutor, jobID int64, tableIDs []int64, ts uint
 		paramsList = append(paramsList, jobID, tableID, startKeyEncoded, endKeyEncoded, ts)
 	}
 	_, err := s.ExecuteInternal(context.Background(), buf.String(), paramsList...)
+	return errors.Trace(err)
+}
+
+func doBatchInsert(s sqlexec.SQLExecutor, jobID int64, tableIDs []int64, ts uint64) error {
+	logutil.BgLogger().Info("[ddl] batch insert into delete-range table", zap.Int64("jobID", jobID), zap.Int64s("elementIDs", tableIDs))
+	sql := insertDeleteRangeSQLPrefix
+	for i, tableID := range tableIDs {
+		startKey := tablecodec.EncodeTablePrefix(tableID)
+		endKey := tablecodec.EncodeTablePrefix(tableID + 1)
+		startKeyEncoded := hex.EncodeToString(startKey)
+		endKeyEncoded := hex.EncodeToString(endKey)
+		sql += fmt.Sprintf(insertDeleteRangeSQLValue, jobID, tableID, startKeyEncoded, endKeyEncoded, ts)
+		if i != len(tableIDs)-1 {
+			sql += ","
+		}
+	}
+	_, err := s.Execute(context.Background(), sql)
 	return errors.Trace(err)
 }
 

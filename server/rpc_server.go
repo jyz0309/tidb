@@ -16,8 +16,11 @@ package server
 import (
 	"context"
 	"fmt"
+<<<<<<< HEAD
 	"net"
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/kvproto/pkg/coprocessor"
 	"github.com/pingcap/kvproto/pkg/diagnosticspb"
 	"github.com/pingcap/kvproto/pkg/tikvpb"
@@ -209,8 +212,13 @@ func (s *rpcServer) createSession() (session.Session, error) {
 	se.GetSessionVars().TxnCtx.InfoSchema = is
 	// This is for disable parallel hash agg.
 	// TODO: remove this.
+<<<<<<< HEAD
 	se.GetSessionVars().SetHashAggPartialConcurrency(1)
 	se.GetSessionVars().SetHashAggFinalConcurrency(1)
+=======
+	se.GetSessionVars().HashAggPartialConcurrency = 1
+	se.GetSessionVars().HashAggFinalConcurrency = 1
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	se.GetSessionVars().StmtCtx.MemTracker = memory.NewTracker(memory.LabelForCoprocessor, -1)
 	se.SetSessionManager(s.sm)
 	return se, nil

@@ -48,9 +48,19 @@ type TxnState struct {
 	kv.Transaction
 	txnFuture *txnFuture
 
+<<<<<<< HEAD
 	initCnt       int
 	stagingHandle kv.StagingHandle
 	mutations     map[int64]*binlog.TableMutation
+=======
+	stmtBuf      kv.MemBuffer
+	mutations    map[int64]*binlog.TableMutation
+	dirtyTableOP []dirtyTableOperation
+
+	// If doNotCommit is not nil, Commit() will not commit the transaction.
+	// doNotCommit flag may be set when StmtCommit fail.
+	doNotCommit error
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (st *TxnState) init() {
@@ -58,6 +68,7 @@ func (st *TxnState) init() {
 }
 
 func (st *TxnState) initStmtBuf() {
+<<<<<<< HEAD
 	if st.Transaction == nil {
 		return
 	}
@@ -90,14 +101,68 @@ func (st *TxnState) cleanupStmtBuf() {
 	buf := st.Transaction.GetMemBuffer()
 	buf.Cleanup(st.stagingHandle)
 	st.initCnt = buf.Len()
+=======
+	if st.stmtBuf == nil {
+		st.stmtBuf = st.Transaction.NewStagingBuffer()
+	}
+}
+
+func (st *TxnState) stmtBufLen() int {
+	if st.stmtBuf == nil {
+		return 0
+	}
+	return st.stmtBuf.Len()
+}
+
+func (st *TxnState) stmtBufSize() int {
+	if st.stmtBuf == nil {
+		return 0
+	}
+	return st.stmtBuf.Size()
+}
+
+func (st *TxnState) stmtBufGet(ctx context.Context, k kv.Key) ([]byte, error) {
+	if st.stmtBuf == nil {
+		return nil, kv.ErrNotExist
+	}
+	return st.stmtBuf.Get(ctx, k)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // Size implements the MemBuffer interface.
 func (st *TxnState) Size() int {
+<<<<<<< HEAD
 	if st.Transaction == nil {
 		return 0
+=======
+	size := st.stmtBufSize()
+	if st.Transaction != nil {
+		size += st.Transaction.Size()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	return st.Transaction.Size()
+}
+
+// NewStagingBuffer returns a new child write buffer.
+func (st *TxnState) NewStagingBuffer() kv.MemBuffer {
+	st.initStmtBuf()
+	return st.stmtBuf.NewStagingBuffer()
+}
+
+// Flush flushes all staging kvs into parent buffer.
+func (st *TxnState) Flush() (int, error) {
+	if st.stmtBuf == nil {
+		return 0, nil
+	}
+	return st.stmtBuf.Flush()
+}
+
+// Discard discards all staging kvs.
+func (st *TxnState) Discard() {
+	if st.stmtBuf == nil {
+		return
+	}
+	st.stmtBuf.Discard()
 }
 
 // Valid implements the kv.Transaction interface.
@@ -135,6 +200,12 @@ func (st *TxnState) GoString() string {
 		if len(st.mutations) > 0 {
 			fmt.Fprintf(&s, ", len(mutations)=%d, %#v", len(st.mutations), st.mutations)
 		}
+<<<<<<< HEAD
+=======
+		if st.stmtBufLen() != 0 {
+			fmt.Fprintf(&s, ", buf.length: %d, buf.size: %d", st.stmtBufLen(), st.stmtBufSize())
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	} else {
 		s.WriteString("state=invalid")
 	}
@@ -174,10 +245,14 @@ func (st *TxnState) changePendingToValid(ctx context.Context) error {
 }
 
 func (st *TxnState) changeToInvalid() {
+<<<<<<< HEAD
 	if st.stagingHandle != kv.InvalidStagingHandle {
 		st.Transaction.GetMemBuffer().Cleanup(st.stagingHandle)
 	}
 	st.stagingHandle = kv.InvalidStagingHandle
+=======
+	st.stmtBuf = nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	st.Transaction = nil
 	st.txnFuture = nil
 }
@@ -211,7 +286,11 @@ func ResetMockAutoRandIDRetryCount(failTimes int64) {
 // Commit overrides the Transaction interface.
 func (st *TxnState) Commit(ctx context.Context) error {
 	defer st.reset()
+<<<<<<< HEAD
 	if len(st.mutations) != 0 || st.countHint() != 0 {
+=======
+	if len(st.mutations) != 0 || len(st.dirtyTableOP) != 0 || st.stmtBufLen() != 0 {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		logutil.BgLogger().Error("the code should never run here",
 			zap.String("TxnState", st.GoString()),
 			zap.Int("staging handler", int(st.stagingHandle)),
@@ -255,16 +334,154 @@ func (st *TxnState) reset() {
 	st.changeToInvalid()
 }
 
+<<<<<<< HEAD
 func (st *TxnState) cleanup() {
 	st.cleanupStmtBuf()
 	st.initStmtBuf()
 	for key := range st.mutations {
 		delete(st.mutations, key)
 	}
+=======
+// Get overrides the Transaction interface.
+func (st *TxnState) Get(ctx context.Context, k kv.Key) ([]byte, error) {
+	val, err := st.stmtBufGet(ctx, k)
+	if kv.IsErrNotFound(err) {
+		val, err = st.Transaction.Get(ctx, k)
+		if kv.IsErrNotFound(err) {
+			return nil, err
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	if len(val) == 0 {
+		return nil, kv.ErrNotExist
+	}
+	return val, nil
+}
+
+// GetMemBuffer overrides the Transaction interface.
+func (st *TxnState) GetMemBuffer() kv.MemBuffer {
+	if st.stmtBuf == nil || st.stmtBuf.Size() == 0 {
+		return st.Transaction.GetMemBuffer()
+	}
+	return kv.NewBufferStoreFrom(st.Transaction.GetMemBuffer(), st.stmtBuf)
+}
+
+// GetMemBufferSnapshot overrides the Transaction interface.
+func (st *TxnState) GetMemBufferSnapshot() kv.MemBuffer {
+	return st.Transaction.GetMemBuffer()
+}
+
+// BatchGet overrides the Transaction interface.
+func (st *TxnState) BatchGet(ctx context.Context, keys []kv.Key) (map[string][]byte, error) {
+	bufferValues := make([][]byte, len(keys))
+	shrinkKeys := make([]kv.Key, 0, len(keys))
+	for i, key := range keys {
+		val, err := st.stmtBufGet(ctx, key)
+		if kv.IsErrNotFound(err) {
+			shrinkKeys = append(shrinkKeys, key)
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+		if len(val) != 0 {
+			bufferValues[i] = val
+		}
+	}
+	storageValues, err := st.Transaction.BatchGet(ctx, shrinkKeys)
+	if err != nil {
+		return nil, err
+	}
+	for i, key := range keys {
+		if bufferValues[i] == nil {
+			continue
+		}
+		storageValues[string(key)] = bufferValues[i]
+	}
+	return storageValues, nil
+}
+
+// Set overrides the Transaction interface.
+func (st *TxnState) Set(k kv.Key, v []byte) error {
+	st.initStmtBuf()
+	return st.stmtBuf.Set(k, v)
+}
+
+// Delete overrides the Transaction interface.
+func (st *TxnState) Delete(k kv.Key) error {
+	st.initStmtBuf()
+	return st.stmtBuf.Delete(k)
+}
+
+// DeleteWithNeedLock overrides the Transaction interface.
+func (st *TxnState) DeleteWithNeedLock(k kv.Key) error {
+	st.initStmtBuf()
+	return st.stmtBuf.DeleteWithNeedLock(k)
+}
+
+// Iter overrides the Transaction interface.
+func (st *TxnState) Iter(k kv.Key, upperBound kv.Key) (kv.Iterator, error) {
+	retrieverIt, err := st.Transaction.Iter(k, upperBound)
+	if err != nil {
+		return nil, err
+	}
+	if st.stmtBuf == nil {
+		return retrieverIt, nil
+	}
+	bufferIt, err := st.stmtBuf.Iter(k, upperBound)
+	if err != nil {
+		return nil, err
+	}
+	return kv.NewUnionIter(bufferIt, retrieverIt, false)
+}
+
+// IterReverse overrides the Transaction interface.
+func (st *TxnState) IterReverse(k kv.Key) (kv.Iterator, error) {
+	retrieverIt, err := st.Transaction.IterReverse(k)
+	if err != nil {
+		return nil, err
+	}
+	if st.stmtBuf == nil {
+		return retrieverIt, nil
+	}
+	bufferIt, err := st.stmtBuf.IterReverse(k)
+	if err != nil {
+		return nil, err
+	}
+	return kv.NewUnionIter(bufferIt, retrieverIt, true)
+}
+
+func (st *TxnState) cleanup() {
+	if st.stmtBuf != nil {
+		st.stmtBuf.Discard()
+		st.stmtBuf = nil
+	}
+	for key := range st.mutations {
+		delete(st.mutations, key)
+	}
+	if st.dirtyTableOP != nil {
+		empty := dirtyTableOperation{}
+		for i := 0; i < len(st.dirtyTableOP); i++ {
+			st.dirtyTableOP[i] = empty
+		}
+		if len(st.dirtyTableOP) > 256 {
+			// Reduce memory footprint for the large transaction.
+			st.dirtyTableOP = nil
+		} else {
+			st.dirtyTableOP = st.dirtyTableOP[:0]
+		}
+	}
+	if st.Transaction != nil {
+		st.Transaction.ResetStmtKeyExistErrs()
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // KeysNeedToLock returns the keys need to be locked.
 func (st *TxnState) KeysNeedToLock() ([]kv.Key, error) {
+<<<<<<< HEAD
 	if st.stagingHandle == kv.InvalidStagingHandle {
 		return nil, nil
 	}
@@ -273,6 +490,15 @@ func (st *TxnState) KeysNeedToLock() ([]kv.Key, error) {
 	buf.InspectStage(st.stagingHandle, func(k kv.Key, flags kv.KeyFlags, v []byte) {
 		if !keyNeedToLock(k, v, flags) {
 			return
+=======
+	if st.stmtBufLen() == 0 {
+		return nil, nil
+	}
+	keys := make([]kv.Key, 0, st.stmtBufLen())
+	if err := kv.WalkMemBuffer(st.stmtBuf, func(k kv.Key, v []byte) error {
+		if !st.stmtBuf.GetFlags(context.Background(), k).HasNeedLocked() && !keyNeedToLock(k, v) {
+			return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		keys = append(keys, k)
 	})
@@ -285,6 +511,7 @@ func keyNeedToLock(k, v []byte, flags kv.KeyFlags) bool {
 		// meta key always need to lock.
 		return true
 	}
+<<<<<<< HEAD
 	if flags.HasPresumeKeyNotExists() {
 		return true
 	}
@@ -292,6 +519,13 @@ func keyNeedToLock(k, v []byte, flags kv.KeyFlags) bool {
 	// lock row key, primary key and unique index for delete operation,
 	if len(v) == 0 {
 		return flags.HasNeedLocked() || tablecodec.IsRecordKey(k)
+=======
+
+	// only need to delete row key here,
+	// primary key and unique indexes are handled outside.
+	if len(v) == 0 {
+		return k[10] == 'r'
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	if tablecodec.IsUntouchedIndexKValue(k, v) {
@@ -387,15 +621,47 @@ func (s *session) StmtCommit() {
 	defer func() {
 		s.txn.cleanup()
 	}()
+<<<<<<< HEAD
 
 	st := &s.txn
 	st.flushStmtBuf()
+=======
+
+	st := &s.txn
+
+	if _, err := st.Flush(); err != nil {
+		return err
+	}
+
+	var err error
+	failpoint.Inject("mockStmtCommitError", func(val failpoint.Value) {
+		if val.(bool) && st.stmtBufLen() > 3 {
+			err = errors.New("mock stmt commit error")
+		}
+	})
+	if err != nil {
+		st.doNotCommit = err
+		return err
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// Need to flush binlog.
 	for tableID, delta := range st.mutations {
 		mutation := getBinlogMutation(s, tableID)
 		mergeToMutation(mutation, delta)
 	}
+<<<<<<< HEAD
+=======
+
+	if len(st.dirtyTableOP) > 0 {
+		dirtyDB := executor.GetDirtyDB(s)
+		for _, op := range st.dirtyTableOP {
+			mergeToDirtyDB(dirtyDB, op)
+		}
+	}
+	st.MergeStmtKeyExistErrs()
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // StmtRollback implements the sessionctx.Context interface.

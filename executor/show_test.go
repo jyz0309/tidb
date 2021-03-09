@@ -737,6 +737,7 @@ func (s *testSuite5) TestShowCreateTable(c *C) {
 	tk.MustExec("create sequence seq")
 	tk.MustQuery("show create table seq;").Check(testkit.Rows("seq CREATE SEQUENCE `seq` start with 1 minvalue 1 maxvalue 9223372036854775806 increment by 1 cache 1000 nocycle ENGINE=InnoDB"))
 
+<<<<<<< HEAD
 	// Test for issue #15633, 'binary' collation should be ignored in the result of 'show create table'.
 	tk.MustExec(`drop table if exists binary_collate`)
 	tk.MustExec(`create table binary_collate(a varchar(10)) default collate=binary;`)
@@ -762,6 +763,8 @@ func (s *testSuite5) TestShowCreateTable(c *C) {
 			"  `a` varchar(10) DEFAULT NULL\n"+
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin", // non-binary collate is kept.
 	))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Test for issue #17 in bug competition, default num and sequence should be shown without quote.
 	tk.MustExec(`drop table if exists default_num`)
 	tk.MustExec("create table default_num(a int default 11)")
@@ -788,6 +791,7 @@ func (s *testSuite5) TestShowCreateTable(c *C) {
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin",
 	))
 
+<<<<<<< HEAD
 	// TiDB defaults (and only supports) foreign_key_checks=0
 	// This means that the child table can be created before the parent table.
 	// This behavior is required for mysqldump restores.
@@ -819,6 +823,8 @@ func (s *testSuite5) TestShowCreateTable(c *C) {
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin",
 	))
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	// Test issue #20327
 	tk.MustExec("drop table if exists t;")
 	tk.MustExec("create table t(a int, b char(10) as ('a'));")
@@ -828,6 +834,7 @@ func (s *testSuite5) TestShowCreateTable(c *C) {
 	tk.MustExec("create table t(a int, b char(10) as (_utf8'a'));")
 	result = tk.MustQuery("show create table t;").Rows()[0][1]
 	c.Assert(result, Matches, `(?s).*GENERATED ALWAYS AS \(_utf8'a'\).*`)
+<<<<<<< HEAD
 
 	// Test show list partition table
 	tk.MustExec(`DROP TABLE IF EXISTS t`)
@@ -884,6 +891,8 @@ func (s *testSuite5) TestShowCreateTable(c *C) {
 			"  PARTITION `p0` VALUES IN ((3,\"1\"),(5,\"5\")),\n"+
 			"  PARTITION `p1` VALUES IN ((1,\"1\"))\n"+
 			")"))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testAutoRandomSuite) TestShowCreateTableAutoRandom(c *C) {
@@ -918,7 +927,11 @@ func (s *testAutoRandomSuite) TestShowCreateTableAutoRandom(c *C) {
 		""+
 			"auto_random_tbl3 CREATE TABLE `auto_random_tbl3` (\n"+
 			"  `a` bigint(20) NOT NULL /*T![auto_rand] AUTO_RANDOM(5) */,\n"+
+<<<<<<< HEAD
 			"  PRIMARY KEY (`a`) /*T![clustered_index] CLUSTERED */\n"+
+=======
+			"  PRIMARY KEY (`a`)\n"+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin",
 	))
 	// Test show auto_random table option.
@@ -928,7 +941,11 @@ func (s *testAutoRandomSuite) TestShowCreateTableAutoRandom(c *C) {
 			"auto_random_tbl4 CREATE TABLE `auto_random_tbl4` (\n"+
 			"  `a` bigint(20) NOT NULL /*T![auto_rand] AUTO_RANDOM(5) */,\n"+
 			"  `b` varchar(255) DEFAULT NULL,\n"+
+<<<<<<< HEAD
 			"  PRIMARY KEY (`a`) /*T![clustered_index] CLUSTERED */\n"+
+=======
+			"  PRIMARY KEY (`a`)\n"+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin /*T![auto_rand_base] AUTO_RANDOM_BASE=100 */",
 	))
 	// Test implicit auto_random with auto_random table option.
@@ -938,7 +955,11 @@ func (s *testAutoRandomSuite) TestShowCreateTableAutoRandom(c *C) {
 			"auto_random_tbl5 CREATE TABLE `auto_random_tbl5` (\n"+
 			"  `a` bigint(20) NOT NULL /*T![auto_rand] AUTO_RANDOM(5) */,\n"+
 			"  `b` char(1) DEFAULT NULL,\n"+
+<<<<<<< HEAD
 			"  PRIMARY KEY (`a`) /*T![clustered_index] CLUSTERED */\n"+
+=======
+			"  PRIMARY KEY (`a`)\n"+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin /*T![auto_rand_base] AUTO_RANDOM_BASE=50 */",
 	))
 	// Test auto_random table option already with special comment.
@@ -947,7 +968,11 @@ func (s *testAutoRandomSuite) TestShowCreateTableAutoRandom(c *C) {
 		""+
 			"auto_random_tbl6 CREATE TABLE `auto_random_tbl6` (\n"+
 			"  `a` bigint(20) NOT NULL /*T![auto_rand] AUTO_RANDOM(5) */,\n"+
+<<<<<<< HEAD
 			"  PRIMARY KEY (`a`) /*T![clustered_index] CLUSTERED */\n"+
+=======
+			"  PRIMARY KEY (`a`)\n"+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin /*T![auto_rand_base] AUTO_RANDOM_BASE=200 */",
 	))
 }
@@ -963,7 +988,11 @@ func (s *testAutoRandomSuite) TestAutoIdCache(c *C) {
 		""+
 			"t CREATE TABLE `t` (\n"+
 			"  `a` int(11) NOT NULL AUTO_INCREMENT,\n"+
+<<<<<<< HEAD
 			"  PRIMARY KEY (`a`) /*T![clustered_index] CLUSTERED */\n"+
+=======
+			"  PRIMARY KEY (`a`)\n"+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin /*T![auto_id_cache] AUTO_ID_CACHE=10 */",
 	))
 	tk.MustExec("drop table if exists t")
@@ -973,7 +1002,11 @@ func (s *testAutoRandomSuite) TestAutoIdCache(c *C) {
 			"t CREATE TABLE `t` (\n"+
 			"  `a` int(11) NOT NULL AUTO_INCREMENT,\n"+
 			"  `b` int(11) NOT NULL,\n"+
+<<<<<<< HEAD
 			"  PRIMARY KEY (`b`) /*T![clustered_index] CLUSTERED */,\n"+
+=======
+			"  PRIMARY KEY (`b`),\n"+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			"  UNIQUE KEY `a` (`a`)\n"+
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin /*T![auto_id_cache] AUTO_ID_CACHE=100 */",
 	))
@@ -983,7 +1016,11 @@ func (s *testAutoRandomSuite) TestAutoIdCache(c *C) {
 		""+
 			"t CREATE TABLE `t` (\n"+
 			"  `a` int(11) NOT NULL,\n"+
+<<<<<<< HEAD
 			"  PRIMARY KEY (`a`) /*T![clustered_index] CLUSTERED */\n"+
+=======
+			"  PRIMARY KEY (`a`)\n"+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin /*T![auto_id_cache] AUTO_ID_CACHE=5 */",
 	))
 }
@@ -1005,7 +1042,11 @@ func (s *testAutoRandomSuite) TestAutoRandomBase(c *C) {
 			"t CREATE TABLE `t` (\n"+
 			"  `a` bigint(20) NOT NULL /*T![auto_rand] AUTO_RANDOM(5) */,\n"+
 			"  `b` int(11) NOT NULL AUTO_INCREMENT,\n"+
+<<<<<<< HEAD
 			"  PRIMARY KEY (`a`) /*T![clustered_index] CLUSTERED */,\n"+
+=======
+			"  PRIMARY KEY (`a`),\n"+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			"  UNIQUE KEY `b` (`b`)\n"+
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=100 /*T![auto_rand_base] AUTO_RANDOM_BASE=100 */",
 	))
@@ -1016,13 +1057,21 @@ func (s *testAutoRandomSuite) TestAutoRandomBase(c *C) {
 			"t CREATE TABLE `t` (\n"+
 			"  `a` bigint(20) NOT NULL /*T![auto_rand] AUTO_RANDOM(5) */,\n"+
 			"  `b` int(11) NOT NULL AUTO_INCREMENT,\n"+
+<<<<<<< HEAD
 			"  PRIMARY KEY (`a`) /*T![clustered_index] CLUSTERED */,\n"+
+=======
+			"  PRIMARY KEY (`a`),\n"+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			"  UNIQUE KEY `b` (`b`)\n"+
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=5100 /*T![auto_rand_base] AUTO_RANDOM_BASE=6001 */",
 	))
 }
 
+<<<<<<< HEAD
 func (s *testSerialSuite) TestAutoRandomWithLargeSignedShowTableRegions(c *C) {
+=======
+func (s *testAutoRandomSuite) TestAutoRandomWithLargeSignedShowTableRegions(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("create database if not exists auto_random_db;")
 	defer tk.MustExec("drop database if exists auto_random_db;")
@@ -1116,6 +1165,7 @@ func (s *testSuite5) TestShowClusterConfig(c *C) {
 	c.Assert(tk.QueryToErr("show config"), ErrorMatches, confErr.Error())
 }
 
+<<<<<<< HEAD
 func (s *testSerialSuite1) TestShowCreateTableWithIntegerDisplayLengthWarnings(c *C) {
 	parsertypes.TiDBStrictIntegerDisplayWidth = true
 	defer func() {
@@ -1187,6 +1237,12 @@ func (s *testSuite5) TestShowVar(c *C) {
 		if variable.FilterImplicitFeatureSwitch(v) {
 			continue
 		}
+=======
+func (s *testSuite5) TestShowVar(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	var showSQL string
+	for _, v := range variable.SysVars {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		// When ScopeSession only. `show global variables` must return empty.
 		if v.Scope == variable.ScopeSession {
 			showSQL = "show variables like '" + v.Name + "'"
@@ -1204,6 +1260,7 @@ func (s *testSuite5) TestShowVar(c *C) {
 			c.Check(res.Rows(), HasLen, 1)
 		}
 	}
+<<<<<<< HEAD
 	// Test for switch variable which shouldn't seen by users.
 	for _, one := range variable.FeatureSwitchVariables {
 		res := tk.MustQuery("show variables like '" + one + "'")
@@ -1232,4 +1289,6 @@ func (s *testSuite5) TestIssue19507(c *C) {
 			"t2|1|t2_b_c_index|2|c|A|0|<nil>|<nil>||BTREE|||YES|NULL",
 			"t2|1|t2_c_b_index|1|c|A|0|<nil>|<nil>||BTREE|||YES|NULL",
 			"t2|1|t2_c_b_index|2|b|A|0|<nil>|<nil>|YES|BTREE|||YES|NULL"))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

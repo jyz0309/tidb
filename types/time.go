@@ -739,8 +739,13 @@ func ParseDateFormat(format string) []string {
 		return nil
 	}
 
+<<<<<<< HEAD
 	// Date format must start with number.
 	if !isDigit(format[0]) {
+=======
+	// Date format must start and end with number.
+	if !isDigit(format[0]) || !isDigit(format[len(format)-1]) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return nil
 	}
 
@@ -756,6 +761,7 @@ func ParseDateFormat(format string) []string {
 			prevParts := len(seps)
 			seps = append(seps, format[start:i])
 			start = i + 1
+<<<<<<< HEAD
 
 			// consume further consecutive separators
 			for j := i + 1; j < len(format); j++ {
@@ -763,6 +769,15 @@ func ParseDateFormat(format string) []string {
 					break
 				}
 
+=======
+
+			// consume further consecutive separators
+			for j := i + 1; j < len(format); j++ {
+				if !isValidSeparator(format[j], prevParts) {
+					break
+				}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 				start++
 				i++
 			}
@@ -786,6 +801,7 @@ func isValidSeparator(c byte, prevParts int) bool {
 		return true
 	}
 
+<<<<<<< HEAD
 	if prevParts == 2 && (c == ' ' || c == 'T') {
 		return true
 	}
@@ -794,6 +810,9 @@ func isValidSeparator(c byte, prevParts int) bool {
 		return true
 	}
 	return false
+=======
+	return prevParts == 2 && (c == ' ' || c == 'T')
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 var validIdxCombinations = map[int]struct {
@@ -849,10 +868,17 @@ func GetTimezone(lit string) (idx int, tzSign, tzHour, tzSep, tzMinute string) {
 	k := 0
 	if l-zidx == 1 {
 		k += 100
+<<<<<<< HEAD
 	}
 	if t := l - sidx; t == 3 || t == 5 || t == 6 {
 		k += t * 10
 	}
+=======
+	}
+	if t := l - sidx; t == 3 || t == 5 || t == 6 {
+		k += t * 10
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if l-spidx == 3 {
 		k += 3
 	}
@@ -1092,8 +1118,11 @@ func parseDatetime(sc *stmtctx.StatementContext, str string, fsp int8, isFloat b
 			sc.AppendWarning(ErrTruncatedWrongVal.GenWithStackByArgs("datetime", str))
 			err = nil
 		}
+<<<<<<< HEAD
 	case 2:
 		return ZeroDatetime, errors.Trace(ErrWrongValue.GenWithStackByArgs(DateTimeStr, str))
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case 3:
 		// YYYY-MM-DD
 		err = scanTimeArgs(seps, &year, &month, &day)

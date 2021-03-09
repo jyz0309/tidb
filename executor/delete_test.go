@@ -82,7 +82,10 @@ func (s *testSuite8) TestDeleteLockKey(c *C) {
 			tk1, tk2 := testkit.NewTestKit(c, s.store), testkit.NewTestKit(c, s.store)
 			tk1.MustExec("use test")
 			tk2.MustExec("use test")
+<<<<<<< HEAD
 			tk1.Se.GetSessionVars().EnableClusteredIndex = false
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			tk1.MustExec(t.ddl)
 			tk1.MustExec(t.pre)
 			tk1.MustExec("begin pessimistic")

@@ -26,9 +26,16 @@ import (
 	"github.com/pingcap/errors"
 	"github.com/pingcap/log"
 	"github.com/pingcap/tidb/kv"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/store/tikv/logutil"
 	"github.com/pingcap/tidb/store/tikv/metrics"
 	"github.com/pingcap/tidb/util/execdetails"
+=======
+	"github.com/pingcap/tidb/metrics"
+	"github.com/pingcap/tidb/util/execdetails"
+	"github.com/pingcap/tidb/util/fastrand"
+	"github.com/pingcap/tidb/util/logutil"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -45,11 +52,30 @@ const (
 	DecorrJitter
 )
 
+<<<<<<< HEAD
 func (t BackoffType) metric() prometheus.Observer {
 	switch t {
 	// TODO: distinguish tikv and tiflash in metrics
 	case BoTiKVRPC, BoTiFlashRPC:
 		return metrics.BackoffHistogramRPC
+=======
+var (
+	tikvBackoffHistogramRPC        = metrics.TiKVBackoffHistogram.WithLabelValues("tikvRPC")
+	tikvBackoffHistogramLock       = metrics.TiKVBackoffHistogram.WithLabelValues("txnLock")
+	tikvBackoffHistogramLockFast   = metrics.TiKVBackoffHistogram.WithLabelValues("tikvLockFast")
+	tikvBackoffHistogramPD         = metrics.TiKVBackoffHistogram.WithLabelValues("pdRPC")
+	tikvBackoffHistogramRegionMiss = metrics.TiKVBackoffHistogram.WithLabelValues("regionMiss")
+	tikvBackoffHistogramServerBusy = metrics.TiKVBackoffHistogram.WithLabelValues("serverBusy")
+	tikvBackoffHistogramStaleCmd   = metrics.TiKVBackoffHistogram.WithLabelValues("staleCommand")
+	tikvBackoffHistogramEmpty      = metrics.TiKVBackoffHistogram.WithLabelValues("")
+)
+
+func (t backoffType) metric() prometheus.Observer {
+	switch t {
+	// TODO: distinguish tikv and tiflash in metrics
+	case boTiKVRPC, boTiFlashRPC:
+		return tikvBackoffHistogramRPC
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case BoTxnLock:
 		return metrics.BackoffHistogramLock
 	case BoTxnLockFast:
@@ -57,11 +83,19 @@ func (t BackoffType) metric() prometheus.Observer {
 	case BoPDRPC:
 		return metrics.BackoffHistogramPD
 	case BoRegionMiss:
+<<<<<<< HEAD
 		return metrics.BackoffHistogramRegionMiss
 	case boTiKVServerBusy, boTiFlashServerBusy:
 		return metrics.BackoffHistogramServerBusy
 	case boStaleCmd:
 		return metrics.BackoffHistogramStaleCmd
+=======
+		return tikvBackoffHistogramRegionMiss
+	case boTiKVServerBusy, boTiFlashServerBusy:
+		return tikvBackoffHistogramServerBusy
+	case boStaleCmd:
+		return tikvBackoffHistogramStaleCmd
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	return metrics.BackoffHistogramEmpty
 }
@@ -119,8 +153,13 @@ type BackoffType int
 
 // Back off types.
 const (
+<<<<<<< HEAD
 	BoTiKVRPC BackoffType = iota
 	BoTiFlashRPC
+=======
+	boTiKVRPC backoffType = iota
+	boTiFlashRPC
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	BoTxnLock
 	BoTxnLockFast
 	BoPDRPC
@@ -129,7 +168,10 @@ const (
 	boTiFlashServerBusy
 	boTxnNotFound
 	boStaleCmd
+<<<<<<< HEAD
 	boMaxTsNotSynced
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 func (t BackoffType) createFn(vars *kv.Variables) func(context.Context, int) int {
@@ -137,7 +179,11 @@ func (t BackoffType) createFn(vars *kv.Variables) func(context.Context, int) int
 		vars.Hook(t.String(), vars)
 	}
 	switch t {
+<<<<<<< HEAD
 	case BoTiKVRPC, BoTiFlashRPC:
+=======
+	case boTiKVRPC, boTiFlashRPC:
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return NewBackoffFn(100, 2000, EqualJitter)
 	case BoTxnLock:
 		return NewBackoffFn(200, 3000, EqualJitter)
@@ -154,8 +200,11 @@ func (t BackoffType) createFn(vars *kv.Variables) func(context.Context, int) int
 		return NewBackoffFn(2000, 10000, EqualJitter)
 	case boStaleCmd:
 		return NewBackoffFn(2, 1000, NoJitter)
+<<<<<<< HEAD
 	case boMaxTsNotSynced:
 		return NewBackoffFn(2, 500, NoJitter)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	return nil
 }
@@ -164,7 +213,11 @@ func (t BackoffType) String() string {
 	switch t {
 	case BoTiKVRPC:
 		return "tikvRPC"
+<<<<<<< HEAD
 	case BoTiFlashRPC:
+=======
+	case boTiFlashRPC:
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return "tiflashRPC"
 	case BoTxnLock:
 		return "txnLock"
@@ -193,9 +246,15 @@ func (t BackoffType) TError() error {
 	switch t {
 	case BoTiKVRPC:
 		return ErrTiKVServerTimeout
+<<<<<<< HEAD
 	case BoTiFlashRPC:
 		return ErrTiFlashServerTimeout
 	case BoTxnLock, BoTxnLockFast, boTxnNotFound:
+=======
+	case boTiFlashRPC:
+		return ErrTiFlashServerTimeout
+	case BoTxnLock, boTxnLockFast, boTxnNotFound:
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return ErrResolveLockTimeout
 	case BoPDRPC:
 		return ErrPDServerTimeout
@@ -207,8 +266,11 @@ func (t BackoffType) TError() error {
 		return ErrTiFlashServerBusy
 	case boStaleCmd:
 		return ErrTiKVStaleCommand
+<<<<<<< HEAD
 	case boMaxTsNotSynced:
 		return ErrTiKVMaxTimestampNotSynced
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 	return ErrUnknown
 }
@@ -216,6 +278,10 @@ func (t BackoffType) TError() error {
 // Maximum total sleep time(in ms) for kv/cop commands.
 const (
 	GetAllMembersBackoff           = 5000
+<<<<<<< HEAD
+=======
+	copBuildTaskMaxBackoff         = 5000
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tsoMaxBackoff                  = 15000
 	scannerNextMaxBackoff          = 20000
 	batchGetMaxBackoff             = 20000

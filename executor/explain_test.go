@@ -97,7 +97,11 @@ func (s *testSuite1) TestExplainWrite(c *C) {
 	tk.MustQuery("select * from t").Check(testkit.Rows("1"))
 	tk.MustQuery("explain analyze update t set a=2 where a=1")
 	tk.MustQuery("select * from t").Check(testkit.Rows("2"))
+<<<<<<< HEAD
 	tk.MustQuery("explain format = 'brief' insert into t select 1")
+=======
+	tk.MustQuery("explain insert into t select 1")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustQuery("select * from t").Check(testkit.Rows("2"))
 	tk.MustQuery("explain analyze insert into t select 1")
 	tk.MustQuery("explain analyze replace into t values (3)")
@@ -259,6 +263,7 @@ func (s *testSuite2) checkActRowsNotEmpty(c *C, tk *testkit.TestKit, sql string)
 		c.Assert(strs[actRowsCol], Not(Equals), "")
 	}
 }
+<<<<<<< HEAD
 
 func checkActRows(c *C, tk *testkit.TestKit, sql string, expected []string) {
 	actRowsCol := 2
@@ -326,3 +331,5 @@ func (s *testSuite1) TestCheckActRowsWithUnistore(c *C) {
 		checkActRows(c, tk, test.sql, test.expected)
 	}
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

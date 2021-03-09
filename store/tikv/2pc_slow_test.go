@@ -43,9 +43,12 @@ func (s *testCommitterSuite) TestCommitMultipleRegions(c *C) {
 }
 
 func (s *testTiclientSuite) TestSplitRegionIn2PC(c *C) {
+<<<<<<< HEAD
 	if *WithTiKV {
 		c.Skip("scatter will timeout with single node TiKV")
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	const preSplitThresholdInTest = 500
 	old := atomic.LoadUint32(&preSplitDetectThreshold)
 	defer atomic.StoreUint32(&preSplitDetectThreshold, old)

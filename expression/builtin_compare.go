@@ -852,10 +852,17 @@ func (b *builtinLeastTimeSig) evalString(row chunk.Row) (res string, isNull bool
 			}
 		} else {
 			v = t.String()
+<<<<<<< HEAD
 		}
 		if i == 0 || strings.Compare(v, strRes) < 0 {
 			strRes = v
 		}
+=======
+		}
+		if i == 0 || strings.Compare(v, strRes) < 0 {
+			strRes = v
+		}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if i == 0 || t.Compare(timeRes) < 0 {
 			timeRes = t
 		}
@@ -1099,8 +1106,11 @@ func getBaseCmpType(lhs, rhs types.EvalType, lft, rft *types.FieldType) types.Ev
 		return types.ETString
 	} else if (lhs == types.ETInt || (lft != nil && lft.Hybrid())) && (rhs == types.ETInt || (rft != nil && rft.Hybrid())) {
 		return types.ETInt
+<<<<<<< HEAD
 	} else if (lhs == types.ETDecimal && rhs == types.ETString) || (lhs == types.ETString && rhs == types.ETDecimal) {
 		return types.ETReal
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	} else if ((lhs == types.ETInt || (lft != nil && lft.Hybrid())) || lhs == types.ETDecimal) &&
 		((rhs == types.ETInt || (rft != nil && rft.Hybrid())) || rhs == types.ETDecimal) {
 		return types.ETDecimal
@@ -1373,7 +1383,11 @@ func (c *compareFunctionClass) refineArgs(ctx sessionctx.Context, args []Express
 		}
 	}
 	// int constant [cmp] year type
+<<<<<<< HEAD
 	if arg0IsCon && arg0IsInt && arg1Type.Tp == mysql.TypeYear && !arg0.Value.IsNull() {
+=======
+	if arg0IsCon && arg0IsInt && arg1Type.Tp == mysql.TypeYear {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		adjusted, failed := types.AdjustYear(arg0.Value.GetInt64(), false)
 		if failed == nil {
 			arg0.Value.SetInt64(adjusted)
@@ -1381,7 +1395,11 @@ func (c *compareFunctionClass) refineArgs(ctx sessionctx.Context, args []Express
 		}
 	}
 	// year type [cmp] int constant
+<<<<<<< HEAD
 	if arg1IsCon && arg1IsInt && arg0Type.Tp == mysql.TypeYear && !arg1.Value.IsNull() {
+=======
+	if arg1IsCon && arg1IsInt && arg0Type.Tp == mysql.TypeYear {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		adjusted, failed := types.AdjustYear(arg1.Value.GetInt64(), false)
 		if failed == nil {
 			arg1.Value.SetInt64(adjusted)

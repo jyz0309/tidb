@@ -761,6 +761,7 @@ func (s *testSuite3) TestRoleAtomic(c *C) {
 	tk.MustExec("drop role r2;")
 }
 
+<<<<<<< HEAD
 func (s *testSuite3) TestExtendedStatsPrivileges(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
@@ -800,6 +801,8 @@ func (s *testSuite3) TestExtendedStatsPrivileges(c *C) {
 	tk.MustExec("drop user 'u1'@'%'")
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testSuite3) TestIssue17247(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("create user 'issue17247'")

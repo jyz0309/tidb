@@ -107,8 +107,12 @@ func (n *ValueExpr) Restore(ctx *format.RestoreCtx) error {
 			ctx.WritePlain("_")
 			ctx.WriteKeyWord(n.Type.Charset)
 		}
+<<<<<<< HEAD
 		// Replace '\' to '\\' regardless of sql_mode "NO_BACKSLASH_ESCAPES", which is the same as MySQL.
 		ctx.WriteString(strings.ReplaceAll(n.GetString(), "\\", "\\\\"))
+=======
+		ctx.WriteString(n.GetString())
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	case types.KindBytes:
 		ctx.WriteString(n.GetString())
 	case types.KindMysqlDecimal:

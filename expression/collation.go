@@ -178,10 +178,13 @@ func deriveCoercibilityForConstant(c *Constant) Coercibility {
 }
 
 func deriveCoercibilityForColumn(c *Column) Coercibility {
+<<<<<<< HEAD
 	// For specified type null, it should return CoercibilityIgnorable, which means it got the lowest priority in DeriveCollationFromExprs.
 	if c.RetType.Tp == mysql.TypeNull {
 		return CoercibilityIgnorable
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if c.RetType.EvalType() != types.ETString {
 		return CoercibilityNumeric
 	}

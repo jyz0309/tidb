@@ -93,11 +93,16 @@ func convertPoint(sc *stmtctx.StatementContext, point *point, tp *types.FieldTyp
 	}
 	casted, err := point.value.ConvertTo(sc, tp)
 	if err != nil {
+<<<<<<< HEAD
 		if tp.Tp == mysql.TypeYear && terror.ErrorEqual(err, types.ErrInvalidYear) {
 			// see issue #20101: overflow when converting integer to year
 		} else if tp.Tp == mysql.TypeBit && terror.ErrorEqual(err, types.ErrDataTooLong) {
 			// see issue #19067: we should ignore the types.ErrDataTooLong when we convert value to TypeBit value
 		} else {
+=======
+		// see issue #20101: overflow when converting integer to year
+		if tp.Tp != mysql.TypeYear || !terror.ErrorEqual(err, types.ErrOverflow) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			return point, errors.Trace(err)
 		}
 	}
@@ -301,7 +306,11 @@ func buildColumnRange(accessConditions []expression.Expression, sc *stmtctx.Stat
 				ran.HighExclude = false
 			}
 		}
+<<<<<<< HEAD
 		ranges, err = UnionRanges(sc, ranges, true)
+=======
+		ranges, err = UnionRanges(sc, ranges)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if err != nil {
 			return nil, err
 		}
@@ -367,9 +376,15 @@ func (d *rangeDetacher) buildCNFIndexRange(newTp []*types.FieldType,
 	}
 
 	// Take prefix index into consideration.
+<<<<<<< HEAD
 	if hasPrefix(d.lengths) {
 		if fixPrefixColRange(ranges, d.lengths, newTp) {
 			ranges, err = UnionRanges(sc, ranges, d.mergeConsecutive)
+=======
+	if hasPrefix(lengths) {
+		if fixPrefixColRange(ranges, lengths, newTp) {
+			ranges, err = UnionRanges(sc, ranges)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			if err != nil {
 				return nil, errors.Trace(err)
 			}
@@ -389,7 +404,11 @@ type sortRange struct {
 // For two intervals [a, b], [c, d], we have guaranteed that a <= c. If b >= c. Then two intervals are overlapped.
 // And this two can be merged as [a, max(b, d)].
 // Otherwise they aren't overlapped.
+<<<<<<< HEAD
 func UnionRanges(sc *stmtctx.StatementContext, ranges []*Range, mergeConsecutive bool) ([]*Range, error) {
+=======
+func UnionRanges(sc *stmtctx.StatementContext, ranges []*Range) ([]*Range, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if len(ranges) == 0 {
 		return nil, nil
 	}
@@ -417,8 +436,12 @@ func UnionRanges(sc *stmtctx.StatementContext, ranges []*Range, mergeConsecutive
 	ranges = ranges[:0]
 	lastRange := objects[0]
 	for i := 1; i < len(objects); i++ {
+<<<<<<< HEAD
 		if (mergeConsecutive && bytes.Compare(lastRange.encodedEnd, objects[i].encodedStart) >= 0) ||
 			(!mergeConsecutive && bytes.Compare(lastRange.encodedEnd, objects[i].encodedStart) > 0) {
+=======
+		if bytes.Compare(lastRange.encodedEnd, objects[i].encodedStart) >= 0 {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			if bytes.Compare(lastRange.encodedEnd, objects[i].encodedEnd) < 0 {
 				lastRange.encodedEnd = objects[i].encodedEnd
 				lastRange.originalValue.HighVal = objects[i].originalValue.HighVal

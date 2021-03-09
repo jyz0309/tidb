@@ -44,8 +44,11 @@ import (
 	"github.com/pingcap/tidb/types"
 	"github.com/pingcap/tidb/util"
 	"github.com/pingcap/tidb/util/chunk"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/util/codec"
 	"github.com/pingcap/tidb/util/collate"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/util/execdetails"
 	"github.com/pingcap/tidb/util/logutil"
 	"github.com/pingcap/tidb/util/memory"
@@ -479,7 +482,14 @@ func (e *IndexLookUpExecutor) startIndexWorker(ctx context.Context, kvRanges []k
 	if err != nil {
 		return err
 	}
+<<<<<<< HEAD
 	tps := e.getRetTpsByHandle()
+=======
+	tps := []*types.FieldType{types.NewFieldType(mysql.TypeLonglong)}
+	if e.checkIndexValue != nil {
+		tps = e.idxColTps
+	}
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	idxID := e.getIndexPlanRootID()
 	// Since the first read only need handle information. So its returned col is only 1.
 	result, err := distsql.SelectWithRuntimeStats(ctx, e.ctx, kvReq, tps, e.feedback, getPhysicalPlanIDs(e.idxPlans), idxID)
@@ -646,7 +656,11 @@ func (e *IndexLookUpExecutor) initRuntimeStats() {
 		if e.stats == nil {
 			e.stats = &IndexLookUpRunTimeStats{
 				indexScanBasicStats: &execdetails.BasicRuntimeStats{},
+<<<<<<< HEAD
 				Concurrency:         e.ctx.GetSessionVars().IndexLookupConcurrency(),
+=======
+				Concurrency:         e.ctx.GetSessionVars().IndexLookupConcurrency,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 			e.ctx.GetSessionVars().StmtCtx.RuntimeStatsColl.RegisterStats(e.id, e.stats)
 		}
@@ -709,6 +723,12 @@ func (w *indexWorker) fetchHandles(ctx context.Context, result distsql.SelectRes
 	}()
 	retTps := w.idxLookup.getRetTpsByHandle()
 	chk := chunk.NewChunkWithCapacity(retTps, w.idxLookup.maxChunkSize)
+	idxID := w.idxLookup.getIndexPlanRootID()
+	if w.idxLookup.ctx.GetSessionVars().StmtCtx.RuntimeStatsColl != nil {
+		if idxID != w.idxLookup.id && w.idxLookup.stats != nil {
+			w.idxLookup.ctx.GetSessionVars().StmtCtx.RuntimeStatsColl.RegisterStats(idxID, w.idxLookup.stats.indexScanBasicStats)
+		}
+	}
 	idxID := w.idxLookup.getIndexPlanRootID()
 	if w.idxLookup.ctx.GetSessionVars().StmtCtx.RuntimeStatsColl != nil {
 		if idxID != w.idxLookup.id && w.idxLookup.stats != nil {
@@ -904,6 +924,7 @@ func (w *tableWorker) pickAndExecTask(ctx context.Context) {
 	}
 }
 
+<<<<<<< HEAD
 func (e *IndexLookUpExecutor) getHandle(row chunk.Row, handleIdx []int,
 	isCommonHandle bool, tp getHandleType) (handle kv.Handle, err error) {
 	if isCommonHandle {
@@ -952,6 +973,8 @@ func (e *IndexLookUpExecutor) getHandle(row chunk.Row, handleIdx []int,
 	return
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // IndexLookUpRunTimeStats record the indexlookup runtime stat
 type IndexLookUpRunTimeStats struct {
 	// indexScanBasicStats uses to record basic runtime stats for index scan.
@@ -1051,7 +1074,11 @@ func (w *tableWorker) compareData(ctx context.Context, task *lookupTableTask, ta
 			for i, col := range w.idxTblCols {
 				vals = append(vals, row.GetDatum(i, &col.FieldType))
 			}
+<<<<<<< HEAD
 			tablecodec.TruncateIndexValues(tblInfo, w.idxLookup.index, vals)
+=======
+			vals = tablecodec.TruncateIndexValuesIfNeeded(tblInfo, w.idxLookup.index, vals)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			for i, val := range vals {
 				col := w.idxTblCols[i]
 				tp := &col.FieldType

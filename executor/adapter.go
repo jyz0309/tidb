@@ -306,7 +306,11 @@ func (a *ExecStmt) Exec(ctx context.Context) (_ sqlexec.RecordSet, err error) {
 	}()
 
 	sctx := a.Ctx
+<<<<<<< HEAD
 	ctx = util.SetSessionID(ctx, sctx.GetSessionVars().ConnectionID)
+=======
+	ctx = sessionctx.SetCommitCtx(ctx, sctx)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if _, ok := a.Plan.(*plannercore.Analyze); ok && sctx.GetSessionVars().InRestrictedSQL {
 		oriStats, _ := sctx.GetSessionVars().GetSystemVar(variable.TiDBBuildStatsConcurrency)
 		oriScan := sctx.GetSessionVars().DistSQLScanConcurrency()
@@ -391,9 +395,12 @@ func (a *ExecStmt) handleNoDelay(ctx context.Context, e Executor, isPessimistic 
 		// done in the `defer` function. If the rs is not nil, the detachment will be done in
 		// `rs.Close` in `handleStmt`
 		if sc != nil && rs == nil {
+<<<<<<< HEAD
 			if sc.MemTracker != nil {
 				sc.MemTracker.DetachFromGlobalTracker()
 			}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			if sc.DiskTracker != nil {
 				sc.DiskTracker.DetachFromGlobalTracker()
 			}
@@ -823,6 +830,19 @@ var (
 	sessionExecuteRunDurationGeneral  = metrics.SessionExecuteRunDuration.WithLabelValues(metrics.LblGeneral)
 )
 
+<<<<<<< HEAD
+=======
+// CloseRecordSet will finish the execution of current statement and do some record work
+func (a *ExecStmt) CloseRecordSet(txnStartTS uint64, lastErr error) {
+	a.FinishExecuteStmt(txnStartTS, lastErr == nil, false)
+	a.logAudit()
+	// Detach the disk tracker from GlobalDiskUsageTracker after every execution
+	if stmtCtx := a.Ctx.GetSessionVars().StmtCtx; stmtCtx != nil && stmtCtx.DiskTracker != nil {
+		stmtCtx.DiskTracker.DetachFromGlobalTracker()
+	}
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // FinishExecuteStmt is used to record some information after `ExecStmt` execution finished:
 // 1. record slow log if needed.
 // 2. record summary statement.
@@ -858,6 +878,7 @@ func (a *ExecStmt) FinishExecuteStmt(txnTS uint64, succ bool, hasMoreResults boo
 	}
 }
 
+<<<<<<< HEAD
 // CloseRecordSet will finish the execution of current statement and do some record work
 func (a *ExecStmt) CloseRecordSet(txnStartTS uint64, lastErr error) {
 	a.FinishExecuteStmt(txnStartTS, lastErr == nil, false)
@@ -873,6 +894,8 @@ func (a *ExecStmt) CloseRecordSet(txnStartTS uint64, lastErr error) {
 	}
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // LogSlowQuery is used to print the slow query in the log files.
 func (a *ExecStmt) LogSlowQuery(txnTS uint64, succ bool, hasMoreResults bool) {
 	sessVars := a.Ctx.GetSessionVars()
@@ -948,12 +971,19 @@ func (a *ExecStmt) LogSlowQuery(txnTS uint64, succ bool, hasMoreResults bool) {
 		Prepared:          a.isPreparedStmt,
 		HasMoreResults:    hasMoreResults,
 		PlanFromCache:     sessVars.FoundInPlanCache,
+<<<<<<< HEAD
 		PlanFromBinding:   sessVars.FoundInBinding,
 		RewriteInfo:       sessVars.RewritePhaseInfo,
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		KVTotal:           time.Duration(atomic.LoadInt64(&stmtDetail.WaitKVRespDuration)),
 		PDTotal:           time.Duration(atomic.LoadInt64(&stmtDetail.WaitPDRespDuration)),
 		BackoffTotal:      time.Duration(atomic.LoadInt64(&stmtDetail.BackoffDuration)),
 		WriteSQLRespTotal: stmtDetail.WriteSQLRespDuration,
+<<<<<<< HEAD
+=======
+		RewriteInfo:       sessVars.RewritePhaseInfo,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		ExecRetryCount:    a.retryCount,
 	}
 	if a.retryCount > 0 {
@@ -971,12 +1001,21 @@ func (a *ExecStmt) LogSlowQuery(txnTS uint64, succ bool, hasMoreResults bool) {
 		logutil.SlowQueryLogger.Warn(sessVars.SlowLogFormat(slowItems))
 		if sessVars.InRestrictedSQL {
 			totalQueryProcHistogramInternal.Observe(costTime.Seconds())
+<<<<<<< HEAD
 			totalCopProcHistogramInternal.Observe(execDetail.TimeDetail.ProcessTime.Seconds())
 			totalCopWaitHistogramInternal.Observe(execDetail.TimeDetail.WaitTime.Seconds())
 		} else {
 			totalQueryProcHistogramGeneral.Observe(costTime.Seconds())
 			totalCopProcHistogramGeneral.Observe(execDetail.TimeDetail.ProcessTime.Seconds())
 			totalCopWaitHistogramGeneral.Observe(execDetail.TimeDetail.WaitTime.Seconds())
+=======
+			totalCopProcHistogramInternal.Observe(execDetail.ProcessTime.Seconds())
+			totalCopWaitHistogramInternal.Observe(execDetail.WaitTime.Seconds())
+		} else {
+			totalQueryProcHistogramGeneral.Observe(costTime.Seconds())
+			totalCopProcHistogramGeneral.Observe(execDetail.ProcessTime.Seconds())
+			totalCopWaitHistogramGeneral.Observe(execDetail.WaitTime.Seconds())
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		}
 		var userString string
 		if sessVars.User != nil {
@@ -1141,7 +1180,10 @@ func (a *ExecStmt) SummaryStmt(succ bool) {
 		IsInternal:      sessVars.InRestrictedSQL,
 		Succeed:         succ,
 		PlanInCache:     sessVars.FoundInPlanCache,
+<<<<<<< HEAD
 		PlanInBinding:   sessVars.FoundInBinding,
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		ExecRetryCount:  a.retryCount,
 		StmtExecDetails: stmtDetail,
 		Prepared:        a.isPreparedStmt,

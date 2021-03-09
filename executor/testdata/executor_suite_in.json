@@ -1,5 +1,6 @@
 [
   {
+<<<<<<< HEAD
     "name": "TestSetOperation",
     "cases": [
       "select * from t3 union select * from t1",
@@ -32,6 +33,8 @@
     ]
   },
   {
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
     "name": "TestNaturalJoin",
     "cases": [
       "select * from t1 natural join t2",

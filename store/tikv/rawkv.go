@@ -20,10 +20,17 @@ import (
 
 	"github.com/pingcap/errors"
 	"github.com/pingcap/kvproto/pkg/kvrpcpb"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/store/tikv/config"
 	"github.com/pingcap/tidb/store/tikv/metrics"
 	"github.com/pingcap/tidb/store/tikv/tikvrpc"
 	pd "github.com/tikv/pd/client"
+=======
+	"github.com/pingcap/tidb/config"
+	"github.com/pingcap/tidb/metrics"
+	"github.com/pingcap/tidb/store/tikv/tikvrpc"
+	"github.com/tikv/pd/client"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 var (

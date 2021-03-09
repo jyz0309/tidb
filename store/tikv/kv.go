@@ -17,6 +17,7 @@ import (
 	"context"
 	"crypto/tls"
 	"math/rand"
+	"net/url"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -24,6 +25,10 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/pingcap/errors"
 	"github.com/pingcap/failpoint"
+<<<<<<< HEAD
+=======
+	"github.com/pingcap/tidb/config"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/tidb/kv"
 	"github.com/pingcap/tidb/store/tikv/config"
 	"github.com/pingcap/tidb/store/tikv/latch"
@@ -32,6 +37,12 @@ import (
 	"github.com/pingcap/tidb/store/tikv/oracle"
 	"github.com/pingcap/tidb/store/tikv/oracle/oracles"
 	"github.com/pingcap/tidb/store/tikv/tikvrpc"
+<<<<<<< HEAD
+=======
+	"github.com/pingcap/tidb/util/execdetails"
+	"github.com/pingcap/tidb/util/fastrand"
+	"github.com/pingcap/tidb/util/logutil"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	pd "github.com/tikv/pd/client"
 	"go.etcd.io/etcd/clientv3"
 	"go.uber.org/zap"
@@ -53,6 +64,77 @@ func createEtcdKV(addrs []string, tlsConfig *tls.Config) (*clientv3.Client, erro
 	return cli, nil
 }
 
+<<<<<<< HEAD
+=======
+// Open opens or creates an TiKV storage with given path.
+// Path example: tikv://etcd-node1:port,etcd-node2:port?cluster=1&disableGC=false
+func (d Driver) Open(path string) (kv.Storage, error) {
+	mc.Lock()
+	defer mc.Unlock()
+
+	security := config.GetGlobalConfig().Security
+	tikvConfig := config.GetGlobalConfig().TiKVClient
+	txnLocalLatches := config.GetGlobalConfig().TxnLocalLatches
+	etcdAddrs, disableGC, err := config.ParsePath(path)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	pdCli, err := pd.NewClient(etcdAddrs, pd.SecurityOption{
+		CAPath:   security.ClusterSSLCA,
+		CertPath: security.ClusterSSLCert,
+		KeyPath:  security.ClusterSSLKey,
+	}, pd.WithGRPCDialOptions(
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:    time.Duration(tikvConfig.GrpcKeepAliveTime) * time.Second,
+			Timeout: time.Duration(tikvConfig.GrpcKeepAliveTimeout) * time.Second,
+		}),
+	))
+
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	pdCli = execdetails.InterceptedPDClient{Client: pdCli}
+
+	// FIXME: uuid will be a very long and ugly string, simplify it.
+	uuid := fmt.Sprintf("tikv-%v", pdCli.GetClusterID(context.TODO()))
+	if store, ok := mc.cache[uuid]; ok {
+		return store, nil
+	}
+
+	tlsConfig, err := security.ToTLSConfig()
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	spkv, err := NewEtcdSafePointKV(etcdAddrs, tlsConfig)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	coprCacheConfig := &config.GetGlobalConfig().TiKVClient.CoprCache
+	s, err := newTikvStore(uuid, &codecPDClient{pdCli}, spkv, newRPCClient(security), !disableGC, coprCacheConfig)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	if txnLocalLatches.Enabled {
+		s.EnableTxnLocalLatches(txnLocalLatches.Capacity)
+	}
+	s.etcdAddrs = etcdAddrs
+	s.tlsConfig = tlsConfig
+
+	mc.cache[uuid] = s
+	return s, nil
+}
+
+// EtcdBackend is used for judging a storage is a real TiKV.
+type EtcdBackend interface {
+	EtcdAddrs() ([]string, error)
+	TLSConfig() *tls.Config
+	StartGCWorker() error
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // update oracle's lastTS every 2000ms.
 var oracleUpdateInterval = 2000
 
@@ -131,6 +213,10 @@ func NewKVStore(uuid string, pdClient pd.Client, spkv SafePointKV, client Client
 		memCache:        kv.NewCacheDB(),
 	}
 	store.lockResolver = newLockResolver(store)
+<<<<<<< HEAD
+=======
+	store.enableGC = enableGC
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	coprCache, err := newCoprCache(coprCacheConfig)
 	if err != nil {
@@ -154,7 +240,64 @@ func (s *KVStore) IsLatchEnabled() bool {
 	return s.txnLatches != nil
 }
 
+<<<<<<< HEAD
 func (s *KVStore) runSafePointChecker() {
+=======
+func (s *tikvStore) EtcdAddrs() ([]string, error) {
+	if s.etcdAddrs == nil {
+		return nil, nil
+	}
+	ctx := context.Background()
+	bo := NewBackoffer(ctx, GetAllMembersBackoff)
+	etcdAddrs := make([]string, 0)
+	pdClient := s.pdClient
+	if pdClient == nil {
+		return nil, errors.New("Etcd client not found")
+	}
+	for {
+		members, err := pdClient.GetAllMembers(ctx)
+		if err != nil {
+			err := bo.Backoff(BoRegionMiss, err)
+			if err != nil {
+				return nil, err
+			}
+			continue
+		}
+		for _, member := range members {
+			if len(member.ClientUrls) > 0 {
+				u, err := url.Parse(member.ClientUrls[0])
+				if err != nil {
+					logutil.BgLogger().Error("fail to parse client url from pd members", zap.String("client_url", member.ClientUrls[0]), zap.Error(err))
+					return nil, err
+				}
+				etcdAddrs = append(etcdAddrs, u.Host)
+			}
+		}
+		return etcdAddrs, nil
+	}
+}
+
+func (s *tikvStore) TLSConfig() *tls.Config {
+	return s.tlsConfig
+}
+
+// StartGCWorker starts GC worker, it's called in BootstrapSession, don't call this function more than once.
+func (s *tikvStore) StartGCWorker() error {
+	if !s.enableGC || NewGCHandlerFunc == nil {
+		return nil
+	}
+
+	gcWorker, err := NewGCHandlerFunc(s, s.pdClient)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	gcWorker.Start()
+	s.gcWorker = gcWorker
+	return nil
+}
+
+func (s *tikvStore) runSafePointChecker() {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	d := gcSafePointUpdateInterval
 	for {
 		select {
@@ -229,9 +372,12 @@ func (s *KVStore) Close() error {
 		s.txnLatches.Close()
 	}
 	s.regionCache.Close()
+<<<<<<< HEAD
 	if s.coprCache != nil {
 		s.coprCache.cache.Close()
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	if err := s.kv.Close(); err != nil {
 		return errors.Trace(err)
@@ -244,10 +390,16 @@ func (s *KVStore) UUID() string {
 	return s.uuid
 }
 
+<<<<<<< HEAD
 // CurrentVersion returns current max committed version with the given txnScope (local or global).
 func (s *KVStore) CurrentVersion(txnScope string) (kv.Version, error) {
 	bo := NewBackofferWithVars(context.Background(), tsoMaxBackoff, nil)
 	startTS, err := s.getTimestampWithRetry(bo, txnScope)
+=======
+func (s *tikvStore) CurrentVersion() (kv.Version, error) {
+	bo := NewBackofferWithVars(context.Background(), tsoMaxBackoff, nil)
+	startTS, err := s.getTimestampWithRetry(bo)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if err != nil {
 		return kv.NewVersion(0), errors.Trace(err)
 	}

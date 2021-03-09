@@ -132,6 +132,7 @@ var DeferredFunctions = map[string]struct{}{
 	ast.Curdate:          {},
 	ast.CurrentDate:      {},
 	ast.UTCDate:          {},
+<<<<<<< HEAD
 }
 
 // AllowedPartitionFuncMap stores functions which can be used in the partition expression.
@@ -176,6 +177,8 @@ var AllowedPartition4BinaryOpMap = map[opcode.Op]struct{}{
 var AllowedPartition4UnaryOpMap = map[opcode.Op]struct{}{
 	opcode.Plus:  {},
 	opcode.Minus: {},
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // inequalFunctions stores functions which cannot be propagated from column equal condition.

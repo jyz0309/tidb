@@ -82,6 +82,7 @@ func (s *testSerialSuite1) testSortInDisk(c *C, removeDir bool) {
 }
 
 func (s *testSerialSuite1) TestIssue16696(c *C) {
+<<<<<<< HEAD
 	defer config.RestoreFunc()()
 	config.UpdateGlobal(func(conf *config.Config) {
 		conf.OOMUseTmpStorage = true
@@ -90,6 +91,13 @@ func (s *testSerialSuite1) TestIssue16696(c *C) {
 	variable.MemoryUsageAlarmRatio.Store(0.0)
 	defer variable.MemoryUsageAlarmRatio.Store(alarmRatio)
 
+=======
+	originCfg := config.GetGlobalConfig()
+	newConf := *originCfg
+	newConf.OOMUseTmpStorage = true
+	config.StoreGlobalConfig(&newConf)
+	defer config.StoreGlobalConfig(originCfg)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(failpoint.Enable("github.com/pingcap/tidb/executor/testSortedRowContainerSpill", "return(true)"), IsNil)
 	defer func() {
 		c.Assert(failpoint.Disable("github.com/pingcap/tidb/executor/testSortedRowContainerSpill"), IsNil)

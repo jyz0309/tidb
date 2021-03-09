@@ -154,6 +154,7 @@ func flatten(flatMap map[string]interface{}, nested interface{}, prefix string) 
 		flatMap[prefix] = nested
 	}
 }
+<<<<<<< HEAD
 
 // GetTxnScopeFromConfig extract txn_scope default value from config
 func GetTxnScopeFromConfig() string {
@@ -163,3 +164,5 @@ func GetTxnScopeFromConfig() string {
 	}
 	return DefTxnScope
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1

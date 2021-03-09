@@ -55,7 +55,11 @@ func (s *testBootstrapSuite) TestBootstrap(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(req.NumRows() == 0, IsFalse)
 	datums := statistics.RowToDatums(req.GetRow(0), r.Fields())
+<<<<<<< HEAD
 	match(c, datums, `%`, "root", []byte(""), "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "N", "Y", "Y", "Y", "Y", "Y", "Y", "Y")
+=======
+	match(c, datums, `%`, "root", []byte(""), "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "N", "Y", "Y", "Y", "Y")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "root", Hostname: "anyhost"}, []byte(""), []byte("")), IsTrue)
 	mustExecSQL(c, se, "USE test;")
@@ -160,7 +164,11 @@ func (s *testBootstrapSuite) TestBootstrapWithError(c *C) {
 	c.Assert(req.NumRows() == 0, IsFalse)
 	row := req.GetRow(0)
 	datums := statistics.RowToDatums(row, r.Fields())
+<<<<<<< HEAD
 	match(c, datums, `%`, "root", []byte(""), "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "N", "Y", "Y", "Y", "Y", "Y", "Y", "Y")
+=======
+	match(c, datums, `%`, "root", []byte(""), "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "N", "Y", "Y", "Y", "Y")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(r.Close(), IsNil)
 
 	mustExecSQL(c, se, "USE test;")
@@ -272,6 +280,7 @@ func (s *testBootstrapSuite) TestUpgrade(c *C) {
 	c.Assert(r.Close(), IsNil)
 }
 
+<<<<<<< HEAD
 func (s *testBootstrapSuite) TestIssue17979_1(c *C) {
 	oomAction := config.GetGlobalConfig().OOMAction
 	defer func() {
@@ -358,6 +367,8 @@ func (s *testBootstrapSuite) TestIssue17979_2(c *C) {
 	c.Assert(config.GetGlobalConfig().OOMAction, Equals, config.OOMActionCancel)
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testBootstrapSuite) TestIssue20900_1(c *C) {
 	ctx := context.Background()
 	defer testleak.AfterTest(c)()
@@ -397,6 +408,21 @@ func (s *testBootstrapSuite) TestIssue20900_1(c *C) {
 	r.Next(ctx, req)
 	c.Assert(req.GetRow(0).GetString(0), Equals, "34359738368")
 	c.Assert(seV4.GetSessionVars().MemQuotaQuery, Equals, int64(34359738368))
+<<<<<<< HEAD
+=======
+
+	mustExecSQL(c, seV4, `update mysql.tidb set variable_value = '123' where variable_name='default_memory_quota_query'`)
+	r = mustExecSQL(c, seV4, "select variable_value from mysql.tidb where variable_name='default_memory_quota_query'")
+	req = r.NewChunk()
+	r.Next(ctx, req)
+	c.Assert(req.GetRow(0).GetString(0), Equals, "123")
+	se2 := newSession(c, store, s.dbName)
+	r = mustExecSQL(c, se2, "select @@tidb_mem_quota_query")
+	req = r.NewChunk()
+	r.Next(ctx, req)
+	c.Assert(req.GetRow(0).GetString(0), Equals, "34359738368")
+	c.Assert(se2.GetSessionVars().MemQuotaQuery, Equals, int64(34359738368))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testBootstrapSuite) TestIssue20900_2(c *C) {
@@ -410,17 +436,29 @@ func (s *testBootstrapSuite) TestIssue20900_2(c *C) {
 	txn, err := store.Begin()
 	c.Assert(err, IsNil)
 	m := meta.NewMeta(txn)
+<<<<<<< HEAD
 	err = m.FinishBootstrap(int64(52))
 	c.Assert(err, IsNil)
 	err = txn.Commit(context.Background())
 	c.Assert(err, IsNil)
 	mustExecSQL(c, seV3, "update mysql.tidb set variable_value=52 where variable_name='tidb_server_version'")
+=======
+	err = m.FinishBootstrap(int64(48))
+	c.Assert(err, IsNil)
+	err = txn.Commit(context.Background())
+	c.Assert(err, IsNil)
+	mustExecSQL(c, seV3, "update mysql.tidb set variable_value=48 where variable_name='tidb_server_version'")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	mustExecSQL(c, seV3, "delete from mysql.tidb where variable_name='default_memory_quota_query'")
 	mustExecSQL(c, seV3, "commit")
 	unsetStoreBootstrapped(store.UUID())
 	ver, err := getBootstrapVersion(seV3)
 	c.Assert(err, IsNil)
+<<<<<<< HEAD
 	c.Assert(ver, Equals, int64(52))
+=======
+	c.Assert(ver, Equals, int64(48))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	domV4, err := BootstrapSession(store)
 	c.Assert(err, IsNil)
@@ -502,7 +540,11 @@ func (s *testBootstrapSuite) TestStmtSummary(c *C) {
 	req := r.NewChunk()
 	c.Assert(r.Next(ctx, req), IsNil)
 	row := req.GetRow(0)
+<<<<<<< HEAD
 	c.Assert(row.GetBytes(0), BytesEquals, []byte("ON"))
+=======
+	c.Assert(row.GetBytes(0), BytesEquals, []byte("1"))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	c.Assert(r.Close(), IsNil)
 }
 
@@ -548,7 +590,11 @@ func (s *testBootstrapSuite) TestUpdateBindInfo(c *C) {
 		)
 		mustExecSQL(c, se, sql)
 
+<<<<<<< HEAD
 		upgradeToVer61(se, version60)
+=======
+		upgradeToVer51(se, version50)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		r := mustExecSQL(c, se, `select original_sql, bind_sql, default_db, status from mysql.bind_info where source != 'builtin'`)
 		req := r.NewChunk()
 		c.Assert(r.Next(ctx, req), IsNil)
@@ -583,7 +629,11 @@ func (s *testBootstrapSuite) TestUpdateDuplicateBindInfo(c *C) {
 	// The latest one.
 	mustExecSQL(c, se, `insert into mysql.bind_info values('select * from test . t', 'select /*+ use_index(t, idx_b)*/ * from test.t', 'test', 'using', '2021-01-04 14:50:58.257', '2021-01-09 14:50:58.257', 'utf8', 'utf8_general_ci', 'manual')`)
 
+<<<<<<< HEAD
 	upgradeToVer61(se, version60)
+=======
+	upgradeToVer51(se, version50)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	r := mustExecSQL(c, se, `select original_sql, bind_sql, default_db, status, create_time from mysql.bind_info where source != 'builtin'`)
 	req := r.NewChunk()

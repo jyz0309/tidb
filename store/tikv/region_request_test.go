@@ -63,7 +63,11 @@ var _ = Suite(&testRegionRequestToSingleStoreSuite{})
 var _ = Suite(&testRegionRequestToThreeStoresSuite{})
 
 func (s *testRegionRequestToSingleStoreSuite) SetUpTest(c *C) {
+<<<<<<< HEAD
 	s.cluster = mocktikv.NewCluster(mocktikv.MustNewMVCCStore())
+=======
+	s.cluster = mocktikv.NewCluster()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	s.store, s.peer, s.region = mocktikv.BootstrapWithSingleStore(s.cluster)
 	pdCli := &CodecPDClient{mocktikv.NewPDClient(s.cluster)}
 	s.cache = NewRegionCache(pdCli)
@@ -74,7 +78,11 @@ func (s *testRegionRequestToSingleStoreSuite) SetUpTest(c *C) {
 }
 
 func (s *testRegionRequestToThreeStoresSuite) SetUpTest(c *C) {
+<<<<<<< HEAD
 	s.cluster = mocktikv.NewCluster(mocktikv.MustNewMVCCStore())
+=======
+	s.cluster = mocktikv.NewCluster()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	s.storeIDs, s.peerIDs, s.regionID, s.leaderPeer = mocktikv.BootstrapWithMultiStores(s.cluster, 3)
 	pdCli := &CodecPDClient{mocktikv.NewPDClient(s.cluster)}
 	s.cache = NewRegionCache(pdCli)
@@ -425,6 +433,7 @@ func (s *mockTikvGrpcServer) Coprocessor(context.Context, *coprocessor.Request) 
 func (s *mockTikvGrpcServer) BatchCoprocessor(*coprocessor.BatchRequest, tikvpb.Tikv_BatchCoprocessorServer) error {
 	return errors.New("unreachable")
 }
+<<<<<<< HEAD
 func (s *mockTikvGrpcServer) DispatchMPPTask(context.Context, *mpp.DispatchTaskRequest) (*mpp.DispatchTaskResponse, error) {
 	return nil, errors.New("unreachable")
 }
@@ -434,6 +443,8 @@ func (s *mockTikvGrpcServer) EstablishMPPConnection(*mpp.EstablishMPPConnectionR
 func (s *mockTikvGrpcServer) CancelMPPTask(context.Context, *mpp.CancelTaskRequest) (*mpp.CancelTaskResponse, error) {
 	return nil, errors.New("unreachable")
 }
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *mockTikvGrpcServer) Raft(tikvpb.Tikv_RaftServer) error {
 	return errors.New("unreachable")
 }
@@ -465,6 +476,7 @@ func (s *mockTikvGrpcServer) ReadIndex(context.Context, *kvrpcpb.ReadIndexReques
 	return nil, errors.New("unreachable")
 }
 
+<<<<<<< HEAD
 func (s *mockTikvGrpcServer) VerGet(context.Context, *kvrpcpb.VerGetRequest) (*kvrpcpb.VerGetResponse, error) {
 	return nil, errors.New("unreachable")
 }
@@ -493,6 +505,8 @@ func (s *mockTikvGrpcServer) CheckLeader(context.Context, *kvrpcpb.CheckLeaderRe
 	return nil, errors.New("unreachable")
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testRegionRequestToSingleStoreSuite) TestNoReloadRegionForGrpcWhenCtxCanceled(c *C) {
 	// prepare a mock tikv grpc server
 	addr := "localhost:56341"

@@ -18,8 +18,13 @@ import (
 
 	"github.com/pingcap/errors"
 	"github.com/pingcap/kvproto/pkg/metapb"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/store/tikv/util/codec"
 	pd "github.com/tikv/pd/client"
+=======
+	"github.com/pingcap/tidb/util/codec"
+	"github.com/tikv/pd/client"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 )
 
 // CodecPDClient wraps a PD Client to decode the encoded keys in region meta.
@@ -29,15 +34,23 @@ type CodecPDClient struct {
 
 // GetRegion encodes the key before send requests to pd-server and decodes the
 // returned StartKey && EndKey from pd-server.
+<<<<<<< HEAD
 func (c *CodecPDClient) GetRegion(ctx context.Context, key []byte) (*pd.Region, error) {
+=======
+func (c *codecPDClient) GetRegion(ctx context.Context, key []byte) (*pd.Region, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	encodedKey := codec.EncodeBytes([]byte(nil), key)
 	region, err := c.Client.GetRegion(ctx, encodedKey)
 	return processRegionResult(region, err)
 }
 
+<<<<<<< HEAD
 // GetPrevRegion encodes the key before send requests to pd-server and decodes the
 // returned StartKey && EndKey from pd-server.
 func (c *CodecPDClient) GetPrevRegion(ctx context.Context, key []byte) (*pd.Region, error) {
+=======
+func (c *codecPDClient) GetPrevRegion(ctx context.Context, key []byte) (*pd.Region, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	encodedKey := codec.EncodeBytes([]byte(nil), key)
 	region, err := c.Client.GetPrevRegion(ctx, encodedKey)
 	return processRegionResult(region, err)
@@ -45,7 +58,11 @@ func (c *CodecPDClient) GetPrevRegion(ctx context.Context, key []byte) (*pd.Regi
 
 // GetRegionByID encodes the key before send requests to pd-server and decodes the
 // returned StartKey && EndKey from pd-server.
+<<<<<<< HEAD
 func (c *CodecPDClient) GetRegionByID(ctx context.Context, regionID uint64) (*pd.Region, error) {
+=======
+func (c *codecPDClient) GetRegionByID(ctx context.Context, regionID uint64) (*pd.Region, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	region, err := c.Client.GetRegionByID(ctx, regionID)
 	return processRegionResult(region, err)
 }
@@ -64,7 +81,11 @@ func (c *CodecPDClient) ScanRegions(ctx context.Context, startKey []byte, endKey
 	}
 	for _, region := range regions {
 		if region != nil {
+<<<<<<< HEAD
 			err = decodeRegionMetaKeyInPlace(region.Meta)
+=======
+			err = decodeRegionMetaKeyInPlace(region)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			if err != nil {
 				return nil, errors.Trace(err)
 			}

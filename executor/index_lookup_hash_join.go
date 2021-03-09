@@ -156,7 +156,11 @@ func (e *IndexNestedLoopHashJoin) Open(ctx context.Context) error {
 }
 
 func (e *IndexNestedLoopHashJoin) startWorkers(ctx context.Context) {
+<<<<<<< HEAD
 	concurrency := e.ctx.GetSessionVars().IndexLookupJoinConcurrency()
+=======
+	concurrency := e.ctx.GetSessionVars().IndexLookupJoinConcurrency
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if e.stats != nil {
 		e.stats.concurrency = concurrency
 	}

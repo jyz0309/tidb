@@ -67,7 +67,10 @@ type StatementContext struct {
 	InSelectStmt              bool
 	InLoadDataStmt            bool
 	InExplainStmt             bool
+<<<<<<< HEAD
 	InCreateOrAlterStmt       bool
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	IgnoreTruncate            bool
 	IgnoreZeroInDate          bool
 	DupKeyAsWarning           bool
@@ -80,9 +83,14 @@ type StatementContext struct {
 	BatchCheck                bool
 	InNullRejectCheck         bool
 	AllowInvalidDate          bool
+<<<<<<< HEAD
 	IgnoreNoPartition         bool
 	OptimDependOnMutableConst bool
 	IgnoreExplainIDSuffix     bool
+=======
+	OptimDependOnMutableConst bool
+	IgnoreNoPartition         bool
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// mu struct holds variables that change during execution.
 	mu struct {
@@ -159,8 +167,13 @@ type StatementContext struct {
 	LockKeysDuration      int64
 	LockKeysCount         int32
 	TblInfo2UnionScan     map[*model.TableInfo]bool
+<<<<<<< HEAD
 	TaskID                uint64 // unique ID for an execution of a statement
 	TaskMapBakTS          uint64 // counter for
+=======
+	TaskID                uint64              // unique ID for an execution of a statement
+	CheckKeyExists        map[string]struct{} // mark the keys needs to check for existence for pessimistic locks.
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // StmtHints are SessionVars related sql hints.
@@ -420,6 +433,20 @@ func (sc *StatementContext) SetWarnings(warns []SQLWarn) {
 	sc.mu.Unlock()
 }
 
+// TruncateWarnings truncates wanrings begin from start and returns the truncated warnings.
+func (sc *StatementContext) TruncateWarnings(start int) []SQLWarn {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+	sz := len(sc.mu.warnings) - start
+	if sz <= 0 {
+		return nil
+	}
+	ret := make([]SQLWarn, sz)
+	copy(ret, sc.mu.warnings[start:])
+	sc.mu.warnings = sc.mu.warnings[:start]
+	return ret
+}
+
 // AppendWarning appends a warning with level 'Warning'.
 func (sc *StatementContext) AppendWarning(warn error) {
 	sc.mu.Lock()
@@ -514,6 +541,10 @@ func (sc *StatementContext) ResetForRetry() {
 	sc.TableIDs = sc.TableIDs[:0]
 	sc.IndexNames = sc.IndexNames[:0]
 	sc.TaskID = AllocateTaskID()
+<<<<<<< HEAD
+=======
+	sc.CheckKeyExists = make(map[string]struct{})
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // MergeExecDetails merges a single region execution details into self, used to print
@@ -523,6 +554,11 @@ func (sc *StatementContext) MergeExecDetails(details *execdetails.ExecDetails, c
 	defer sc.mu.Unlock()
 	if details != nil {
 		sc.mu.execDetails.CopTime += details.CopTime
+<<<<<<< HEAD
+=======
+		sc.mu.execDetails.ProcessTime += details.ProcessTime
+		sc.mu.execDetails.WaitTime += details.WaitTime
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		sc.mu.execDetails.BackoffTime += details.BackoffTime
 		sc.mu.execDetails.RequestCount++
 		sc.MergeScanDetail(details.ScanDetail)
@@ -536,6 +572,7 @@ func (sc *StatementContext) MergeExecDetails(details *execdetails.ExecDetails, c
 			sc.mu.execDetails.CommitDetail.Merge(commitDetails)
 		}
 	}
+<<<<<<< HEAD
 }
 
 // MergeScanDetail merges scan details into self.
@@ -554,6 +591,9 @@ func (sc *StatementContext) MergeScanDetail(scanDetail *execdetails.ScanDetail) 
 func (sc *StatementContext) MergeTimeDetail(timeDetail execdetails.TimeDetail) {
 	sc.mu.execDetails.TimeDetail.ProcessTime += timeDetail.ProcessTime
 	sc.mu.execDetails.TimeDetail.WaitTime += timeDetail.WaitTime
+=======
+	sc.mu.Unlock()
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // MergeLockKeysExecDetails merges lock keys execution details into self.
@@ -581,7 +621,13 @@ func (sc *StatementContext) GetExecDetails() execdetails.ExecDetails {
 // This is the case for `insert`, `update`, `alter table`, `create table` and `load data infile` statements, when not in strict SQL mode.
 // see https://dev.mysql.com/doc/refman/5.7/en/out-of-range-and-overflow.html
 func (sc *StatementContext) ShouldClipToZero() bool {
+<<<<<<< HEAD
 	return sc.InInsertStmt || sc.InLoadDataStmt || sc.InUpdateStmt || sc.InCreateOrAlterStmt || sc.IsDDLJobInQueue
+=======
+	// TODO: Currently altering column of integer to unsigned integer is not supported.
+	// If it is supported one day, that case should be added here.
+	return sc.InInsertStmt || sc.InLoadDataStmt || sc.InUpdateStmt
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // ShouldIgnoreOverflowError indicates whether we should ignore the error when type conversion overflows,

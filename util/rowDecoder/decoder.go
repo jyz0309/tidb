@@ -17,7 +17,10 @@ import (
 	"sort"
 	"time"
 
+<<<<<<< HEAD
 	"github.com/pingcap/parser/model"
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"github.com/pingcap/parser/mysql"
 	"github.com/pingcap/tidb/expression"
 	"github.com/pingcap/tidb/kv"
@@ -38,6 +41,7 @@ type Column struct {
 
 // RowDecoder decodes a byte slice into datums and eval the generated column value.
 type RowDecoder struct {
+<<<<<<< HEAD
 	tbl           table.Table
 	mutRow        chunk.MutRow
 	colMap        map[int64]Column
@@ -46,6 +50,13 @@ type RowDecoder struct {
 	defaultVals   []types.Datum
 	cols          []*table.Column
 	pkCols        []int64
+=======
+	tbl         table.Table
+	mutRow      chunk.MutRow
+	columns     map[int64]Column
+	colTypes    map[int64]*types.FieldType
+	defaultVals []types.Datum
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // NewRowDecoder returns a new RowDecoder.
@@ -79,11 +90,17 @@ func NewRowDecoder(tbl table.Table, cols []*table.Column, decodeColMap map[int64
 	return &RowDecoder{
 		tbl:         tbl,
 		mutRow:      chunk.MutRowFromTypes(tps),
+<<<<<<< HEAD
 		colMap:      decodeColMap,
 		colTypes:    colFieldMap,
 		defaultVals: make([]types.Datum, len(cols)),
 		cols:        cols,
 		pkCols:      pkCols,
+=======
+		columns:     decodeColMap,
+		colTypes:    colFieldMap,
+		defaultVals: make([]types.Datum, len(cols)),
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 }
 
@@ -98,11 +115,16 @@ func (rd *RowDecoder) DecodeAndEvalRowWithMap(ctx sessionctx.Context, handle kv.
 	if err != nil {
 		return nil, err
 	}
+<<<<<<< HEAD
 	row, err = tablecodec.DecodeHandleToDatumMap(handle, rd.pkCols, rd.colTypes, decodeLoc, row)
 	if err != nil {
 		return nil, err
 	}
 	for _, dCol := range rd.colMap {
+=======
+
+	for _, dCol := range rd.columns {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		colInfo := dCol.Col.ColumnInfo
 		val, ok := row[colInfo.ID]
 		if ok || dCol.GenExpr != nil {
@@ -120,15 +142,25 @@ func (rd *RowDecoder) DecodeAndEvalRowWithMap(ctx sessionctx.Context, handle kv.
 		}
 		rd.mutRow.SetValue(colInfo.Offset, val.GetValue())
 	}
+<<<<<<< HEAD
 	keys := make([]int, 0, len(rd.colMap))
 	ids := make(map[int]int, len(rd.colMap))
 	for k, col := range rd.colMap {
+=======
+	keys := make([]int, 0)
+	ids := make(map[int]int)
+	for k, col := range rd.columns {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		keys = append(keys, col.Col.Offset)
 		ids[col.Col.Offset] = int(k)
 	}
 	sort.Ints(keys)
 	for _, id := range keys {
+<<<<<<< HEAD
 		col := rd.colMap[int64(ids[id])]
+=======
+		col := rd.columns[int64(ids[id])]
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		if col.GenExpr == nil {
 			continue
 		}
@@ -153,26 +185,39 @@ func (rd *RowDecoder) DecodeAndEvalRowWithMap(ctx sessionctx.Context, handle kv.
 			}
 		}
 		rd.mutRow.SetValue(col.Col.Offset, val.GetValue())
+<<<<<<< HEAD
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		row[int64(ids[id])] = val
 	}
 	return row, nil
 }
 
+<<<<<<< HEAD
 // BuildFullDecodeColMap builds a map that contains [columnID -> struct{*table.Column, expression.Expression}] from all columns.
 func BuildFullDecodeColMap(cols []*table.Column, schema *expression.Schema) map[int64]Column {
 	decodeColMap := make(map[int64]Column, len(cols))
 	for _, col := range cols {
+=======
+// BuildFullDecodeColMap build a map that contains [columnID -> struct{*table.Column, expression.Expression}] from all columns.
+func BuildFullDecodeColMap(t table.Table, schema *expression.Schema) map[int64]Column {
+	decodeColMap := make(map[int64]Column, len(t.Cols()))
+	for _, col := range t.Cols() {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		decodeColMap[col.ID] = Column{
 			Col:     col,
 			GenExpr: schema.Columns[col.Offset].VirtualExpr,
 		}
 	}
 	return decodeColMap
+<<<<<<< HEAD
 }
 
 // CurrentRowWithDefaultVal returns current decoding row with default column values set properly.
 // Please make sure calling DecodeAndEvalRowWithMap first.
 func (rd *RowDecoder) CurrentRowWithDefaultVal() chunk.Row {
 	return rd.mutRow.ToRow()
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }

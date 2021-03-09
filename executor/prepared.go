@@ -180,6 +180,7 @@ func (e *PrepareExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		SchemaVersion: e.is.SchemaMetaVersion(),
 	}
 
+<<<<<<< HEAD
 	if !plannercore.PreparedPlanCacheEnabled() {
 		prepared.UseCache = false
 	} else {
@@ -189,6 +190,9 @@ func (e *PrepareExec) Next(ctx context.Context, req *chunk.Chunk) error {
 			prepared.UseCache = plannercore.Cacheable(stmt, nil)
 		}
 	}
+=======
+	prepared.UseCache = plannercore.PreparedPlanCacheEnabled() && plannercore.Cacheable(stmt, e.is)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	// We try to build the real statement of preparedStmt.
 	for i := range prepared.Params {

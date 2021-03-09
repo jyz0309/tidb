@@ -290,19 +290,33 @@ func (s *testIntegrationSuite2) TestIssue19229(c *C) {
 	tk.MustExec("CREATE TABLE enumt (type enum('a', 'b') );")
 	_, err := tk.Exec("insert into enumt values('xxx');")
 	terr := errors.Cause(err).(*terror.Error)
+<<<<<<< HEAD
 	c.Assert(terr.Code(), Equals, errors.ErrCode(errno.WarnDataTruncated))
 	_, err = tk.Exec("insert into enumt values(-1);")
 	terr = errors.Cause(err).(*terror.Error)
 	c.Assert(terr.Code(), Equals, errors.ErrCode(errno.WarnDataTruncated))
+=======
+	c.Assert(terr.Equal(types.ErrTruncated), IsTrue)
+	_, err = tk.Exec("insert into enumt values(-1);")
+	terr = errors.Cause(err).(*terror.Error)
+	c.Assert(terr.Equal(types.ErrTruncated), IsTrue)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("drop table enumt")
 
 	tk.MustExec("CREATE TABLE sett (type set('a', 'b') );")
 	_, err = tk.Exec("insert into sett values('xxx');")
 	terr = errors.Cause(err).(*terror.Error)
+<<<<<<< HEAD
 	c.Assert(terr.Code(), Equals, errors.ErrCode(errno.WarnDataTruncated))
 	_, err = tk.Exec("insert into sett values(-1);")
 	terr = errors.Cause(err).(*terror.Error)
 	c.Assert(terr.Code(), Equals, errors.ErrCode(errno.WarnDataTruncated))
+=======
+	c.Assert(terr.Equal(types.ErrTruncated), IsTrue)
+	_, err = tk.Exec("insert into sett values(-1);")
+	terr = errors.Cause(err).(*terror.Error)
+	c.Assert(terr.Equal(types.ErrTruncated), IsTrue)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("drop table sett")
 }
 
@@ -1376,6 +1390,7 @@ func (s *testIntegrationSuite8) TestCreateTableTooManyIndexes(c *C) {
 }
 
 func (s *testIntegrationSuite3) TestChangeColumnPosition(c *C) {
+<<<<<<< HEAD
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test")
 
@@ -1416,6 +1431,48 @@ func (s *testIntegrationSuite3) TestChangeColumnPosition(c *C) {
 	tk.MustExec("alter table position4 add index t(b)")
 	tk.MustExec("alter table position4 change column b c int first")
 	createSQL := tk.MustQuery("show create table position4").Rows()[0][1]
+=======
+	s.tk = testkit.NewTestKit(c, s.store)
+	s.tk.MustExec("use test")
+
+	s.tk.MustExec("create table position (a int default 1, b int default 2)")
+	s.tk.MustExec("insert into position value ()")
+	s.tk.MustExec("insert into position values (3,4)")
+	s.tk.MustQuery("select * from position").Check(testkit.Rows("1 2", "3 4"))
+	s.tk.MustExec("alter table position modify column b int first")
+	s.tk.MustQuery("select * from position").Check(testkit.Rows("2 1", "4 3"))
+	s.tk.MustExec("insert into position value ()")
+	s.tk.MustQuery("select * from position").Check(testkit.Rows("2 1", "4 3", "<nil> 1"))
+
+	s.tk.MustExec("create table position1 (a int, b int, c double, d varchar(5))")
+	s.tk.MustExec(`insert into position1 value (1, 2, 3.14, 'TiDB')`)
+	s.tk.MustExec("alter table position1 modify column d varchar(5) after a")
+	s.tk.MustQuery("select * from position1").Check(testkit.Rows("1 TiDB 2 3.14"))
+	s.tk.MustExec("alter table position1 modify column a int after c")
+	s.tk.MustQuery("select * from position1").Check(testkit.Rows("TiDB 2 3.14 1"))
+	s.tk.MustExec("alter table position1 modify column c double first")
+	s.tk.MustQuery("select * from position1").Check(testkit.Rows("3.14 TiDB 2 1"))
+	s.tk.MustGetErrCode("alter table position1 modify column b int after b", errno.ErrBadField)
+
+	s.tk.MustExec("create table position2 (a int, b int)")
+	s.tk.MustExec("alter table position2 add index t(a, b)")
+	s.tk.MustExec("alter table position2 modify column b int first")
+	s.tk.MustExec("insert into position2 value (3, 5)")
+	s.tk.MustQuery("select a from position2 where a = 3").Check(testkit.Rows())
+	s.tk.MustExec("alter table position2 change column b c int first")
+	s.tk.MustQuery("select * from position2 where c = 3").Check(testkit.Rows("3 5"))
+	s.tk.MustGetErrCode("alter table position2 change column c b int after c", errno.ErrBadField)
+
+	s.tk.MustExec("create table position3 (a int default 2)")
+	s.tk.MustExec("alter table position3 modify column a int default 5 first")
+	s.tk.MustExec("insert into position3 value ()")
+	s.tk.MustQuery("select * from position3").Check(testkit.Rows("5"))
+
+	s.tk.MustExec("create table position4 (a int, b int)")
+	s.tk.MustExec("alter table position4 add index t(b)")
+	s.tk.MustExec("alter table position4 change column b c int first")
+	createSQL := s.tk.MustQuery("show create table position4").Rows()[0][1]
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	expectedSQL := []string{
 		"CREATE TABLE `position4` (",
 		"  `c` int(11) DEFAULT NULL,",
@@ -1663,6 +1720,7 @@ func (s *testIntegrationSuite3) TestAlterAlgorithm(c *C) {
 		PARTITION p2 VALUES LESS THAN (16),
 		PARTITION p3 VALUES LESS THAN (21)
 	)`)
+<<<<<<< HEAD
 	s.assertAlterWarnExec(tk, c, "alter table t modify column a bigint, ALGORITHM=INPLACE;")
 	tk.MustExec("alter table t modify column a bigint, ALGORITHM=INPLACE, ALGORITHM=INSTANT;")
 	tk.MustExec("alter table t modify column a bigint, ALGORITHM=DEFAULT;")
@@ -1710,6 +1768,55 @@ func (s *testIntegrationSuite3) TestAlterAlgorithm(c *C) {
 	s.assertAlterWarnExec(tk, c, "alter table t default charset = utf8mb4, ALGORITHM=COPY")
 	s.assertAlterWarnExec(tk, c, "alter table t default charset = utf8mb4, ALGORITHM=INPLACE")
 	tk.MustExec("alter table t default charset = utf8mb4, ALGORITHM=INSTANT")
+=======
+	s.assertAlterWarnExec(c, "alter table t modify column a bigint, ALGORITHM=INPLACE;")
+	s.tk.MustExec("alter table t modify column a bigint, ALGORITHM=INPLACE, ALGORITHM=INSTANT;")
+	s.tk.MustExec("alter table t modify column a bigint, ALGORITHM=DEFAULT;")
+
+	// Test add/drop index
+	s.assertAlterErrorExec(c, "alter table t add index idx_b(b), ALGORITHM=INSTANT")
+	s.assertAlterWarnExec(c, "alter table t add index idx_b1(b), ALGORITHM=COPY")
+	s.tk.MustExec("alter table t add index idx_b2(b), ALGORITHM=INPLACE")
+	s.tk.MustExec("alter table t add index idx_b3(b), ALGORITHM=DEFAULT")
+	s.assertAlterWarnExec(c, "alter table t drop index idx_b3, ALGORITHM=INPLACE")
+	s.assertAlterWarnExec(c, "alter table t drop index idx_b1, ALGORITHM=COPY")
+	s.tk.MustExec("alter table t drop index idx_b2, ALGORITHM=INSTANT")
+
+	// Test rename
+	s.assertAlterWarnExec(c, "alter table t rename to t1, ALGORITHM=COPY")
+	s.assertAlterWarnExec(c, "alter table t1 rename to t2, ALGORITHM=INPLACE")
+	s.tk.MustExec("alter table t2 rename to t, ALGORITHM=INSTANT")
+	s.tk.MustExec("alter table t rename to t1, ALGORITHM=DEFAULT")
+	s.tk.MustExec("alter table t1 rename to t")
+
+	// Test rename index
+	s.assertAlterWarnExec(c, "alter table t rename index idx_c to idx_c1, ALGORITHM=COPY")
+	s.assertAlterWarnExec(c, "alter table t rename index idx_c1 to idx_c2, ALGORITHM=INPLACE")
+	s.tk.MustExec("alter table t rename index idx_c2 to idx_c, ALGORITHM=INSTANT")
+	s.tk.MustExec("alter table t rename index idx_c to idx_c1, ALGORITHM=DEFAULT")
+
+	// partition.
+	s.assertAlterWarnExec(c, "alter table t ALGORITHM=COPY, truncate partition p1")
+	s.assertAlterWarnExec(c, "alter table t ALGORITHM=INPLACE, truncate partition p2")
+	s.tk.MustExec("alter table t ALGORITHM=INSTANT, truncate partition p3")
+
+	s.assertAlterWarnExec(c, "alter table t add partition (partition p4 values less than (2002)), ALGORITHM=COPY")
+	s.assertAlterWarnExec(c, "alter table t add partition (partition p5 values less than (3002)), ALGORITHM=INPLACE")
+	s.tk.MustExec("alter table t add partition (partition p6 values less than (4002)), ALGORITHM=INSTANT")
+
+	s.assertAlterWarnExec(c, "alter table t ALGORITHM=COPY, drop partition p4")
+	s.assertAlterWarnExec(c, "alter table t ALGORITHM=INPLACE, drop partition p5")
+	s.tk.MustExec("alter table t ALGORITHM=INSTANT, drop partition p6")
+
+	// Table options
+	s.assertAlterWarnExec(c, "alter table t comment = 'test', ALGORITHM=COPY")
+	s.assertAlterWarnExec(c, "alter table t comment = 'test', ALGORITHM=INPLACE")
+	s.tk.MustExec("alter table t comment = 'test', ALGORITHM=INSTANT")
+
+	s.assertAlterWarnExec(c, "alter table t default charset = utf8mb4, ALGORITHM=COPY")
+	s.assertAlterWarnExec(c, "alter table t default charset = utf8mb4, ALGORITHM=INPLACE")
+	s.tk.MustExec("alter table t default charset = utf8mb4, ALGORITHM=INSTANT")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testIntegrationSuite3) TestAlterTableAddUniqueOnPartionRangeColumn(c *C) {
@@ -1804,9 +1911,15 @@ func (s *testIntegrationSuite1) TestTreatOldVersionUTF8AsUTF8MB4(c *C) {
 	config.UpdateGlobal(func(conf *config.Config) {
 		conf.TreatOldVersionUTF8AsUTF8MB4 = false
 	})
+<<<<<<< HEAD
 	tk.MustExec("alter table t drop column c;") //  reload schema.
 	tk.MustGetErrCode("insert into t set a= x'f09f8c80'", errno.ErrTruncatedWrongValueForField)
 	tk.MustQuery("show create table t").Check(testkit.Rows("t CREATE TABLE `t` (\n" +
+=======
+	s.tk.MustExec("alter table t drop column c;") //  reload schema.
+	s.tk.MustGetErrCode("insert into t set a= x'f09f8c80'", errno.ErrTruncatedWrongValueForField)
+	s.tk.MustQuery("show create table t").Check(testkit.Rows("t CREATE TABLE `t` (\n" +
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		"  `a` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,\n" +
 		"  `b` varchar(10) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL\n" +
 		") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin"))
@@ -1823,9 +1936,15 @@ func (s *testIntegrationSuite1) TestTreatOldVersionUTF8AsUTF8MB4(c *C) {
 	config.UpdateGlobal(func(conf *config.Config) {
 		conf.TreatOldVersionUTF8AsUTF8MB4 = true
 	})
+<<<<<<< HEAD
 	tk.MustExec("alter table t add column c varchar(10);") //  load latest schema.
 	tk.MustExec("insert into t set a= x'f09f8c80'")
 	tk.MustQuery("show create table t").Check(testkit.Rows("t CREATE TABLE `t` (\n" +
+=======
+	s.tk.MustExec("alter table t add column c varchar(10);") //  load latest schema.
+	s.tk.MustExec("insert into t set a= x'f09f8c80'")
+	s.tk.MustQuery("show create table t").Check(testkit.Rows("t CREATE TABLE `t` (\n" +
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		"  `a` varchar(10) DEFAULT NULL,\n" +
 		"  `b` varchar(10) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,\n" +
 		"  `c` varchar(10) DEFAULT NULL\n" +
@@ -1834,9 +1953,15 @@ func (s *testIntegrationSuite1) TestTreatOldVersionUTF8AsUTF8MB4(c *C) {
 	config.UpdateGlobal(func(conf *config.Config) {
 		conf.TreatOldVersionUTF8AsUTF8MB4 = false
 	})
+<<<<<<< HEAD
 	tk.MustExec("alter table t drop column c;") //  reload schema.
 	tk.MustGetErrCode("insert into t set a= x'f09f8c80'", errno.ErrTruncatedWrongValueForField)
 	tk.MustQuery("show create table t").Check(testkit.Rows("t CREATE TABLE `t` (\n" +
+=======
+	s.tk.MustExec("alter table t drop column c;") //  reload schema.
+	s.tk.MustGetErrCode("insert into t set a= x'f09f8c80'", errno.ErrTruncatedWrongValueForField)
+	s.tk.MustQuery("show create table t").Check(testkit.Rows("t CREATE TABLE `t` (\n" +
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		"  `a` varchar(10) DEFAULT NULL,\n" +
 		"  `b` varchar(10) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL\n" +
 		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin"))
@@ -1845,7 +1970,11 @@ func (s *testIntegrationSuite1) TestTreatOldVersionUTF8AsUTF8MB4(c *C) {
 	config.UpdateGlobal(func(conf *config.Config) {
 		conf.TreatOldVersionUTF8AsUTF8MB4 = true
 	})
+<<<<<<< HEAD
 	tk.MustExec("alter table t modify column a varchar(10) character set utf8mb4") //  change column charset.
+=======
+	s.tk.MustExec("alter table t modify column a varchar(10) character set utf8mb4") //  change column charset.
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tbl = testGetTableByName(c, s.ctx, "test", "t")
 	c.Assert(tbl.Meta().Columns[0].Charset, Equals, charset.CharsetUTF8MB4)
 	c.Assert(tbl.Meta().Columns[0].Collate, Equals, charset.CollationUTF8MB4)
@@ -1883,9 +2012,15 @@ func (s *testIntegrationSuite1) TestTreatOldVersionUTF8AsUTF8MB4(c *C) {
 	config.UpdateGlobal(func(conf *config.Config) {
 		conf.TreatOldVersionUTF8AsUTF8MB4 = false
 	})
+<<<<<<< HEAD
 	tk.MustExec("alter table t change column b b varchar(30) character set ascii") // reload schema.
 	tk.MustGetErrCode("insert into t set a= x'f09f8c80'", errno.ErrTruncatedWrongValueForField)
 	tk.MustQuery("show create table t").Check(testkit.Rows("t CREATE TABLE `t` (\n" +
+=======
+	s.tk.MustExec("alter table t change column b b varchar(30) character set ascii") // reload schema.
+	s.tk.MustGetErrCode("insert into t set a= x'f09f8c80'", errno.ErrTruncatedWrongValueForField)
+	s.tk.MustQuery("show create table t").Check(testkit.Rows("t CREATE TABLE `t` (\n" +
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		"  `a` varchar(20) DEFAULT NULL,\n" +
 		"  `b` varchar(30) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL\n" +
 		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin"))
@@ -1894,14 +2029,24 @@ func (s *testIntegrationSuite1) TestTreatOldVersionUTF8AsUTF8MB4(c *C) {
 	config.UpdateGlobal(func(conf *config.Config) {
 		conf.TreatOldVersionUTF8AsUTF8MB4 = true
 	})
+<<<<<<< HEAD
 	tk.MustExec("alter table t drop column b") // reload schema.
 	tk.MustExec("alter table t convert to charset utf8mb4;")
+=======
+	s.tk.MustExec("alter table t drop column b") // reload schema.
+	s.tk.MustExec("alter table t convert to charset utf8mb4;")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	config.UpdateGlobal(func(conf *config.Config) {
 		conf.TreatOldVersionUTF8AsUTF8MB4 = false
 	})
+<<<<<<< HEAD
 	tk.MustExec("alter table t add column b varchar(50);") // reload schema.
 	tk.MustQuery("show create table t").Check(testkit.Rows("t CREATE TABLE `t` (\n" +
+=======
+	s.tk.MustExec("alter table t add column b varchar(50);") // reload schema.
+	s.tk.MustQuery("show create table t").Check(testkit.Rows("t CREATE TABLE `t` (\n" +
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		"  `a` varchar(20) DEFAULT NULL,\n" +
 		"  `b` varchar(50) DEFAULT NULL\n" +
 		") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin"))
@@ -2223,10 +2368,15 @@ func (s *testIntegrationSuite7) TestAddExpressionIndex(c *C) {
 }
 
 func (s *testIntegrationSuite7) TestCreateExpressionIndexError(c *C) {
+<<<<<<< HEAD
 	defer config.RestoreFunc()
 	config.UpdateGlobal(func(conf *config.Config) {
 		conf.Experimental.AllowsExpressionIndex = true
 		conf.AlterPrimaryKey = true
+=======
+	config.UpdateGlobal(func(conf *config.Config) {
+		conf.Experimental.AllowsExpressionIndex = true
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	})
 
 	tk := testkit.NewTestKit(c, s.store)
@@ -2689,4 +2839,237 @@ func (s *testIntegrationSuite3) TestIssue21835(c *C) {
 	tk.MustExec("drop table if exists t;")
 	_, err := tk.Exec("create table t( col decimal(1,2) not null default 0);")
 	c.Assert(err.Error(), Equals, "[types:1427]For float(M,D), double(M,D) or decimal(M,D), M must be >= D (column 'col').")
+}
+
+// TestCreateTableWithAutoIdCache test the auto_id_cache table option.
+// `auto_id_cache` take effects on handle too when `PKIshandle` is false,
+// or even there is no auto_increment column at all.
+func (s *testIntegrationSuite3) TestCreateTableWithAutoIdCache(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("USE test;")
+	tk.MustExec("drop table if exists t;")
+	tk.MustExec("drop table if exists t1;")
+
+	// Test primary key is handle.
+	tk.MustExec("create table t(a int auto_increment key) auto_id_cache 100")
+	tblInfo, err := s.dom.InfoSchema().TableByName(model.NewCIStr("test"), model.NewCIStr("t"))
+	c.Assert(err, IsNil)
+	c.Assert(tblInfo.Meta().AutoIdCache, Equals, int64(100))
+	tk.MustExec("insert into t values()")
+	tk.MustQuery("select * from t").Check(testkit.Rows("1"))
+	tk.MustExec("delete from t")
+
+	// Invalid the allocator cache, insert will trigger a new cache
+	tk.MustExec("rename table t to t1;")
+	tk.MustExec("insert into t1 values()")
+	tk.MustQuery("select * from t1").Check(testkit.Rows("101"))
+
+	// Test primary key is not handle.
+	tk.MustExec("drop table if exists t;")
+	tk.MustExec("drop table if exists t1;")
+	tk.MustExec("create table t(a int) auto_id_cache 100")
+	tblInfo, err = s.dom.InfoSchema().TableByName(model.NewCIStr("test"), model.NewCIStr("t"))
+	c.Assert(err, IsNil)
+
+	tk.MustExec("insert into t values()")
+	tk.MustQuery("select _tidb_rowid from t").Check(testkit.Rows("1"))
+	tk.MustExec("delete from t")
+
+	// Invalid the allocator cache, insert will trigger a new cache
+	tk.MustExec("rename table t to t1;")
+	tk.MustExec("insert into t1 values()")
+	tk.MustQuery("select _tidb_rowid from t1").Check(testkit.Rows("101"))
+
+	// Test both auto_increment and rowid exist.
+	tk.MustExec("drop table if exists t;")
+	tk.MustExec("drop table if exists t1;")
+	tk.MustExec("create table t(a int null, b int auto_increment unique) auto_id_cache 100")
+	tblInfo, err = s.dom.InfoSchema().TableByName(model.NewCIStr("test"), model.NewCIStr("t"))
+	c.Assert(err, IsNil)
+
+	tk.MustExec("insert into t(b) values(NULL)")
+	tk.MustQuery("select b, _tidb_rowid from t").Check(testkit.Rows("1 2"))
+	tk.MustExec("delete from t")
+
+	// Invalid the allocator cache, insert will trigger a new cache.
+	tk.MustExec("rename table t to t1;")
+	tk.MustExec("insert into t1(b) values(NULL)")
+	tk.MustQuery("select b, _tidb_rowid from t1").Check(testkit.Rows("101 102"))
+	tk.MustExec("delete from t1")
+
+	// Test alter auto_id_cache.
+	tk.MustExec("alter table t1 auto_id_cache 200")
+	tblInfo, err = s.dom.InfoSchema().TableByName(model.NewCIStr("test"), model.NewCIStr("t1"))
+	c.Assert(err, IsNil)
+	c.Assert(tblInfo.Meta().AutoIdCache, Equals, int64(200))
+
+	tk.MustExec("insert into t1(b) values(NULL)")
+	tk.MustQuery("select b, _tidb_rowid from t1").Check(testkit.Rows("201 202"))
+	tk.MustExec("delete from t1")
+
+	// Invalid the allocator cache, insert will trigger a new cache.
+	tk.MustExec("rename table t1 to t;")
+	tk.MustExec("insert into t(b) values(NULL)")
+	tk.MustQuery("select b, _tidb_rowid from t").Check(testkit.Rows("401 402"))
+	tk.MustExec("delete from t")
+
+	tk.MustExec("drop table if exists t;")
+	tk.MustExec("drop table if exists t1;")
+	tk.MustExec("create table t(a int auto_increment key) auto_id_cache 3")
+	tblInfo, err = s.dom.InfoSchema().TableByName(model.NewCIStr("test"), model.NewCIStr("t"))
+	c.Assert(err, IsNil)
+	c.Assert(tblInfo.Meta().AutoIdCache, Equals, int64(3))
+
+	// Test insert batch size(4 here) greater than the customized autoid step(3 here).
+	tk.MustExec("insert into t(a) values(NULL),(NULL),(NULL),(NULL)")
+	tk.MustQuery("select a from t").Check(testkit.Rows("1", "2", "3", "4"))
+	tk.MustExec("delete from t")
+
+	// Invalid the allocator cache, insert will trigger a new cache.
+	tk.MustExec("rename table t to t1;")
+	tk.MustExec("insert into t1(a) values(NULL)")
+	next := tk.MustQuery("select a from t1").Rows()[0][0].(string)
+	nextInt, err := strconv.Atoi(next)
+	c.Assert(err, IsNil)
+	c.Assert(nextInt, Greater, 5)
+
+	// Test auto_id_cache overflows int64.
+	tk.MustExec("drop table if exists t;")
+	_, err = tk.Exec("create table t(a int) auto_id_cache = 9223372036854775808")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "table option auto_id_cache overflows int64")
+
+	tk.MustExec("create table t(a int) auto_id_cache = 9223372036854775807")
+	_, err = tk.Exec("alter table t auto_id_cache = 9223372036854775808")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "table option auto_id_cache overflows int64")
+}
+
+func (s *testIntegrationSuite7) TestAutoIncrementTableOption(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	defer config.RestoreFunc()()
+	config.UpdateGlobal(func(conf *config.Config) {
+		// Make sure the integer primary key is the handle(PkIsHandle).
+		conf.AlterPrimaryKey = false
+	})
+	tk.MustExec("drop database if exists test_auto_inc_table_opt;")
+	tk.MustExec("create database test_auto_inc_table_opt;")
+	tk.MustExec("use test_auto_inc_table_opt;")
+
+	// Empty auto_inc allocator should not cause error.
+	tk.MustExec("create table t (a bigint primary key) auto_increment = 10;")
+	tk.MustExec("alter table t auto_increment = 10;")
+	tk.MustExec("alter table t auto_increment = 12345678901234567890;")
+
+	// Rebase the auto_inc allocator to a large integer should work.
+	tk.MustExec("drop table t;")
+	tk.MustExec("create table t (a bigint unsigned auto_increment, unique key idx(a));")
+	tk.MustExec("alter table t auto_increment = 12345678901234567890;")
+	tk.MustExec("insert into t values ();")
+	tk.MustQuery("select * from t;").Check(testkit.Rows("12345678901234567890"))
+}
+
+// TestDefaultValueIsLatin1 for issue #18977
+func (s *testIntegrationSuite3) TestEnumAndSetDefaultValue(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t")
+	defer tk.MustExec("drop table if exists t")
+	tk.MustExec("create table t (a enum(0x61, 'b') not null default 0x61, b set(0x61, 'b') not null default 0x61) character set latin1")
+	tbl := testGetTableByName(c, s.ctx, "test", "t")
+	c.Assert(tbl.Meta().Columns[0].DefaultValue, Equals, "a")
+	c.Assert(tbl.Meta().Columns[1].DefaultValue, Equals, "a")
+
+	tk.MustExec("drop table t")
+	tk.MustExec("create table t (a enum(0x61, 'b') not null default 0x61, b set(0x61, 'b') not null default 0x61) character set utf8mb4")
+	tbl = testGetTableByName(c, s.ctx, "test", "t")
+	c.Assert(tbl.Meta().Columns[0].DefaultValue, Equals, "a")
+	c.Assert(tbl.Meta().Columns[1].DefaultValue, Equals, "a")
+}
+
+func (s *testIntegrationSuite3) TestIssue20490(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test;")
+	tk.MustExec("create table issue20490 (a int);")
+	tk.MustExec("insert into issue20490(a) values(1);")
+	tk.MustExec("alter table issue20490 add b int not null default 1;")
+	tk.MustExec("insert into issue20490(a) values(2);")
+	tk.MustExec("alter table issue20490 modify b int null;")
+	tk.MustExec("insert into issue20490(a) values(3);")
+
+	tk.MustQuery("select b from issue20490 order by a;").Check(testkit.Rows("1", "1", "<nil>"))
+}
+
+func (s *testIntegrationSuite3) TestIssue20741WithEnumField(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists issue20741")
+	tk.MustExec("create table issue20741(id int primary key, c int)")
+	tk.MustExec("insert into issue20741(id, c) values(1, 2), (2, 2)")
+	tk.MustExec("alter table issue20741 add column cc enum('a', 'b', 'c', 'd') not null")
+	tk.MustExec("update issue20741 set c=2 where id=1")
+	tk.MustQuery("select * from issue20741").Check(testkit.Rows("1 2 a", "2 2 a"))
+	tk.MustQuery("select * from issue20741 where cc = 0").Check(testkit.Rows())
+	tk.MustQuery("select * from issue20741 where cc = 1").Check(testkit.Rows("1 2 a", "2 2 a"))
+}
+
+func (s *testIntegrationSuite3) TestIssue20741WithSetField(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists issue20741_2")
+	tk.MustExec("create table issue20741_2(id int primary key, c int)")
+	tk.MustExec("insert into issue20741_2(id, c) values(1, 2), (2, 2)")
+	tk.MustExec("alter table issue20741_2 add column cc set('a', 'b', 'c', 'd') not null")
+	tk.MustExec("update issue20741_2 set c=2 where id=1")
+	tk.MustQuery("select * from issue20741_2").Check(testkit.Rows("1 2 ", "2 2 "))
+	tk.MustQuery("select * from issue20741_2 where cc = 0").Check(testkit.Rows("1 2 ", "2 2 "))
+	tk.MustQuery("select * from issue20741_2 where cc = 1").Check(testkit.Rows())
+	_, err := tk.Exec("insert into issue20741_2(id, c) values (3, 3)")
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "[table:1364]Field 'cc' doesn't have a default value")
+}
+
+func (s *testIntegrationSuite7) TestDuplicateErrorMessage(c *C) {
+	defer collate.SetNewCollationEnabledForTest(false)
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+
+	type testdata struct {
+		types  []string
+		values []string
+	}
+	tests := []testdata{
+		{[]string{"int"}, []string{"1"}},
+		{[]string{"datetime"}, []string{"'2020-01-01 00:00:00'"}},
+		{[]string{"varchar(10)"}, []string{"'qwe'"}},
+		{[]string{"enum('r', 'g', 'b')"}, []string{"'r'"}},
+		{[]string{"int", "datetime", "varchar(10)", "enum('r', 'g', 'b')"}, []string{"1", "'2020-01-01 00:00:00'", "'qwe'", "'r'"}},
+	}
+
+	for _, newCollate := range []bool{false, true} {
+		collate.SetNewCollationEnabledForTest(newCollate)
+		for _, t := range tests {
+			tk.MustExec("drop table if exists t;")
+			fields := make([]string, len(t.types))
+
+			for i, tp := range t.types {
+				fields[i] = fmt.Sprintf("a%d %s", i, tp)
+			}
+			tk.MustExec("create table t (id1 int, id2 varchar(10), " + strings.Join(fields, ",") + ",primary key(id1, id2)) " +
+				"collate utf8mb4_general_ci " +
+				"partition by range (id1) (partition p1 values less than (2), partition p2 values less than (maxvalue))")
+
+			vals := strings.Join(t.values, ",")
+			tk.MustExec(fmt.Sprintf("insert into t values (1, 'asd', %s), (1, 'dsa', %s)", vals, vals))
+			for i := range t.types {
+				fields[i] = fmt.Sprintf("a%d", i)
+			}
+			index := strings.Join(fields, ",")
+			for i, val := range t.values {
+				fields[i] = strings.Replace(val, "'", "", -1)
+			}
+			tk.MustGetErrMsg("alter table t add unique index t_idx(id1,"+index+")",
+				fmt.Sprintf("[kv:1062]Duplicate entry '1-%s' for key 't_idx'", strings.Join(fields, "-")))
+		}
+	}
 }

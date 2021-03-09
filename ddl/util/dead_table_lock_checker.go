@@ -44,17 +44,29 @@ func NewDeadTableLockChecker(etcdCli *clientv3.Client) DeadTableLockChecker {
 	}
 }
 
+<<<<<<< HEAD
 func (d *DeadTableLockChecker) getAliveServers(ctx context.Context) (map[string]struct{}, error) {
+=======
+func (d *DeadTableLockChecker) getAliveServers(quitCh chan struct{}) (map[string]struct{}, error) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	var err error
 	var resp *clientv3.GetResponse
 	allInfos := make(map[string]struct{})
 	for i := 0; i < defaultRetryCnt; i++ {
 		select {
+<<<<<<< HEAD
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		default:
 		}
 		childCtx, cancel := context.WithTimeout(ctx, defaultTimeout)
+=======
+		case <-quitCh:
+			return nil, nil
+		default:
+		}
+		childCtx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		resp, err = d.etcdCli.Get(childCtx, DDLAllSchemaVersions, clientv3.WithPrefix())
 		cancel()
 		if err != nil {
@@ -72,19 +84,33 @@ func (d *DeadTableLockChecker) getAliveServers(ctx context.Context) (map[string]
 }
 
 // GetDeadLockedTables gets dead locked tables.
+<<<<<<< HEAD
 func (d *DeadTableLockChecker) GetDeadLockedTables(ctx context.Context, schemas []*model.DBInfo) (map[model.SessionInfo][]model.TableLockTpInfo, error) {
 	if d.etcdCli == nil {
 		return nil, nil
 	}
 	aliveServers, err := d.getAliveServers(ctx)
 	if err != nil {
+=======
+func (d *DeadTableLockChecker) GetDeadLockedTables(quitCh chan struct{}, schemas []*model.DBInfo) (map[model.SessionInfo][]model.TableLockTpInfo, error) {
+	if d.etcdCli == nil {
+		return nil, nil
+	}
+	aliveServers, err := d.getAliveServers(quitCh)
+	if err != nil || len(aliveServers) == 0 {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return nil, err
 	}
 	deadLockTables := make(map[model.SessionInfo][]model.TableLockTpInfo)
 	for _, schema := range schemas {
 		select {
+<<<<<<< HEAD
 		case <-ctx.Done():
 			return nil, ctx.Err()
+=======
+		case <-quitCh:
+			return nil, nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		default:
 		}
 		for _, tbl := range schema.Tables {

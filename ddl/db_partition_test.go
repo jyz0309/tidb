@@ -285,6 +285,7 @@ func (s *testIntegrationSuite3) TestCreateTableWithPartition(c *C) {
 	// Fix https://github.com/pingcap/tidb/issues/16333
 	tk.MustExec(`create table t35 (dt timestamp) partition by range (unix_timestamp(dt))
 (partition p0 values less than (unix_timestamp('2020-04-15 00:00:00')));`)
+<<<<<<< HEAD
 
 	tk.MustExec(`drop table if exists too_long_identifier`)
 	tk.MustGetErrCode(`create table too_long_identifier(a int)
@@ -300,6 +301,8 @@ partition by range (a)
     partition p0 values less than (200),
     partition p1 values less than (300),
     partition p2 values less than maxvalue)`)
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testIntegrationSuite2) TestCreateTableWithHashPartition(c *C) {
@@ -352,9 +355,14 @@ func (s *testIntegrationSuite2) TestCreateTableWithHashPartition(c *C) {
                                        PARTITION p1 VALUES LESS THAN (200),
                                        PARTITION p2 VALUES LESS THAN MAXVALUE)`)
 	tk.MustGetErrCode("select * from t_sub partition (p0)", tmysql.ErrPartitionClauseOnNonpartitioned)
+<<<<<<< HEAD
 
 	// Fix create partition table using extract() function as partition key.
 	tk.MustExec("create table t2 (a date, b datetime) partition by hash (EXTRACT(YEAR_MONTH FROM a)) partitions 7")
+=======
+	tk.MustGetErrCode("create table t_hash(a int) partition by hash (a) partitions 3 (partition p1, partition p2, partition p2);", tmysql.ErrSameNamePartition)
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tk.MustExec("create table t3 (a int, b int) partition by hash(ceiling(a-b)) partitions 10")
 	tk.MustExec("create table t4 (a int, b int) partition by hash(floor(a-b)) partitions 10")
 }
@@ -464,6 +472,7 @@ create table log_message_1 (
 				"partition p0 values less than ( 'a')," +
 				"partition p1 values less than ('a'))",
 			ddl.ErrRangeNotIncreasing,
+<<<<<<< HEAD
 		},
 		// create as normal table, warning.
 		//	{
@@ -1106,9 +1115,44 @@ func (s *testIntegrationSuite5) TestAlterTableAddPartitionByListColumns(c *C) {
 		},
 		{"alter table t add partition (partition p6 values in ((7,'a')))",
 			ddl.ErrMultipleDefConstInListPart,
+=======
+		},
+		// create as normal table, warning.
+		//	{
+		//		"create table t (a int, b varchar(64)) partition by range columns (a, b) (" +
+		//			"partition p0 values less than (1, 'b')," +
+		//			"partition p1 values less than (1, 'a'))",
+		//		ddl.ErrRangeNotIncreasing,
+		//	},
+		{
+			"create table t (a int, b varchar(64)) partition by range columns (b) (" +
+				"partition p0 values less than ('b')," +
+				"partition p1 values less than ('a'))",
+			ddl.ErrRangeNotIncreasing,
+		},
+		// create as normal table, warning.
+		//		{
+		//			"create table t (a int, b varchar(64)) partition by range columns (a, b) (" +
+		//				"partition p0 values less than (1, maxvalue)," +
+		//				"partition p1 values less than (1, 'a'))",
+		//			ddl.ErrRangeNotIncreasing,
+		//		},
+		{
+			"create table t (a int, b varchar(64)) partition by range columns ( b) (" +
+				"partition p0 values less than (  maxvalue)," +
+				"partition p1 values less than ('a'))",
+			ddl.ErrRangeNotIncreasing,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		},
 		{"alter table t add partition (partition p6 values in (('a','a')))",
 			ddl.ErrWrongTypeColumnValue,
+		},
+		{
+			"create table t(a char(10) collate utf8mb4_bin) " +
+				"partition by range columns (a) (" +
+				"partition p0 values less than ('a'), " +
+				"partition p1 values less than ('G'));",
+			ddl.ErrRangeNotIncreasing,
 		},
 	}
 
@@ -1121,6 +1165,7 @@ func (s *testIntegrationSuite5) TestAlterTableAddPartitionByListColumns(c *C) {
 	}
 }
 
+<<<<<<< HEAD
 func (s *testIntegrationSuite5) TestAlterTableDropPartitionByList(c *C) {
 	tk := testkit.NewTestKit(c, s.store)
 	tk.MustExec("use test;")
@@ -1253,6 +1298,27 @@ func (s *testIntegrationSuite5) TestAlterTableTruncatePartitionByListColumns(c *
 	tk.MustQuery("select * from t").Check(testkit.Rows("1 a"))
 	tk.MustExec(`alter table t truncate partition p0`)
 	tk.MustQuery("select * from t").Check(testkit.Rows())
+=======
+	tk.MustExec("drop table if exists t1;")
+	tk.MustExec("create table t1 (a int, b char(3)) partition by range columns (a, b) (" +
+		"partition p0 values less than (1, 'a')," +
+		"partition p1 values less than (2, maxvalue))")
+
+	tk.MustExec("drop table if exists t2;")
+	tk.MustExec("create table t2 (a int, b char(3)) partition by range columns (b) (" +
+		"partition p0 values less than ( 'a')," +
+		"partition p1 values less than (maxvalue))")
+
+	tk.MustExec("drop table if exists t;")
+	tk.MustExec(`create table t(a char(10) collate utf8mb4_general_ci) partition by range columns (a) (
+    	partition p0 values less than ('a'),
+    	partition p1 values less than ('G'));`)
+
+	tk.MustExec("drop table if exists t;")
+	tk.MustExec(`create table t(a int) partition by range columns (a) (
+    	partition p0 values less than (10),
+    	partition p1 values less than (20));`)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testIntegrationSuite3) TestCreateTableWithKeyPartition(c *C) {
@@ -2529,7 +2595,11 @@ func (s *testIntegrationSuite5) TestPartitionUniqueKeyNeedAllFieldsInPf(c *C) {
                partition p1 values less than (7, 9),
                partition p2 values less than (11, 22)
         )`
+<<<<<<< HEAD
 	tk.MustExec(sql11)
+=======
+	tk.MustGetErrCode(sql11, tmysql.ErrUniqueKeyNeedAllFieldsInPf)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 
 	sql12 := `create table part12 (a varchar(20), b binary, unique index (a(5))) partition by range columns (a) (
 			partition p0 values less than ('aaaaa'),
@@ -3020,6 +3090,7 @@ func (s *testIntegrationSuite3) TestPartitionErrorCode(c *C) {
 	tk.MustGetErrCode("alter table t_part optimize partition p0,p1;", tmysql.ErrUnsupportedDDLOperation)
 	tk.MustGetErrCode("alter table t_part rebuild partition p0,p1;", tmysql.ErrUnsupportedDDLOperation)
 	tk.MustGetErrCode("alter table t_part remove partitioning;", tmysql.ErrUnsupportedDDLOperation)
+<<<<<<< HEAD
 	tk.MustGetErrCode("alter table t_part repair partition p1;", tmysql.ErrUnsupportedDDLOperation)
 
 	// Reduce the impact on DML when executing partition DDL
@@ -3037,6 +3108,10 @@ func (s *testIntegrationSuite3) TestPartitionErrorCode(c *C) {
 
 	_, err = tk1.Exec("commit")
 	c.Assert(err, IsNil)
+=======
+	tk.MustExec("create table t_part2 like t_part")
+	tk.MustGetErrCode("alter table t_part exchange partition p0 with table t_part2", tmysql.ErrUnsupportedDDLOperation)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func (s *testIntegrationSuite5) TestConstAndTimezoneDepent(c *C) {
@@ -3353,4 +3428,95 @@ func (s *testIntegrationSuite7) TestPartitionListWithNewCollation(c *C) {
 	tk.MustQuery(`select * from t11 partition (p1);`).Check(testkit.Rows("c", "C", "d"))
 	str := tk.MustQuery(`desc select * from t11 where a = 'b';`).Rows()[0][3].(string)
 	c.Assert(strings.Contains(str, "partition:p0"), IsTrue)
+}
+
+func (s *testIntegrationSuite7) TestCreatePartitionTableWithWrongType(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop table if exists t")
+	var err error
+	_, err = tk.Exec(`create table t(
+	b int(10)
+	) partition by range columns (b) (
+		partition p0 values less than (0x10),
+		partition p3 values less than (0x20)
+	)`)
+	c.Assert(err, NotNil)
+	c.Assert(ddl.ErrWrongTypeColumnValue.Equal(err), IsTrue)
+
+	_, err = tk.Exec(`create table t(
+	b int(10)
+	) partition by range columns (b) (
+		partition p0 values less than ('g'),
+		partition p3 values less than ('k')
+	)`)
+	c.Assert(err, NotNil)
+	c.Assert(ddl.ErrWrongTypeColumnValue.Equal(err), IsTrue)
+
+	_, err = tk.Exec(`create table t(
+	b char(10)
+	) partition by range columns (b) (
+		partition p0 values less than (30),
+		partition p3 values less than (60)
+	)`)
+	c.Assert(err, NotNil)
+	c.Assert(ddl.ErrWrongTypeColumnValue.Equal(err), IsTrue)
+
+	_, err = tk.Exec(`create table t(
+	b datetime
+	) partition by range columns (b) (
+		partition p0 values less than ('g'),
+		partition p3 values less than ('m')
+	)`)
+	c.Assert(err, NotNil)
+}
+
+func (s *testIntegrationSuite7) TestAddPartitionForTableWithWrongType(c *C) {
+	tk := testkit.NewTestKit(c, s.store)
+	tk.MustExec("use test")
+	tk.MustExec("drop tables if exists t_int, t_char, t_date")
+	tk.MustExec(`create table t_int(b int(10))
+	partition by range columns (b) (
+		partition p0 values less than (10)
+	)`)
+
+	tk.MustExec(`create table t_char(b char(10))
+	partition by range columns (b) (
+		partition p0 values less than ('a')
+	)`)
+
+	tk.MustExec(`create table t_date(b datetime)
+	partition by range columns (b) (
+		partition p0 values less than ('2020-09-01')
+	)`)
+
+	var err error
+
+	_, err = tk.Exec("alter table t_int add partition (partition p1 values less than ('g'))")
+	c.Assert(err, NotNil)
+	c.Assert(ddl.ErrWrongTypeColumnValue.Equal(err), IsTrue)
+
+	_, err = tk.Exec("alter table t_int add partition (partition p1 values less than (0x20))")
+	c.Assert(err, NotNil)
+	c.Assert(ddl.ErrWrongTypeColumnValue.Equal(err), IsTrue)
+
+	_, err = tk.Exec("alter table t_char add partition (partition p1 values less than (0x20))")
+	c.Assert(err, NotNil)
+	c.Assert(ddl.ErrWrongTypeColumnValue.Equal(err), IsTrue)
+
+	_, err = tk.Exec("alter table t_char add partition (partition p1 values less than (10))")
+	c.Assert(err, NotNil)
+	c.Assert(ddl.ErrWrongTypeColumnValue.Equal(err), IsTrue)
+
+	_, err = tk.Exec("alter table t_date add partition (partition p1 values less than ('m'))")
+	c.Assert(err, NotNil)
+	c.Assert(ddl.ErrWrongTypeColumnValue.Equal(err), IsTrue)
+
+	_, err = tk.Exec("alter table t_date add partition (partition p1 values less than (0x20))")
+	c.Assert(err, NotNil)
+	c.Assert(ddl.ErrWrongTypeColumnValue.Equal(err), IsTrue)
+
+	_, err = tk.Exec("alter table t_date add partition (partition p1 values less than (20))")
+	c.Assert(err, NotNil)
+	c.Assert(ddl.ErrWrongTypeColumnValue.Equal(err), IsTrue)
 }

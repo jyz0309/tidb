@@ -654,7 +654,11 @@ create table t(
 }
 
 // for issue #6661
+<<<<<<< HEAD
 func (s *testRangerSuite) TestIndexRangeForUnsignedAndOverflow(c *C) {
+=======
+func (s *testRangerSuite) TestIndexRangeForUnsigned(c *C) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	defer testleak.AfterTest(c)()
 	dom, store, err := newDomainStoreWithBootstrap(c)
 	defer func() {
@@ -665,6 +669,7 @@ func (s *testRangerSuite) TestIndexRangeForUnsignedAndOverflow(c *C) {
 	testKit := testkit.NewTestKit(c, store)
 	testKit.MustExec("use test")
 	testKit.MustExec("drop table if exists t")
+<<<<<<< HEAD
 	testKit.MustExec(`
 create table t(
 	a smallint(5) unsigned,
@@ -680,6 +685,10 @@ create table t(
 	index idx_int(col_int),
 	index idx_float(col_float)
 )`)
+=======
+	testKit.MustExec("create table t (a smallint(5) unsigned,key (a) ,decimal_unsigned decimal unsigned,key (decimal_unsigned), float_unsigned float unsigned,key(float_unsigned), double_unsigned double unsigned,key(double_unsigned))")
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	tests := []struct {
 		indexPos    int
 		exprStr     string
@@ -811,6 +820,27 @@ create table t(
 			accessConds: "[lt(test.t.col_float, -1e+39)]",
 			filterConds: "[]",
 			resultStr:   "[]",
+		},
+		{
+			indexPos:    1,
+			exprStr:     "decimal_unsigned > -100",
+			accessConds: "[gt(test.t.decimal_unsigned, -100)]",
+			filterConds: "[]",
+			resultStr:   "[[0,+inf]]",
+		},
+		{
+			indexPos:    2,
+			exprStr:     "float_unsigned > -100",
+			accessConds: "[gt(test.t.float_unsigned, -100)]",
+			filterConds: "[]",
+			resultStr:   "[[0,+inf]]",
+		},
+		{
+			indexPos:    3,
+			exprStr:     "double_unsigned > -100",
+			accessConds: "[gt(test.t.double_unsigned, -100)]",
+			filterConds: "[]",
+			resultStr:   "[[0,+inf]]",
 		},
 	}
 
@@ -1279,7 +1309,11 @@ func (s *testRangerSuite) TestIndexStringIsTrueRange(c *C) {
 	testKit.MustExec("drop table if exists t0")
 	testKit.MustExec("CREATE TABLE t0(c0 TEXT(10));")
 	testKit.MustExec("INSERT INTO t0(c0) VALUES (1);")
+<<<<<<< HEAD
 	testKit.MustExec("CREATE INDEX i0 ON t0(c0(255));")
+=======
+	testKit.MustExec("CREATE INDEX i0 ON t0(c0(10));")
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	testKit.MustExec("analyze table t0;")
 
 	var input []string
@@ -1297,6 +1331,7 @@ func (s *testRangerSuite) TestIndexStringIsTrueRange(c *C) {
 	}
 }
 
+<<<<<<< HEAD
 func (s *testRangerSuite) TestCompIndexDNFMatch(c *C) {
 	defer testleak.AfterTest(c)()
 	dom, store, err := newDomainStoreWithBootstrap(c)
@@ -1397,6 +1432,8 @@ func (s *testRangerSuite) TestCompIndexMultiColDNF2(c *C) {
 	}
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testRangerSuite) TestPrefixIndexMultiColDNF(c *C) {
 	defer testleak.AfterTest(c)()
 	dom, store, err := newDomainStoreWithBootstrap(c)
@@ -1433,6 +1470,7 @@ func (s *testRangerSuite) TestPrefixIndexMultiColDNF(c *C) {
 	}
 }
 
+<<<<<<< HEAD
 func (s *testRangerSuite) TestIndexRangeForBit(c *C) {
 	defer testleak.AfterTest(c)()
 	dom, store, err := newDomainStoreWithBootstrap(c)
@@ -1472,6 +1510,8 @@ func (s *testRangerSuite) TestIndexRangeForBit(c *C) {
 	}
 }
 
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 func (s *testRangerSuite) TestIndexRangeForYear(c *C) {
 	defer testleak.AfterTest(c)()
 	dom, store, err := newDomainStoreWithBootstrap(c)

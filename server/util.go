@@ -223,7 +223,11 @@ func dumpBinaryDateTime(data []byte, t types.Time) []byte {
 			data = append(data, 0)
 		} else {
 			data = append(data, 4)
+<<<<<<< HEAD
 			data = dumpUint16(data, uint16(year)) // year
+=======
+			data = dumpUint16(data, uint16(year)) //year
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			data = append(data, byte(mon), byte(day))
 		}
 	}
@@ -371,11 +375,20 @@ func appendFormatFloat(in []byte, fVal float64, prec, bitSize int) []byte {
 	}
 	isEFormat := false
 	if bitSize == 32 {
+<<<<<<< HEAD
 		isEFormat = float32(absVal) >= expFormatBig || (float32(absVal) != 0 && float32(absVal) < expFormatSmall)
 	} else {
 		isEFormat = absVal >= expFormatBig || (absVal != 0 && absVal < expFormatSmall)
 	}
 	var out []byte
+=======
+		isEFormat = (prec == types.UnspecifiedLength && (float32(absVal) >= expFormatBig || (float32(absVal) != 0 && float32(absVal) < expFormatSmall)))
+	} else {
+		isEFormat = (prec == types.UnspecifiedLength && (absVal >= expFormatBig || (absVal != 0 && absVal < expFormatSmall)))
+	}
+	var out []byte
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	if isEFormat {
 		if bitSize == 32 {
 			prec = defaultMySQLPrec

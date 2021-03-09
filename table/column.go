@@ -141,11 +141,28 @@ func truncateTrailingSpaces(v *types.Datum) {
 
 func handleWrongASCIIValue(ctx sessionctx.Context, col *model.ColumnInfo, casted *types.Datum, str string, i int) (types.Datum, error) {
 	sc := ctx.GetSessionVars().StmtCtx
+<<<<<<< HEAD
 	err := ErrTruncatedWrongValueForField.FastGen("incorrect ascii value %x(%s) for column %s", casted.GetBytes(), str, col.Name)
 	logutil.BgLogger().Error("incorrect ASCII value", zap.Uint64("conn", ctx.GetSessionVars().ConnectionID), zap.Error(err))
 	truncateVal := types.NewStringDatum(str[:i])
 	err = sc.HandleTruncate(err)
 	return truncateVal, err
+=======
+	for _, c := range cols {
+		var converted types.Datum
+		converted, err = CastValue(ctx, rec[c.Offset], c.ToInfo(), false, false)
+		if err != nil {
+			if sc.DupKeyAsWarning {
+				sc.AppendWarning(err)
+				logutil.BgLogger().Warn("CastValues failed", zap.Error(err))
+			} else {
+				return err
+			}
+		}
+		rec[c.Offset] = converted
+	}
+	return nil
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 func handleWrongUtf8Value(ctx sessionctx.Context, col *model.ColumnInfo, casted *types.Datum, str string, i int) (types.Datum, error) {
@@ -243,7 +260,11 @@ func CastValue(ctx sessionctx.Context, val types.Datum, col *model.ColumnInfo, r
 	sc := ctx.GetSessionVars().StmtCtx
 	casted, err = val.ConvertTo(sc, &col.FieldType)
 	// TODO: make sure all truncate errors are handled by ConvertTo.
+<<<<<<< HEAD
 	if returnOverflow && types.ErrOverflow.Equal(err) {
+=======
+	if types.ErrOverflow.Equal(err) && returnOverflow {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		return casted, err
 	}
 	if err != nil && types.ErrTruncated.Equal(err) && col.Tp != mysql.TypeSet && col.Tp != mysql.TypeEnum {

@@ -180,6 +180,10 @@ func (e *SetExecutor) setSysVariable(name string, v *expression.VarAssignment) e
 		if name == variable.TxnIsolationOneShot && sessionVars.InTxn() {
 			return errors.Trace(ErrCantChangeTxCharacteristics)
 		}
+		if name == variable.TiDBFoundInPlanCache {
+			sessionVars.StmtCtx.AppendWarning(fmt.Errorf("Set operation for '%s' will not take effect", variable.TiDBFoundInPlanCache))
+			return nil
+		}
 		err = variable.SetSessionSystemVar(sessionVars, name, value)
 		if err != nil {
 			return err
@@ -229,7 +233,11 @@ func (e *SetExecutor) setSysVariable(name string, v *expression.VarAssignment) e
 	case variable.TiDBStmtSummaryMaxSQLLength:
 		return stmtsummary.StmtSummaryByDigestMap.SetMaxSQLLength(valStr, !v.IsGlobal)
 	case variable.TiDBCapturePlanBaseline:
+<<<<<<< HEAD
 		variable.CapturePlanBaseline.Set(valStrToBoolStr, !v.IsGlobal)
+=======
+		variable.CapturePlanBaseline.Set(strings.ToLower(valStr), !v.IsGlobal)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	}
 
 	return nil

@@ -19,6 +19,7 @@ package session
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -197,6 +198,7 @@ func recordAbortTxnDuration(sessVars *variable.SessionVars) {
 }
 
 func finishStmt(ctx context.Context, se *session, meetsErr error, sql sqlexec.Statement) error {
+<<<<<<< HEAD
 	sessVars := se.sessionVars
 	if !sql.IsReadOnly(sessVars) {
 		// All the history should be added here.
@@ -213,6 +215,8 @@ func finishStmt(ctx context.Context, se *session, meetsErr error, sql sqlexec.St
 			}
 		}
 	}
+=======
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	err := autoCommitAfterStmt(ctx, se, meetsErr, sql)
 	if se.txn.pending() {
 		// After run statement finish, txn state is still pending means the
@@ -280,6 +284,96 @@ func checkStmtLimit(ctx context.Context, se *session) error {
 	return err
 }
 
+<<<<<<< HEAD
+=======
+// querySpecialKeys contains the keys of special query, the special query will handled by handleQuerySpecial method.
+var querySpecialKeys = []fmt.Stringer{
+	executor.LoadDataVarKey,
+	executor.LoadStatsVarKey,
+	executor.IndexAdviseVarKey,
+}
+
+func (s *session) hasQuerySpecial() bool {
+	found := false
+	s.mu.RLock()
+	for _, k := range querySpecialKeys {
+		v := s.mu.values[k]
+		if v != nil {
+			found = true
+			break
+		}
+	}
+	s.mu.RUnlock()
+	return found
+}
+
+// runStmt executes the sqlexec.Statement and commit or rollback the current transaction.
+func runStmt(ctx context.Context, sctx sessionctx.Context, s sqlexec.Statement) (rs sqlexec.RecordSet, err error) {
+	if span := opentracing.SpanFromContext(ctx); span != nil && span.Tracer() != nil {
+		span1 := span.Tracer().StartSpan("session.runStmt", opentracing.ChildOf(span.Context()))
+		span1.LogKV("sql", s.OriginText())
+		defer span1.Finish()
+		ctx = opentracing.ContextWithSpan(ctx, span1)
+	}
+	sctx.SetValue(sessionctx.QueryString, s.OriginText())
+	if _, ok := s.(*executor.ExecStmt).StmtNode.(ast.DDLNode); ok {
+		sctx.SetValue(sessionctx.LastExecuteDDL, true)
+	} else {
+		sctx.ClearValue(sessionctx.LastExecuteDDL)
+	}
+
+	se := sctx.(*session)
+	sessVars := se.GetSessionVars()
+	// Save origTxnCtx here to avoid it reset in the transaction retry.
+	origTxnCtx := sessVars.TxnCtx
+	err = se.checkTxnAborted(s)
+	if err != nil {
+		return nil, err
+	}
+	rs, err = s.Exec(ctx)
+	sessVars.TxnCtx.StatementCount++
+	if !s.IsReadOnly(sessVars) {
+		// All the history should be added here.
+		if err == nil && sessVars.TxnCtx.CouldRetry {
+			GetHistory(sctx).Add(s, sessVars.StmtCtx)
+		}
+
+		// Handle the stmt commit/rollback.
+		if txn, err1 := sctx.Txn(false); err1 == nil {
+			if txn.Valid() {
+				if err != nil {
+					sctx.StmtRollback()
+				} else {
+					err = sctx.StmtCommit(sctx.GetSessionVars().StmtCtx.MemTracker)
+				}
+			}
+		} else {
+			logutil.BgLogger().Error("get txn failed", zap.Error(err1))
+		}
+	}
+
+	if rs != nil {
+		return &execStmtResult{
+			RecordSet: rs,
+			sql:       s,
+			se:        se,
+		}, err
+	}
+
+	err = finishStmt(ctx, se, err, s)
+	if se.hasQuerySpecial() {
+		// The special query will be handled later in handleQuerySpecial,
+		// then should call the ExecStmt.FinishExecuteStmt to finish this statement.
+		se.SetValue(ExecStmtVarKey, s.(*executor.ExecStmt))
+	} else {
+		// If it is not a select statement, we record its slow log here,
+		// then it could include the transaction commit time.
+		s.(*executor.ExecStmt).FinishExecuteStmt(origTxnCtx.StartTS, err == nil, false)
+	}
+	return rs, err
+}
+
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 // GetHistory get all stmtHistory in current txn. Exported only for test.
 func GetHistory(ctx sessionctx.Context) *StmtHistory {
 	hist, ok := ctx.GetSessionVars().TxnCtx.History.(*StmtHistory)
@@ -350,3 +444,14 @@ func ResultSetToStringSlice(ctx context.Context, s Session, rs sqlexec.RecordSet
 var (
 	ErrForUpdateCantRetry = dbterror.ClassSession.NewStd(errno.ErrForUpdateCantRetry)
 )
+
+// ExecStmtVarKeyType is a dummy type to avoid naming collision in context.
+type ExecStmtVarKeyType int
+
+// String defines a Stringer function for debugging and pretty printing.
+func (k ExecStmtVarKeyType) String() string {
+	return "exec_stmt_var_key"
+}
+
+// ExecStmtVarKey is a variable key for ExecStmt.
+const ExecStmtVarKey ExecStmtVarKeyType = 0

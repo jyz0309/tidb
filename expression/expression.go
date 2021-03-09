@@ -52,9 +52,13 @@ const (
 // import expression and planner/core together to use EvalAstExpr
 var EvalAstExpr func(sctx sessionctx.Context, expr ast.ExprNode) (types.Datum, error)
 
+<<<<<<< HEAD
 // RewriteAstExpr rewrites ast expression directly.
 // Note: initialized in planner/core
 // import expression and planner/core together to use EvalAstExpr
+=======
+// RewriteAstExpr rewrite ast expression directly.
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 var RewriteAstExpr func(sctx sessionctx.Context, expr ast.ExprNode, schema *Schema, names types.NameSlice) (Expression, error)
 
 // VecExpr contains all vectorized evaluation methods.
@@ -458,6 +462,7 @@ func toBool(sc *stmtctx.StatementContext, tp *types.FieldType, eType types.EvalT
 				sVal := buf.GetString(i)
 				if tp.Hybrid() {
 					switch tp.Tp {
+<<<<<<< HEAD
 					case mysql.TypeSet, mysql.TypeEnum:
 						fVal = float64(len(sVal))
 						if fVal == 0 {
@@ -472,6 +477,10 @@ func toBool(sc *stmtctx.StatementContext, tp *types.FieldType, eType types.EvalT
 								}
 							}
 						}
+=======
+					case mysql.TypeEnum, mysql.TypeSet:
+						fVal = float64(len(sVal))
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 					case mysql.TypeBit:
 						var bl types.BinaryLiteral = buf.GetBytes(i)
 						iVal, err := bl.ToInt(sc)
@@ -810,11 +819,16 @@ func evaluateExprWithNull(ctx sessionctx.Context, schema *Schema, expr Expressio
 }
 
 // TableInfo2SchemaAndNames converts the TableInfo to the schema and name slice.
+<<<<<<< HEAD
 func TableInfo2SchemaAndNames(ctx sessionctx.Context, dbName model.CIStr, tbl *model.TableInfo) (*Schema, []*types.FieldName, error) {
 	cols, names, err := ColumnInfos2ColumnsAndNames(ctx, dbName, tbl.Name, tbl.Cols(), tbl)
 	if err != nil {
 		return nil, nil, err
 	}
+=======
+func TableInfo2SchemaAndNames(ctx sessionctx.Context, dbName model.CIStr, tbl *model.TableInfo) (*Schema, []*types.FieldName) {
+	cols, names := ColumnInfos2ColumnsAndNames(ctx, dbName, tbl.Name, tbl.Columns, tbl)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	keys := make([]KeyInfo, 0, len(tbl.Indices)+1)
 	for _, idx := range tbl.Indices {
 		if !idx.Unique || idx.State != model.StatePublic {
@@ -857,7 +871,11 @@ func TableInfo2SchemaAndNames(ctx sessionctx.Context, dbName model.CIStr, tbl *m
 }
 
 // ColumnInfos2ColumnsAndNames converts the ColumnInfo to the *Column and NameSlice.
+<<<<<<< HEAD
 func ColumnInfos2ColumnsAndNames(ctx sessionctx.Context, dbName, tblName model.CIStr, colInfos []*model.ColumnInfo, tblInfo *model.TableInfo) ([]*Column, types.NameSlice, error) {
+=======
+func ColumnInfos2ColumnsAndNames(ctx sessionctx.Context, dbName, tblName model.CIStr, colInfos []*model.ColumnInfo, tblInfo *model.TableInfo) ([]*Column, types.NameSlice) {
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	columns := make([]*Column, 0, len(colInfos))
 	names := make([]*types.FieldName, 0, len(colInfos))
 	for i, col := range colInfos {
@@ -880,6 +898,7 @@ func ColumnInfos2ColumnsAndNames(ctx sessionctx.Context, dbName, tblName model.C
 	}
 	// Resolve virtual generated column.
 	mockSchema := NewSchema(columns...)
+<<<<<<< HEAD
 	// Ignore redundant warning here.
 	save := ctx.GetSessionVars().StmtCtx.IgnoreTruncate
 	defer func() {
@@ -899,17 +918,43 @@ func ColumnInfos2ColumnsAndNames(ctx sessionctx.Context, dbName, tblName model.C
 			e, err := RewriteAstExpr(ctx, expr, mockSchema, names)
 			if err != nil {
 				return nil, nil, errors.Trace(err)
+=======
+	for i, col := range colInfos {
+		if col.State != model.StatePublic {
+			continue
+		}
+		if col.IsGenerated() && !col.GeneratedStored {
+			expr, err := generatedexpr.ParseExpression(col.GeneratedExprString)
+			if err != nil {
+				terror.Log(err)
+			}
+			expr, err = generatedexpr.SimpleResolveName(expr, tblInfo)
+			if err != nil {
+				terror.Log(err)
+			}
+			e, err := RewriteAstExpr(ctx, expr, mockSchema, names)
+			if err != nil {
+				terror.Log(err)
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			}
 			if e != nil {
 				columns[i].VirtualExpr = e.Clone()
 			}
 			columns[i].VirtualExpr, err = columns[i].VirtualExpr.ResolveIndices(mockSchema)
 			if err != nil {
+<<<<<<< HEAD
 				return nil, nil, errors.Trace(err)
 			}
 		}
 	}
 	return columns, names, nil
+=======
+				terror.Log(err)
+			}
+		}
+	}
+	return columns, names
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 }
 
 // NewValuesFunc creates a new values function.
@@ -1086,8 +1131,12 @@ func canFuncBePushed(sf *ScalarFunction, storeType kv.StoreType) bool {
 		ast.IsIPv4,
 		ast.IsIPv4Compat,
 		ast.IsIPv4Mapped,
+<<<<<<< HEAD
 		ast.IsIPv6,
 		ast.UUID:
+=======
+		ast.IsIPv6:
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 		ret = true
 
 	// A special case: Only push down Round by signature
@@ -1274,7 +1323,11 @@ func scalarExprSupportedByFlash(function *ScalarFunction) bool {
 		case tipb.ScalarFuncSig_CastIntAsInt, tipb.ScalarFuncSig_CastIntAsDecimal, tipb.ScalarFuncSig_CastIntAsString, tipb.ScalarFuncSig_CastIntAsTime,
 			tipb.ScalarFuncSig_CastRealAsInt, tipb.ScalarFuncSig_CastRealAsDecimal, tipb.ScalarFuncSig_CastRealAsString, tipb.ScalarFuncSig_CastRealAsTime,
 			tipb.ScalarFuncSig_CastStringAsInt, tipb.ScalarFuncSig_CastStringAsDecimal, tipb.ScalarFuncSig_CastStringAsString, tipb.ScalarFuncSig_CastStringAsTime,
+<<<<<<< HEAD
 			tipb.ScalarFuncSig_CastDecimalAsInt, tipb.ScalarFuncSig_CastDecimalAsDecimal, tipb.ScalarFuncSig_CastDecimalAsString, tipb.ScalarFuncSig_CastDecimalAsTime,
+=======
+			tipb.ScalarFuncSig_CastDecimalAsInt, tipb.ScalarFuncSig_CastDecimalAsDecimal, tipb.ScalarFuncSig_CastDecimalAsTime,
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 			tipb.ScalarFuncSig_CastTimeAsInt, tipb.ScalarFuncSig_CastTimeAsDecimal, tipb.ScalarFuncSig_CastTimeAsTime:
 			return true
 		default:

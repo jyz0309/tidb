@@ -18,7 +18,11 @@ import (
 	"time"
 
 	"github.com/pingcap/failpoint"
+<<<<<<< HEAD
 	"github.com/pingcap/tidb/store/tikv/logutil"
+=======
+	"github.com/pingcap/tidb/util/logutil"
+>>>>>>> 32cf4b1785cbc9186057a26cb939a16cad94dba1
 	"go.uber.org/zap"
 )
 
