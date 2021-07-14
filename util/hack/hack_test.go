@@ -16,49 +16,41 @@ package hack
 import (
 	"bytes"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestString(t *testing.T) {
+	t.Parallel()
+
 	b := []byte("hello world")
 	a := String(b)
-
-	if a != "hello world" {
-		t.Fatal(a)
-	}
+	assert.EqualValues(t, "hello world", a)
 
 	b[0] = 'a'
-
-	if a != "aello world" {
-		t.Fatal(a)
-	}
+	assert.EqualValues(t, "aello world", a)
 
 	b = append(b, "abc"...)
-	if a != "aello world" {
-		t.Fatalf("a:%v, b:%v", a, b)
-	}
+	assert.EqualValuesf(t, "aello world", a, "a:%v, b:%v", a, b)
 }
 
 func TestByte(t *testing.T) {
+	t.Parallel()
+
 	a := "hello world"
-
 	b := Slice(a)
-
-	if !bytes.Equal(b, []byte("hello world")) {
-		t.Fatal(string(b))
-	}
+	assert.True(t, bytes.Equal(b, []byte("hello world")), string(b))
 }
 
 func TestMutable(t *testing.T) {
+	t.Parallel()
+
 	a := []byte{'a', 'b', 'c'}
 	b := String(a) // b is a mutable string.
 	c := string(b) // Warn, c is a mutable string
-	if c != "abc" {
-		t.Fatalf("assert fail")
-	}
+	assert.Equal(t, "abc", c)
 
 	// c changed after a is modified
 	a[0] = 's'
-	if c != "sbc" {
-		t.Fatal("test mutable string fail")
-	}
+	assert.Equal(t, "sbc", c)
 }
